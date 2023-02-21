@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "ryanluker.vscode-coverage-gutters",
+        "vscjava.vscode-java-pack",
+        "eamodio.gitlens",
+        "vscjava.vscode-gradle",
+        "ms-vsliveshare.vsliveshare",
+        "jebbs.plantuml",
+        "madhavd1.javadoc-tools",
+        "github.vscode-pull-request-github",
+        "sonarsource.sonarlint-vscode"
+    ]
+}

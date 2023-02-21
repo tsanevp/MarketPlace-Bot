@@ -1,0 +1,129 @@
+plugins {
+    // Build "shadow" JARs for deployment
+    id 'com.github.johnrengelman.shadow'
+
+    // Apply the java plugin to add support for Java
+    id 'java'
+
+    // Apply the application plugin to add support for building a CLI application.
+    id 'application'
+
+    // Lombok provides shorthand for repetitive Java tasks
+    id "io.freefair.lombok"
+
+    // Spotless to format code easily
+    id "com.diffplug.spotless"
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+}
+
+dependencies {
+    // log4j so JDA can log
+    implementation 'org.apache.logging.log4j:log4j-api:_'
+    implementation 'org.apache.logging.log4j:log4j-core:_'
+    implementation 'org.slf4j:slf4j-simple:_'
+
+    // sparkjava for simple HTTP serving
+    implementation "com.sparkjava:spark-core:_"
+
+    // Use JUnit Jupiter API for testing.
+    testImplementation Testing.junit.jupiter.api
+
+    // Use JUnit Jupiter Engine for testing.
+    testRuntimeOnly Testing.junit.jupiter.engine
+
+    // Annotations such as Nullable
+    implementation 'com.google.code.findbugs:annotations:_'
+
+    // Force JRE Guava to work around issues with Truth
+    testImplementation "com.google.guava:guava:_"
+
+    // Fluent assertions for testing
+    testImplementation 'com.google.truth:truth:_'
+
+    // JDA for talking to Discord
+    implementation ('net.dv8tion:JDA:_') {
+        // Remove the next line if your bot needs voice support!
+        exclude module: "opus-java"
+    }
+
+    // Dagger for dependency injection
+    implementation Google.dagger
+    annotationProcessor Google.dagger.compiler
+
+    // MongoDB for data storage
+    implementation 'org.mongodb:mongo-java-driver:_'
+
+}
+
+application {
+    // Define the main class for the application.
+    mainClassName = 'edu.northeastern.cs5500.starterbot.App'
+}
+
+// Enable jacoco coverage
+apply plugin: 'jacoco'
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
+
+    // Create a Jacoco report after each test run
+    finalizedBy jacocoTestReport
+}
+
+// Generate an XML report that the coverage extension can use
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled true
+        // Change html.enabled to true if you want html reports
+        html.enabled false
+        csv.enabled false
+        xml.destination file("${buildDir}/reports/jacoco.xml")
+    }
+}
+
+// Check coverage after each test run
+check.dependsOn jacocoTestCoverageVerification
+
+// Target Java 17 - make sure system.properties matches this as well
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java'
+            // srcDirs 'build/generated/sources/annotationProcessor/java/main'
+        }
+    }
+    test {
+        java {
+            srcDirs 'src/test/java'
+            // srcDirs 'build/generated/sources/annotationProcessor/java/test'
+        }
+    }
+}
+
+spotless {
+    format 'misc', {
+        target '**/*.gradle', '**/*.md', '**/.gitignore'
+        targetExclude 'build/**'
+
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+    java {
+        targetExclude 'build/**'
+        googleJavaFormat().aosp()
+    }
+}

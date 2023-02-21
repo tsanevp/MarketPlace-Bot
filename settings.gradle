@@ -1,0 +1,6 @@
+plugins {
+    // Check for updates to dependencies
+    id 'de.fayard.refreshVersions' version '0.40.1'
+}
+
+rootProject.name = 'edu.northeastern.cs5500.starterbot'
