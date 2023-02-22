@@ -9,8 +9,9 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public SlashCommandHandler provideSayCommand(ButtonCommand sayCommand) {
-        return sayCommand;
+    public SlashCommandHandler provideCreateListingCommand(
+            CreateListingCommand createListingCommand) {
+        return createListingCommand;
     }
 
     @Provides
