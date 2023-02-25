@@ -35,6 +35,13 @@ public class CommandModule {
 
     @Provides
     @IntoSet
+    public ButtonHandler provideButtonCreateListingClickHandler(
+            CreateListingCommand buttonCommand) {
+        return buttonCommand;
+    }
+
+    @Provides
+    @IntoSet
     public SlashCommandHandler provideDropdownCommand(DropdownCommand dropdownCommand) {
         return dropdownCommand;
     }
