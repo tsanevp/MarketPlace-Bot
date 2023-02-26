@@ -1,11 +1,14 @@
-app = "cs5500-s22-starterbot"
+app = "cs5500-s23-bear"
 
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
 [build]
-  builder = "cloudfoundry/cnb:bionic"
+  builder = "paketobuildpacks/builder:base"
+
+[build.args]
+  BP_JVM_VERSION=17
 
 [env]
   BPL_JVM_THREAD_COUNT=50
