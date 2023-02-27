@@ -1,6 +1,7 @@
 package edu.northeastern.cs5500.starterbot.listener;
 
 import edu.northeastern.cs5500.starterbot.command.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.command.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.command.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.command.StringSelectHandler;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -23,6 +25,7 @@ public class MessageListener extends ListenerAdapter {
     @Inject Set<SlashCommandHandler> commands;
     @Inject Set<ButtonHandler> buttons;
     @Inject Set<StringSelectHandler> stringSelects;
+    @Inject NewMemberHandler newMemberEvent;
 
     @Inject
     public MessageListener() {
@@ -58,6 +61,9 @@ public class MessageListener extends ListenerAdapter {
         String handlerName = id.split(":", 2)[0];
 
         for (ButtonHandler buttonHandler : buttons) {
+            System.out.println(buttonHandler.getName());
+            System.out.println(handlerName);
+
             if (buttonHandler.getName().equals(handlerName)) {
                 buttonHandler.onButtonInteraction(event);
                 return;
@@ -80,5 +86,10 @@ public class MessageListener extends ListenerAdapter {
         }
 
         log.error("Unknown button handler: {}", handlerName);
+    }
+
+    @Override
+    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
+        newMemberEvent.onGuildMemberJoin(event);
     }
 }
