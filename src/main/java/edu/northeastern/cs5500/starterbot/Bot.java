@@ -4,8 +4,6 @@ import dagger.Component;
 import edu.northeastern.cs5500.starterbot.command.CommandModule;
 import edu.northeastern.cs5500.starterbot.listener.MessageListener;
 import edu.northeastern.cs5500.starterbot.repository.RepositoryModule;
-import java.util.Collection;
-import java.util.EnumSet;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,8 +37,11 @@ public class Bot {
         }
         @SuppressWarnings("null")
         @Nonnull
-        Collection<GatewayIntent> intents = EnumSet.noneOf(GatewayIntent.class);
-        JDA jda = JDABuilder.createLight(token, intents).addEventListeners(messageListener).build();
+        // Collection<GatewayIntent> intents = EnumSet.noneOf(GatewayIntent.class);
+        JDA jda =
+                JDABuilder.createLight(token, GatewayIntent.GUILD_MEMBERS)
+                        .addEventListeners(messageListener)
+                        .build();
 
         CommandListUpdateAction commands = jda.updateCommands();
         commands.addCommands(messageListener.allCommandData());
