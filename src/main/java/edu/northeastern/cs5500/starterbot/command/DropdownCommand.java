@@ -16,7 +16,9 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 public class DropdownCommand implements SlashCommandHandler, StringSelectHandler {
 
     @Inject
-    public DropdownCommand() {}
+    public DropdownCommand() {
+        // Defined public and empty for Dagger injection
+    }
 
     @Override
     @Nonnull

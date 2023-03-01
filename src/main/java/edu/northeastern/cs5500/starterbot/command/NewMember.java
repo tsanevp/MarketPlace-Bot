@@ -9,8 +9,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
@@ -27,12 +25,6 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
     @Nonnull
     public String getName() {
         return "newmember";
-    }
-
-    @Override
-    @Nonnull
-    public CommandData getCommandData() {
-        return Commands.slash(getName(), "Demonstrate a button interaction");
     }
 
     @Override

@@ -61,9 +61,6 @@ public class MessageListener extends ListenerAdapter {
         String handlerName = id.split(":", 2)[0];
 
         for (ButtonHandler buttonHandler : buttons) {
-            System.out.println(buttonHandler.getName());
-            System.out.println(handlerName);
-
             if (buttonHandler.getName().equals(handlerName)) {
                 buttonHandler.onButtonInteraction(event);
                 return;
