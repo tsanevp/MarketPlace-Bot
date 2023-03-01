@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Slf4j
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
     private static final int MAX_NUM_IMAGES = 6;
+    private static final String CURRENCY_USED = "USD ";
 
     @Inject
     public CreateListingCommand() {
@@ -134,10 +135,13 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             titleReformatted.insert(0, String.format("[%s]", location.getAsString()));
         }
 
-        StringBuilder costReformated = new StringBuilder("Cost:");
+        StringBuilder costTitleReformatted = new StringBuilder("Cost:");
         if ("true".equals(shippingCost.getAsString())) {
-            costReformated.insert(4, " + Shipping");
+            costTitleReformatted.insert(4, " + Shipping");
         }
+
+        StringBuilder costReformatted = new StringBuilder(CURRENCY_USED);
+        costReformatted.append(cost.getAsString());
 
         StringBuilder shipsInternationally = new StringBuilder();
         if ("true".equals(shipping.getAsString())) {
@@ -151,11 +155,11 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             if (i == 0) {
                 embedBuilder
-                        .addField(costReformated.toString(), cost.getAsString(), true)
+                        .setColor(100)
+                        .addField(costTitleReformatted.toString(), costReformatted.toString(), true)
                         .addField("Ships International:", shipsInternationally.toString(), true)
                         .addField("Condition:", condition.getAsString(), true)
                         .addField("Description:", description.getAsString(), false)
-                        .setColor(100)
                         .addField("Posted By:", event.getMember().getEffectiveName(), true)
                         .addField("Date Posted:", dtf.format(now), true);
             }
@@ -172,7 +176,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                 Button.success(this.getName() + ":ok", "Post"),
                                 Button.primary(this.getName() + ":edit", "Edit"),
                                 Button.danger(this.getName() + ":cancel", "Cancel"))
-                        .setContent("Result of Button Selection")
                         .setEmbeds(embedBuilderlist);
         event.reply(messageCreateBuilder.build()).queue();
     }
@@ -185,16 +188,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             event.reply(
                             "To Edit your listing, select your UP Arrow Key. This will auto-fill each section BUT will not reattach your images.")
                     .queue();
-            ;
         } else {
             event.reply("The creation of you lisitng has been canceled.").queue();
         }
     }
 }
-
-// MTA3NjYzNDczODQwNTY5MTUyMw.G2nuVY.0Aa7eWsEukbK240tiD8K5v9jp3jDiz-4TF6HGs
-
-// **how to set up sending a message to another channel**
-// TextChannel textChannel = event.getGuild().getTextChannelsByName("trading-channel",
-// true).get(0);
-// textChannel.sendMessage(event.getComponentId()).queue();
