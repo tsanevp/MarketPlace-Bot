@@ -5,10 +5,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import edu.northeastern.cs5500.starterbot.controller.UserController;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -29,7 +32,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
     private static final int MAX_NUM_IMAGES = 6;
     private static final String CURRENCY_USED = "USD ";
-    ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
+//     ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
+
+    @Inject UserController userController;
 
     @Inject
     public CreateListingCommand() {
@@ -126,10 +131,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var condition = Objects.requireNonNull(event.getOption("condition"));
         var description = Objects.requireNonNull(event.getOption("description"));
 
-        // ************Need to store commandString to database here********************
-        // System.out.println(event.getGuild().getId());
-        // testDB.add(event.getGuild().getId());
-        testDB.add(event.getCommandString());
+        // ************Assigns the command as string to database here******************
+        userController.setCurrentListingAsString(event.getUser().getName(), event.getCommandString());
+        // ****************************************************************************
+
+        // ************Assigns GuildId to user in the database here********************
+        userController.setGuildIdForUser(event.getUser().getName(), event.getGuild().getId());
         // ****************************************************************************
 
         ArrayList<OptionMapping> images = new ArrayList<>();
@@ -162,7 +169,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             shipsInternationally.append("No");
         }
 
-        ArrayList<MessageEmbed> embedBuilderlist = new ArrayList<>();
+        List<MessageEmbed> embedBuilderlist = new ArrayList<>();
         for (int i = 0; i < images.size(); i++) {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             if (i == 0) {
@@ -191,7 +198,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .setEmbeds(embedBuilderlist);
         User user = event.getUser();
         // ************Need to store the embeds built to database here********************
-        testDB.add(embedBuilderlist);
+        // testDB.add(embedBuilderlist);
+        userController.setCurrentListingAsBuilder(event.getUser().getName(), embedBuilderlist);
         // *******************************************************************************
         user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
         event.reply(
@@ -203,15 +211,18 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        User user = event.getUser();
         // ************Need to pull saved GuildID from database here********************
-        Guild guild = event.getJDA().getGuildById((String) testDB.get(0));
+        // Guild guild = event.getJDA().getGuildById((String) testDB.get(0));
+        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getName()));
         TextChannel textChannel = guild.getTextChannelsByName("trading-channel", true).get(0);
         // *****************************************************************************
         if ("Post".equals(event.getButton().getLabel())) {
             event.reply("Your listing has been posted on trading-channel!").queue();
             // ************Need to pull saved embed from database here******************
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>) testDB.get(2));
+        //     messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>) testDB.get(2));
+        messageCreateBuilder.setEmbeds(userController.getCurrentListingAsBuilder(user.getName()));
             // *************************************************************************
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
@@ -219,7 +230,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             event.reply(
                             String.format(
                                     "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
-                                    (String) testDB.get(1)))
+                                    userController.getCurrentListingAsString(user.getName())))
                     .queue();
             // *************************************************************************
         } else {

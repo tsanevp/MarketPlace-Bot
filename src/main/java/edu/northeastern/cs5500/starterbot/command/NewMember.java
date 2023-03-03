@@ -4,6 +4,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import edu.northeastern.cs5500.starterbot.controller.UserController;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -15,6 +17,8 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Singleton
 @Slf4j
 public class NewMember implements NewMemberHandler, StringSelectHandler {
+    
+    @Inject UserController userController;
 
     @Inject
     public NewMember() {
@@ -30,6 +34,10 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         log.info("event: newmember");
+
+        // Assigns the guildId to the user object created
+        userController.setGuildIdForUser(event.getUser().toString(), event.getGuild().getId());
+        
         TextChannel textChannel =
                 event.getGuild().getTextChannelsByName("welcome-channel", true).get(0);
 
