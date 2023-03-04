@@ -1,17 +1,14 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.controller.UserController;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import edu.northeastern.cs5500.starterbot.controller.UserController;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -32,7 +29,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
     private static final int MAX_NUM_IMAGES = 6;
     private static final String CURRENCY_USED = "USD ";
-//     ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
+    //     ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
 
     @Inject UserController userController;
 
@@ -132,7 +129,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var description = Objects.requireNonNull(event.getOption("description"));
 
         // ************Assigns the command as string to database here******************
-        userController.setCurrentListingAsString(event.getUser().getName(), event.getCommandString());
+        userController.setCurrentListingAsString(
+                event.getUser().getName(), event.getCommandString());
         // ****************************************************************************
 
         // ************Assigns GuildId to user in the database here********************
@@ -221,8 +219,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             event.reply("Your listing has been posted on trading-channel!").queue();
             // ************Need to pull saved embed from database here******************
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-        //     messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>) testDB.get(2));
-        messageCreateBuilder.setEmbeds(userController.getCurrentListingAsBuilder(user.getName()));
+            //     messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>)
+            // testDB.get(2));
+            messageCreateBuilder.setEmbeds(
+                    userController.getCurrentListingAsBuilder(user.getName()));
             // *************************************************************************
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {

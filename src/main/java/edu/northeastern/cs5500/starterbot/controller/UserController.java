@@ -3,12 +3,11 @@ package edu.northeastern.cs5500.starterbot.controller;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.User;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class UserController {
 
@@ -43,7 +42,6 @@ public class UserController {
         return getUserForMemberId(discordMemberId).getGuildId();
     }
 
-    
     public void setLocationOfResidence(String discordMemberId, String locationOfResidence) {
         User user = getUserForMemberId(discordMemberId);
 
@@ -68,7 +66,8 @@ public class UserController {
         return getUserForMemberId(discordMemberId).getCurrentListingAsString();
     }
 
-    public void setCurrentListingAsBuilder(String discordMemberId, List<MessageEmbed> currentListingAsBuilder) {
+    public void setCurrentListingAsBuilder(
+            String discordMemberId, List<MessageEmbed> currentListingAsBuilder) {
         User user = getUserForMemberId(discordMemberId);
 
         user.setCurrentListingAsBuilder(currentListingAsBuilder);

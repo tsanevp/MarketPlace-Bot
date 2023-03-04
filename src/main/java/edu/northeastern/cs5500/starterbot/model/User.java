@@ -1,10 +1,8 @@
 package edu.northeastern.cs5500.starterbot.model;
 
+import java.util.List;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-
-import java.util.List;
-
 import org.bson.types.ObjectId;
 
 @Data

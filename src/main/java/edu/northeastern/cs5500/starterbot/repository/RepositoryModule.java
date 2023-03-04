@@ -16,8 +16,7 @@ public class RepositoryModule {
     }
 
     @Provides
-    public GenericRepository<User> provideUserRepository(
-            InMemoryRepository<User> repository) {
+    public GenericRepository<User> provideUserRepository(InMemoryRepository<User> repository) {
         return repository;
     }
 
