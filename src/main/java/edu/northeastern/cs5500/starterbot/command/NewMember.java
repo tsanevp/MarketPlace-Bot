@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.controller.UserController;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -16,6 +17,8 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Slf4j
 public class NewMember implements NewMemberHandler, StringSelectHandler {
 
+    @Inject UserController userController;
+
     @Inject
     public NewMember() {
         // Defined public and empty for Dagger injection
@@ -30,6 +33,10 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         log.info("event: newmember");
+
+        // Assigns the guildId to the user object created
+        userController.setGuildIdForUser(event.getUser().toString(), event.getGuild().getId());
+
         TextChannel textChannel =
                 event.getGuild().getTextChannelsByName("welcome-channel", true).get(0);
 
