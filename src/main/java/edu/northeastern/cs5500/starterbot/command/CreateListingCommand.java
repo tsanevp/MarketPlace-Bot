@@ -3,13 +3,18 @@ package edu.northeastern.cs5500.starterbot.command;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -24,6 +29,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
     private static final int MAX_NUM_IMAGES = 6;
     private static final String CURRENCY_USED = "USD ";
+    ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
 
     @Inject
     public CreateListingCommand() {
@@ -120,6 +126,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var condition = Objects.requireNonNull(event.getOption("condition"));
         var description = Objects.requireNonNull(event.getOption("description"));
 
+        // ************Need to store commandString to database here********************
+        // System.out.println(event.getGuild().getId());
+        // testDB.add(event.getGuild().getId());
+        testDB.add(event.getCommandString());
+        // ****************************************************************************
+
         ArrayList<OptionMapping> images = new ArrayList<>();
         for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
             if (event.getOption(String.format("image%s", i)) != null) {
@@ -160,7 +172,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .addField("Ships International:", shipsInternationally.toString(), true)
                         .addField("Condition:", condition.getAsString(), true)
                         .addField("Description:", description.getAsString(), false)
-                        .addField("Posted By:", event.getMember().getEffectiveName(), true)
+                        .addField("Posted By:", event.getUser().getName(), true)
                         .addField("Date Posted:", dtf.format(now), true);
             }
             embedBuilder
@@ -177,17 +189,39 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                 Button.primary(this.getName() + ":edit", "Edit"),
                                 Button.danger(this.getName() + ":cancel", "Cancel"))
                         .setEmbeds(embedBuilderlist);
-        event.reply(messageCreateBuilder.build()).queue();
+        User user = event.getUser();
+        // ************Need to store the embeds built to database here********************
+        testDB.add(embedBuilderlist);
+        // *******************************************************************************
+        user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
+        event.reply(
+                        String.format(
+                                "Hello %s! Please check the DM you just received from BOT to complete your listing.",
+                                user.getName()))
+                .queue();
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        // ************Need to pull saved GuildID from database here********************
+        Guild guild = event.getJDA().getGuildById((String) testDB.get(0));
+        TextChannel textChannel = guild.getTextChannelsByName("trading-channel", true).get(0);
+        // *****************************************************************************
         if ("Post".equals(event.getButton().getLabel())) {
             event.reply("Your listing has been posted on trading-channel!").queue();
+            // ************Need to pull saved embed from database here******************
+            MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
+            messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>) testDB.get(2));
+            // *************************************************************************
+            textChannel.sendMessage(messageCreateBuilder.build()).queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
+            // ************Need to pull saved user input from database here*************
             event.reply(
-                            "To Edit your listing, select your UP Arrow Key. This will auto-fill each section BUT will not reattach your images.")
+                            String.format(
+                                    "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
+                                    (String) testDB.get(1)))
                     .queue();
+            // *************************************************************************
         } else {
             event.reply("The creation of you lisitng has been canceled.").queue();
         }
