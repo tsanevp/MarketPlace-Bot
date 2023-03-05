@@ -8,6 +8,11 @@ import dagger.multibindings.IntoSet;
 public class CommandModule {
 
     @Provides
+    public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoined newGuildJoined) {
+        return newGuildJoined;
+    }
+
+    @Provides
     public NewMemberHandler provideNewMember(NewMember newMember) {
         return newMember;
     }
