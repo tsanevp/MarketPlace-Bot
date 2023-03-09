@@ -36,7 +36,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     @Nonnull
     public String getName() {
-        return "newmember";
+        return "newguildjoined";
     }
 
     @Override
@@ -67,7 +67,6 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
         User user = event.getUser();
         // Pulls the Guild ID from the user object NEED TO IMPLEMENT
         Guild guild = event.getJDA().getGuildById("1081855590650875925");
-        List<TextChannel> guildChannels = guild.getTextChannels();
         // Disable the buttons so that they can only be selected once
         List<Button> buttons = new ArrayList<>();
         for (Button button : event.getMessage().getButtons()) {
@@ -78,7 +77,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
         // Creates a new text channel named "trading-channel"
         if ("Create New Channel".equals(event.getButton().getLabel())) {
             // First checks if a channel named trading-channel already exists on the server
-            for (GuildChannel guildChannel : guildChannels) {
+            for (GuildChannel guildChannel : guild.getTextChannels()) {
                 if ("trading-channel".equals(guildChannel.getName())) {
                     user.openPrivateChannel()
                             .complete()
@@ -102,9 +101,9 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             // Create a dropdown with all the existing channels a user can select as their trading
             // channel
             Builder menu =
-                    StringSelectMenu.create("newmember")
+                    StringSelectMenu.create(getName())
                             .setPlaceholder("Select Existing Channel To Assign For Sales");
-            for (GuildChannel guildChannel : guildChannels) {
+            for (GuildChannel guildChannel : guild.getTextChannels()) {
                 menu.addOption(guildChannel.getName(), guildChannel.getName());
             }
             // Send an embed message with the channel dropdown
@@ -129,6 +128,19 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
         // The selection will be saved as the channel to POST new listing in
         final String response = event.getInteraction().getValues().get(0);
         Objects.requireNonNull(response);
-        event.reply(response).queue();
+        event.deferEdit()
+                .setActionRow(
+                        StringSelectMenu.create(getName())
+                                .setPlaceholder(response)
+                                .addOption(response, response)
+                                .build()
+                                .withDisabled(true))
+                .queue();
+        event.getUser()
+                .openPrivateChannel()
+                .complete()
+                .sendMessage(
+                        String.format("%s has been set as the main trading channel!", response))
+                .queue();
     }
 }
