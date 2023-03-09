@@ -1,6 +1,8 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -17,6 +19,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu.Builder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -41,7 +44,6 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
-        System.out.println(event.getGuild().getId());
         User owner = event.getGuild().getOwner().getUser();
         // Sends DM to user who called /createlisting with their listing information
         EmbedBuilder embedBuilder =
@@ -68,12 +70,12 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
         // Pulls the Guild ID from the user object NEED TO IMPLEMENT
         Guild guild = event.getJDA().getGuildById("1081855590650875925");
         List<TextChannel> guildChannels = guild.getTextChannels();
-
         if ("Create New Channel".equals(event.getButton().getLabel())) {
             // Gets all the current channels in the Guild and checks if trading-channel already
             // exists
             for (GuildChannel guildChannel : guildChannels) {
                 if ("trading-channel".equals(guildChannel.getName())) {
+                    event.reply("\"trading-channel\" already exists on your server.").queue();;
                     return;
                 }
             }
@@ -82,7 +84,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             textChannel.getManager().setParent(category);
             event.reply(
                             String.format(
-                                    "A new channel named \"text-channel\" has been created in your server %s.",
+                                    "A new channel named \"trading-channel\" has been created in your server %s.",
                                     guild.getName()))
                     .queue();
         } else {
@@ -92,7 +94,6 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             for (GuildChannel guildChannel : guildChannels) {
                 menu.addOption(guildChannel.getName(), guildChannel.getName());
             }
-            StringSelectMenu menu2 = menu.build();
 
             EmbedBuilder embedBuilder =
                     new EmbedBuilder()
@@ -103,9 +104,26 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             messageCreateBuilder =
                     messageCreateBuilder
                             .mention(event.getUser())
-                            .addActionRow(menu2)
+                            .addActionRow(menu.build())
                             .addEmbeds(embedBuilder.build());
-            event.reply(messageCreateBuilder.build()).queue();
+            // event.deferReply().addActionRow(menu.build()).addEmbeds(embedBuilder.build()).queue();
+            // List<Button> buttons = new ArrayList<>();
+            
+            ButtonInteraction interaction = event.getInteraction();
+            // Button button = event.getButton();
+            // button = button.withDisabled(true);
+            // interaction.editButton(button).queue();
+            List<Button> buttons = new ArrayList<>();
+
+            for (Button button : event.getMessage().getButtons()) {
+                System.out.println(button.getId());
+                button = button.withDisabled(true);
+                buttons.add(button);
+            }
+            event.deferEdit().setActionRow(buttons).queue();
+            user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
+
+
         }
     }
 
