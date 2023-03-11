@@ -9,22 +9,22 @@ import edu.northeastern.cs5500.starterbot.model.UserPreference;
 public class RepositoryModule {
     // NOTE: You can use the following lines if you'd like to store objects in memory.
     // NOTE: The presence of commented-out code in your project *will* result in a lowered grade.
-    @Provides
-    public GenericRepository<UserPreference> provideUserPreferencesRepository(
-            InMemoryRepository<UserPreference> repository) {
-        return repository;
-    }
+    // @Provides
+    // public GenericRepository<UserPreference> provideUserPreferencesRepository(
+    //         InMemoryRepository<UserPreference> repository) {
+    //     return repository;
+    // }
 
     @Provides
     public GenericRepository<User> provideUserRepository(InMemoryRepository<User> repository) {
         return repository;
     }
 
-    // @Provides
-    // public GenericRepository<UserPreference> provideUserPreferencesRepository(
-    //         MongoDBRepository<UserPreference> repository) {
-    //     return repository;
-    // }
+    @Provides
+    public GenericRepository<UserPreference> provideUserPreferencesRepository(
+            MongoDBRepository<UserPreference> repository) {
+        return repository;
+    }
 
     @Provides
     public Class<UserPreference> provideUserPreference() {
