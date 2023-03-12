@@ -1,8 +1,6 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.controller.UserController;
-
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -218,8 +216,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
             // If Post is pressed, pulls the embedbuilder list from the user object
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            messageCreateBuilder.setEmbeds(
-                    userController.getCurrentListing(user.getName()));
+            messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getName()));
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
