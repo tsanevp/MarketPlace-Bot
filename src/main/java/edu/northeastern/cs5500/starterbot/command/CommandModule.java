@@ -8,7 +8,31 @@ import dagger.multibindings.IntoSet;
 public class CommandModule {
 
     @Provides
+    public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoined newGuildJoined) {
+        return newGuildJoined;
+    }
+
+    @Provides
+    @IntoSet
+    public StringSelectHandler provideNewGuildJoinedHandler(
+            NewGuildJoined stringSelectGuildJoined) {
+        return stringSelectGuildJoined;
+    }
+
+    @Provides
+    @IntoSet
+    public ButtonHandler provideButtonNewGuildJoinedHandler(NewGuildJoined buttonCommand) {
+        return buttonCommand;
+    }
+
+    @Provides
     public NewMemberHandler provideNewMember(NewMember newMember) {
+        return newMember;
+    }
+
+    @Provides
+    @IntoSet
+    public StringSelectHandler provideDropdownNewMemberHandler(NewMember newMember) {
         return newMember;
     }
 
@@ -17,6 +41,13 @@ public class CommandModule {
     public SlashCommandHandler provideCreateListingCommand(
             CreateListingCommand createListingCommand) {
         return createListingCommand;
+    }
+
+    @Provides
+    @IntoSet
+    public ButtonHandler provideButtonCreateListingClickHandler(
+            CreateListingCommand buttonCommand) {
+        return buttonCommand;
     }
 
     @Provides
@@ -46,20 +77,7 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public ButtonHandler provideButtonCreateListingClickHandler(
-            CreateListingCommand buttonCommand) {
-        return buttonCommand;
-    }
-
-    @Provides
-    @IntoSet
     public StringSelectHandler provideDropdownCommandMenuHandler(DropdownCommand dropdownCommand) {
         return dropdownCommand;
-    }
-
-    @Provides
-    @IntoSet
-    public StringSelectHandler provideDropdownNewMemberHandler(NewMember newMember) {
-        return newMember;
     }
 }

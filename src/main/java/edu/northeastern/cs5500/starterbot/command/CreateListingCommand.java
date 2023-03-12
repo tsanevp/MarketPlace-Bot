@@ -29,7 +29,6 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
     private static final int MAX_NUM_IMAGES = 6;
     private static final String CURRENCY_USED = "USD ";
-    //     ArrayList<Object> testDB = new ArrayList<>(Arrays.asList("803083598550270013"));
 
     @Inject UserController userController;
 
@@ -128,14 +127,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var condition = Objects.requireNonNull(event.getOption("condition"));
         var description = Objects.requireNonNull(event.getOption("description"));
 
-        // ************Assigns the command as string to database here******************
+        // Stores the user input as a string to the user object, which is saved in the DB
         userController.setCurrentListingAsString(
                 event.getUser().getName(), event.getCommandString());
-        // ****************************************************************************
 
-        // ************Assigns GuildId to user in the database here********************
+        // Stores the Guild ID to user object, which is saved in the DB
         userController.setGuildIdForUser(event.getUser().getName(), event.getGuild().getId());
-        // ****************************************************************************
 
         ArrayList<OptionMapping> images = new ArrayList<>();
         for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
@@ -172,7 +169,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             if (i == 0) {
                 embedBuilder
-                        .setColor(100)
+                        .setColor(0x00FFFF)
                         .addField(costTitleReformatted.toString(), costReformatted.toString(), true)
                         .addField("Ships International:", shipsInternationally.toString(), true)
                         .addField("Condition:", condition.getAsString(), true)
@@ -195,10 +192,11 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                 Button.danger(this.getName() + ":cancel", "Cancel"))
                         .setEmbeds(embedBuilderlist);
         User user = event.getUser();
-        // ************Need to store the embeds built to database here********************
-        // testDB.add(embedBuilderlist);
+
+        // Stores the embedbuilder list in DB
         userController.setCurrentListingAsBuilder(event.getUser().getName(), embedBuilderlist);
-        // *******************************************************************************
+
+        // Sends DM to user who called /createlisting with their listing information
         user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
         event.reply(
                         String.format(
@@ -210,29 +208,25 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
-        // ************Need to pull saved GuildID from database here********************
-        // Guild guild = event.getJDA().getGuildById((String) testDB.get(0));
+
+        // Pulls the Guild ID from the user object
         Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getName()));
         TextChannel textChannel = guild.getTextChannelsByName("trading-channel", true).get(0);
-        // *****************************************************************************
         if ("Post".equals(event.getButton().getLabel())) {
             event.reply("Your listing has been posted on trading-channel!").queue();
-            // ************Need to pull saved embed from database here******************
+
+            // If Post is pressed, pulls the embedbuilder list from the user object
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            //     messageCreateBuilder.setEmbeds((Collection<? extends MessageEmbed>)
-            // testDB.get(2));
             messageCreateBuilder.setEmbeds(
                     userController.getCurrentListingAsBuilder(user.getName()));
-            // *************************************************************************
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
-            // ************Need to pull saved user input from database here*************
+            // If Edit is pressed, pulls the saved user inputs from the user object
             event.reply(
                             String.format(
                                     "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
                                     userController.getCurrentListingAsString(user.getName())))
                     .queue();
-            // *************************************************************************
         } else {
             event.reply("The creation of you lisitng has been canceled.").queue();
         }
