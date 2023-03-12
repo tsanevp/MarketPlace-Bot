@@ -15,8 +15,13 @@ public class RepositoryModule {
     //     return repository;
     // }
 
+    // @Provides
+    // public GenericRepository<User> provideUserRepository(InMemoryRepository<User> repository) {
+    //     return repository;
+    // }
+
     @Provides
-    public GenericRepository<User> provideUserRepository(InMemoryRepository<User> repository) {
+    public GenericRepository<User> provideUserRepository(MongoDBRepository<User> repository) {
         return repository;
     }
 

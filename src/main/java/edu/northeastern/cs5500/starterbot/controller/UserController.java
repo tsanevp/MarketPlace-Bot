@@ -1,13 +1,30 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.User;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+
+import org.bson.Document;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 public class UserController {
 
@@ -24,6 +41,7 @@ public class UserController {
             user.setLocationOfResidence(null);
             user.setCurrentListingAsString(null);
             user.setCurrentListingAsBuilder(null);
+            user.setCurrentListing(null);
             userRepository.add(user);
         }
     }
@@ -32,13 +50,11 @@ public class UserController {
         User user = getUserForMemberId(discordMemberId);
 
         user.setGuildId(guildId);
-        System.out.println(guildId);
         userRepository.update(user);
     }
 
     @Nullable
     public String getGuildIdForUser(String discordMemberId) {
-        System.out.println(getUserForMemberId(discordMemberId).getGuildId());
         return getUserForMemberId(discordMemberId).getGuildId();
     }
 
@@ -77,6 +93,60 @@ public class UserController {
     @Nullable
     public List<MessageEmbed> getCurrentListingAsBuilder(String discordMemberId) {
         return getUserForMemberId(discordMemberId).getCurrentListingAsBuilder();
+    }
+
+    public void setCurrentListing(
+            String discordMemberId, List<MessageEmbed> currentListings) {
+        User user = getUserForMemberId(discordMemberId);
+        MessageEmbed currentListingAsBuilder = currentListings.get(0);
+        JsonObjectBuilder images = Json.createObjectBuilder();
+        int i = 0;
+        for (MessageEmbed messageEmbed : currentListings) {
+            images.add("image" + i, messageEmbed.getImage().getUrl());
+            i++;
+        }
+        String imagesSaved = images.build().toString();
+        JsonObjectBuilder builder = Json.createObjectBuilder();
+        builder.add("title", currentListingAsBuilder.getTitle());
+        builder.add("titleUrl", currentListingAsBuilder.getUrl());
+
+        List<Field> listingFields = currentListingAsBuilder.getFields();
+        for (Field field : listingFields) {
+            builder.add(field.getName(), field.getValue());
+        }
+        builder.add("image", imagesSaved);
+        builder.add("color", currentListingAsBuilder.getColorRaw());
+        JsonObject object = builder.build();
+        user.setCurrentListing(object.toString());
+        userRepository.update(user);
+    }
+
+    @Nullable
+    public List<MessageEmbed> getCurrentListing(String discordMemberId) {
+        JsonReader reader = Json.createReader(new StringReader(getUserForMemberId(discordMemberId).getCurrentListing()));
+        JsonObject jsonObject = reader.readObject();
+        reader.close();
+
+        JsonReader reader2 = Json.createReader(new StringReader(jsonObject.getString("image")));
+        JsonObject jsonObject2 = reader2.readObject();
+        reader2.close();
+
+        List<MessageEmbed> currentListings = new ArrayList<>();
+        for (int i = 0; i < jsonObject2.keySet().size(); i++) {
+            EmbedBuilder embedBuilder = new EmbedBuilder().setColor(jsonObject.getInt("color")).setTitle(jsonObject.getString("title"), jsonObject.getString("titleUrl")).setImage(jsonObject2.getString("image" + i));
+            for (String key : jsonObject.keySet()) {
+                if ("Description:".equals(key)) {
+                    embedBuilder.addField(key, jsonObject.getString(key), false);
+                    continue;
+                }
+                else if ("title".equals(key) || "titleUrl".equals(key) || "image".equals(key) || "color".equals(key)) {
+                    continue;
+                }
+                embedBuilder.addField(key, jsonObject.getString(key), true);
+            }
+            currentListings.add(embedBuilder.build());
+        }
+        return currentListings;
     }
 
     @Nonnull

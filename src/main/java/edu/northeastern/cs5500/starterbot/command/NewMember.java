@@ -34,7 +34,7 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         log.info("event: newmember");
 
-        // Assigns the guildId to the user object created
+        // Assigns the Guild ID to the user object when a user first joins
         userController.setGuildIdForUser(event.getUser().toString(), event.getGuild().getId());
 
         TextChannel textChannel =

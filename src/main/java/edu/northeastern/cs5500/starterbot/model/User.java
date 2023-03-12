@@ -24,4 +24,6 @@ public class User implements Model {
 
     // This is the current listing as a MessageBuilder
     List<MessageEmbed> currentListingAsBuilder;
+
+    String currentListing;
 }
