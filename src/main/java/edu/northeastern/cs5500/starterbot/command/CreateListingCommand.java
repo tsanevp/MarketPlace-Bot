@@ -193,8 +193,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .setEmbeds(embedBuilderlist);
         User user = event.getUser();
 
-        // Stores the embedbuilder list in DB
-        userController.setCurrentListingAsBuilder(event.getUser().getName(), embedBuilderlist);
+        userController.setCurrentListing(event.getUser().getName(), embedBuilderlist);
 
         // Sends DM to user who called /createlisting with their listing information
         user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
@@ -217,9 +216,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
             // If Post is pressed, pulls the embedbuilder list from the user object
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            messageCreateBuilder.setEmbeds(
-                    userController.getCurrentListingAsBuilder(user.getName()));
+            messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getName()));
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
+
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
             event.reply(
@@ -230,5 +229,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         } else {
             event.reply("The creation of you lisitng has been canceled.").queue();
         }
+        // Uncomment once buttons are made to be clickable only once during the listing creation
+        // process
+        // userController.setCurrentListing(user.getName(), null);
+        // userController.setCurrentListingAsString(user.getName(), null);
     }
 }
