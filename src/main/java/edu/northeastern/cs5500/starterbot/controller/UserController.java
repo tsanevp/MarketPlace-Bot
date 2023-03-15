@@ -18,6 +18,11 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 public class UserController {
+    private static final String TITLE_FIELD_NAME = "title";
+    private static final String TITLE_URL_FIELD_NAME = "titleUrl";
+    private static final String DESCRIPTION_FIELD_NAME = "Description:";
+    private static final String IMAGE_FIELD_NAME = "image";
+    private static final String COLOR_FIELD_NAME = "color";
 
     GenericRepository<User> userRepository;
 
@@ -27,11 +32,10 @@ public class UserController {
 
         if (userRepository.count() == 0) {
             User user = new User();
-            user.setGuildId("2349024");
             user.setDiscordUserId("1234");
+            user.setGuildId("2349024");
             user.setLocationOfResidence(null);
             user.setCurrentListingAsString(null);
-            user.setCurrentListingAsBuilder(null);
             user.setCurrentListing(null);
             userRepository.add(user);
         }
@@ -73,41 +77,31 @@ public class UserController {
         return getUserForMemberId(discordMemberId).getCurrentListingAsString();
     }
 
-    public void setCurrentListingAsBuilder(
-            String discordMemberId, List<MessageEmbed> currentListingAsBuilder) {
-        User user = getUserForMemberId(discordMemberId);
-
-        user.setCurrentListingAsBuilder(currentListingAsBuilder);
-        userRepository.update(user);
-    }
-
-    @Nullable
-    public List<MessageEmbed> getCurrentListingAsBuilder(String discordMemberId) {
-        return getUserForMemberId(discordMemberId).getCurrentListingAsBuilder();
-    }
-
     public void setCurrentListing(String discordMemberId, List<MessageEmbed> currentListings) {
         User user = getUserForMemberId(discordMemberId);
-        MessageEmbed currentListingAsBuilder = currentListings.get(0);
-        JsonObjectBuilder images = Json.createObjectBuilder();
-        int i = 0;
-        for (MessageEmbed messageEmbed : currentListings) {
-            images.add("image" + i, messageEmbed.getImage().getUrl());
-            i++;
-        }
-        String imagesSaved = images.build().toString();
-        JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("title", currentListingAsBuilder.getTitle());
-        builder.add("titleUrl", currentListingAsBuilder.getUrl());
+        user.setCurrentListing(null);
+        if (currentListings != null) {
+            MessageEmbed currentListingAsBuilder = currentListings.get(0);
+            JsonObjectBuilder images = Json.createObjectBuilder();
+            int i = 0;
+            for (MessageEmbed messageEmbed : currentListings) {
+                images.add(IMAGE_FIELD_NAME + i, messageEmbed.getImage().getUrl());
+                i++;
+            }
+            String imagesSaved = images.build().toString();
+            JsonObjectBuilder builder = Json.createObjectBuilder();
+            builder.add(TITLE_FIELD_NAME, currentListingAsBuilder.getTitle());
+            builder.add(TITLE_URL_FIELD_NAME, currentListingAsBuilder.getUrl());
 
-        List<Field> listingFields = currentListingAsBuilder.getFields();
-        for (Field field : listingFields) {
-            builder.add(field.getName(), field.getValue());
+            List<Field> listingFields = currentListingAsBuilder.getFields();
+            for (Field field : listingFields) {
+                builder.add(field.getName(), field.getValue());
+            }
+            builder.add(IMAGE_FIELD_NAME, imagesSaved);
+            builder.add(COLOR_FIELD_NAME, currentListingAsBuilder.getColorRaw());
+            JsonObject object = builder.build();
+            user.setCurrentListing(object.toString());
         }
-        builder.add("image", imagesSaved);
-        builder.add("color", currentListingAsBuilder.getColorRaw());
-        JsonObject object = builder.build();
-        user.setCurrentListing(object.toString());
         userRepository.update(user);
     }
 
@@ -119,7 +113,8 @@ public class UserController {
         JsonObject jsonObject = reader.readObject();
         reader.close();
 
-        JsonReader reader2 = Json.createReader(new StringReader(jsonObject.getString("image")));
+        JsonReader reader2 =
+                Json.createReader(new StringReader(jsonObject.getString(IMAGE_FIELD_NAME)));
         JsonObject jsonObject2 = reader2.readObject();
         reader2.close();
 
@@ -127,21 +122,20 @@ public class UserController {
         for (int i = 0; i < jsonObject2.keySet().size(); i++) {
             EmbedBuilder embedBuilder =
                     new EmbedBuilder()
-                            .setColor(jsonObject.getInt("color"))
+                            .setColor(jsonObject.getInt(COLOR_FIELD_NAME))
                             .setTitle(
-                                    jsonObject.getString("title"), jsonObject.getString("titleUrl"))
-                            .setImage(jsonObject2.getString("image" + i));
+                                    jsonObject.getString(TITLE_FIELD_NAME),
+                                    jsonObject.getString(TITLE_URL_FIELD_NAME))
+                            .setImage(jsonObject2.getString(IMAGE_FIELD_NAME + i));
             for (String key : jsonObject.keySet()) {
-                if ("Description:".equals(key)) {
+                if (DESCRIPTION_FIELD_NAME.equals(key)) {
                     embedBuilder.addField(key, jsonObject.getString(key), false);
-                    continue;
-                } else if ("title".equals(key)
-                        || "titleUrl".equals(key)
-                        || "image".equals(key)
-                        || "color".equals(key)) {
-                    continue;
+                } else if (!TITLE_FIELD_NAME.equals(key)
+                        && !TITLE_URL_FIELD_NAME.equals(key)
+                        && !IMAGE_FIELD_NAME.equals(key)
+                        && !COLOR_FIELD_NAME.equals(key)) {
+                    embedBuilder.addField(key, jsonObject.getString(key), true);
                 }
-                embedBuilder.addField(key, jsonObject.getString(key), true);
             }
             currentListings.add(embedBuilder.build());
         }

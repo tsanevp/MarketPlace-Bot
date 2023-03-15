@@ -218,6 +218,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
             messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getName()));
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
+
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
             event.reply(
@@ -228,5 +229,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         } else {
             event.reply("The creation of you lisitng has been canceled.").queue();
         }
+        // Uncomment once buttons are made to be clickable only once during the listing creation
+        // process
+        // userController.setCurrentListing(user.getName(), null);
+        // userController.setCurrentListingAsString(user.getName(), null);
     }
 }
