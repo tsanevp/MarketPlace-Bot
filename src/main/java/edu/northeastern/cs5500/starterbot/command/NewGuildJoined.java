@@ -26,7 +26,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Slf4j
 public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, StringSelectHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
-    
+
     @Inject UserController userController;
 
     @Inject
