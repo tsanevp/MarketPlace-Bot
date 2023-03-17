@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Singleton
 @Slf4j
 public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, StringSelectHandler {
+    private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject UserController userController;
 
@@ -48,7 +49,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                 new EmbedBuilder()
                         .setTitle(
                                 "Thank you for adding our MarketPlace Bot! To function as intended, a text channel to POST new listings needs to be assigned. Would you like to create a new channel or use an existing channel in your server?")
-                        .setColor(0x00FFFF);
+                        .setColor(EMBED_COLOR);
         MessageCreateBuilder messageCreateBuilder =
                 new MessageCreateBuilder()
                         .addActionRow(
@@ -111,7 +112,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                     new EmbedBuilder()
                             .setDescription(
                                     "Select which text channel you wish to assign as your trading channel.")
-                            .setColor(0x00FFFF);
+                            .setColor(EMBED_COLOR);
             MessageCreateBuilder messageCreateBuilder =
                     new MessageCreateBuilder()
                             .mention(event.getUser())
