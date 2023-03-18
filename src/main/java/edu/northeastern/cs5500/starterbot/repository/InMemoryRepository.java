@@ -25,13 +25,8 @@ public class InMemoryRepository<T extends Model> implements GenericRepository<T>
     }
 
     @Override
-    public T add(@Nonnull T item) {
-        ObjectId id = item.getId();
-        if (id == null) {
-            id = new ObjectId();
-            item.setId(id);
-        }
-        collection.put(id, item);
+    public T add(@Nonnull T item, @Nonnull String userId) {
+        collection.put(userId, item);
         return item;
     }
 
