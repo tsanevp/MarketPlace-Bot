@@ -128,14 +128,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var description = Objects.requireNonNull(event.getOption("description"));
 
         // Stores the user input as a string to the user object, which is saved in the DB
-        userController.setCurrentListingAsString(
-                event.getUser().getId(), event.getCommandString());
+        userController.setCurrentListingAsString(event.getUser().getId(), event.getCommandString());
 
         // Stores the Guild ID to user object, which is saved in the DB
         if (userController.getGuildIdForUser(event.getUser().getId()) == null) {
-                userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
+            userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
         }
-
 
         ArrayList<OptionMapping> images = new ArrayList<>();
         for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
@@ -222,7 +220,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         }
         event.deferEdit().setActionRow(buttons).queue();
         if ("Post".equals(event.getButton().getLabel())) {
-            user.openPrivateChannel().complete().sendMessage("Your listing has been posted on trading-channel!").queue();
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage("Your listing has been posted on trading-channel!")
+                    .queue();
 
             // If Post is pressed, pulls the embedbuilder list from the user object
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
@@ -231,13 +232,18 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
-            user.openPrivateChannel().complete().sendMessage(
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage(
                             String.format(
                                     "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
                                     userController.getCurrentListingAsString(user.getId())))
                     .queue();
         } else {
-            user.openPrivateChannel().complete().sendMessage("The creation of you lisitng has been canceled.").queue();
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage("The creation of you lisitng has been canceled.")
+                    .queue();
         }
         userController.setCurrentListing(user.getName(), null);
         userController.setCurrentListingAsString(user.getName(), null);
