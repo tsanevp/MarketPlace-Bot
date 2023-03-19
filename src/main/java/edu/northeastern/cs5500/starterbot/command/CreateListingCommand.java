@@ -128,11 +128,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var description = Objects.requireNonNull(event.getOption("description"));
 
         // Stores the user input as a string to the user object, which is saved in the DB
-        userController.setCurrentListingAsString(
-                event.getUser().getName(), event.getCommandString());
+        userController.setCurrentListingAsString(event.getUser().getId(), event.getCommandString());
 
         // Stores the Guild ID to user object, which is saved in the DB
-        userController.setGuildIdForUser(event.getUser().getName(), event.getGuild().getId());
+        if (userController.getGuildIdForUser(event.getUser().getId()) == null) {
+            userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
+        }
 
         ArrayList<OptionMapping> images = new ArrayList<>();
         for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
@@ -193,7 +194,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .setEmbeds(embedBuilderlist);
         User user = event.getUser();
 
-        userController.setCurrentListing(event.getUser().getName(), embedBuilderlist);
+        userController.setCurrentListing(event.getUser().getId(), embedBuilderlist);
 
         // Sends DM to user who called /createlisting with their listing information
         user.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
@@ -209,29 +210,42 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         User user = event.getUser();
 
         // Pulls the Guild ID from the user object
-        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getName()));
+        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getId()));
         TextChannel textChannel = guild.getTextChannelsByName("trading-channel", true).get(0);
+
+        List<Button> buttons = new ArrayList<>();
+        for (Button button : event.getMessage().getButtons()) {
+            button = button.withDisabled(true);
+            buttons.add(button);
+        }
+        event.deferEdit().setActionRow(buttons).queue();
         if ("Post".equals(event.getButton().getLabel())) {
-            event.reply("Your listing has been posted on trading-channel!").queue();
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage("Your listing has been posted on trading-channel!")
+                    .queue();
 
             // If Post is pressed, pulls the embedbuilder list from the user object
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getName()));
+            messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getId()));
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
 
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
-            event.reply(
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage(
                             String.format(
                                     "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
-                                    userController.getCurrentListingAsString(user.getName())))
+                                    userController.getCurrentListingAsString(user.getId())))
                     .queue();
         } else {
-            event.reply("The creation of you lisitng has been canceled.").queue();
+            user.openPrivateChannel()
+                    .complete()
+                    .sendMessage("The creation of you lisitng has been canceled.")
+                    .queue();
         }
-        // Uncomment once buttons are made to be clickable only once during the listing creation
-        // process
-        // userController.setCurrentListing(user.getName(), null);
-        // userController.setCurrentListingAsString(user.getName(), null);
+        userController.setCurrentListing(user.getName(), null);
+        userController.setCurrentListingAsString(user.getName(), null);
     }
 }
