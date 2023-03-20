@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -25,6 +26,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Singleton
 @Slf4j
 public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, StringSelectHandler {
+    private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject UserController userController;
 
@@ -42,13 +44,18 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
+
+        for (Member member : event.getGuild().getMembers()) {
+            userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
+        }
+
         User owner = event.getGuild().getOwner().getUser();
         // Sends DM to user who called /createlisting with their listing information
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
                         .setTitle(
                                 "Thank you for adding our MarketPlace Bot! To function as intended, a text channel to POST new listings needs to be assigned. Would you like to create a new channel or use an existing channel in your server?")
-                        .setColor(0x00FFFF);
+                        .setColor(EMBED_COLOR);
         MessageCreateBuilder messageCreateBuilder =
                 new MessageCreateBuilder()
                         .addActionRow(
@@ -65,8 +72,8 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
-        // Pulls the Guild ID from the user object NEED TO IMPLEMENT
-        Guild guild = event.getJDA().getGuildById("1081855590650875925");
+        // Pulls the Guild ID from the user object
+        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getId()));
         // Disable the buttons so that they can only be selected once
         List<Button> buttons = new ArrayList<>();
         for (Button button : event.getMessage().getButtons()) {
@@ -111,7 +118,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                     new EmbedBuilder()
                             .setDescription(
                                     "Select which text channel you wish to assign as your trading channel.")
-                            .setColor(0x00FFFF);
+                            .setColor(EMBED_COLOR);
             MessageCreateBuilder messageCreateBuilder =
                     new MessageCreateBuilder()
                             .mention(event.getUser())

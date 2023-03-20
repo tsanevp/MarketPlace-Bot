@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.model;
 
+import com.mongodb.DBObject;
 import lombok.Data;
 import org.bson.types.ObjectId;
 
@@ -21,5 +22,5 @@ public class User implements Model {
     String currentListingAsString;
 
     // This is the current listing in JSON string format
-    String currentListing;
+    DBObject currentListing;
 }
