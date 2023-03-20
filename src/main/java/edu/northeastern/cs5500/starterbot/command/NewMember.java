@@ -35,7 +35,7 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
         log.info("event: newmember");
 
         // Assigns the Guild ID to the user object when a user first joins
-        userController.setGuildIdForUser(event.getUser().toString(), event.getGuild().getId());
+        userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
 
         TextChannel textChannel =
                 event.getGuild().getTextChannelsByName("welcome-channel", true).get(0);
@@ -76,7 +76,19 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
         final String response = event.getInteraction().getValues().get(0);
         Objects.requireNonNull(response);
-        event.reply(response).queue();
-        // Next step is to save the user's preferred method as an attribute to their user object
+        event.deferEdit()
+                .setActionRow(
+                        StringSelectMenu.create(getName())
+                                .setPlaceholder(response)
+                                .addOption(response, response)
+                                .build()
+                                .withDisabled(true))
+                .queue();
+        event.getUser()
+                .openPrivateChannel()
+                .complete()
+                .sendMessage(String.format("%s has been set as your trading currency!", response))
+                .queue();
+        userController.setLocationOfResidence(event.getUser().getId(), response);
     }
 }
