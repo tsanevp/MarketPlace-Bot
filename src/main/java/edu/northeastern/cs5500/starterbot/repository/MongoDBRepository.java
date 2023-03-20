@@ -8,6 +8,8 @@ import edu.northeastern.cs5500.starterbot.model.Model;
 import edu.northeastern.cs5500.starterbot.service.MongoDBService;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -38,7 +40,7 @@ public class MongoDBRepository<T extends Model> implements GenericRepository<T> 
         collection.insertOne(item);
         return item;
     }
-
+    
     @Override
     public T update(@Nonnull T item) {
         return collection.findOneAndReplace(eq(MONGODB_ID_FIELD, item.getId()), item);
