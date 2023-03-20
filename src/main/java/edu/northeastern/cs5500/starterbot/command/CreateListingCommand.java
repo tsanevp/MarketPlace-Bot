@@ -245,7 +245,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                     .sendMessage("The creation of you lisitng has been canceled.")
                     .queue();
         }
-        userController.setCurrentListing(user.getName(), null);
-        userController.setCurrentListingAsString(user.getName(), null);
+        userController.setCurrentListing(user.getId(), null);
+        userController.setCurrentListingAsString(user.getId(), null);
     }
 }
