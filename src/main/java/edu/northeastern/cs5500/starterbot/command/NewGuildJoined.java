@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -43,6 +44,11 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
+
+        for (Member member : event.getGuild().getMembers()) {
+            userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
+        }
+
         User owner = event.getGuild().getOwner().getUser();
         // Sends DM to user who called /createlisting with their listing information
         EmbedBuilder embedBuilder =
@@ -66,8 +72,8 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
-        // Pulls the Guild ID from the user object NEED TO IMPLEMENT
-        Guild guild = event.getJDA().getGuildById("1081855590650875925");
+        // Pulls the Guild ID from the user object
+        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getId()));
         // Disable the buttons so that they can only be selected once
         List<Button> buttons = new ArrayList<>();
         for (Button button : event.getMessage().getButtons()) {
