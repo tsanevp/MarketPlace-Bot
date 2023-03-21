@@ -5,15 +5,14 @@ import static com.mongodb.client.model.Filters.eq;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.bson.conversions.Bson;
 import edu.northeastern.cs5500.starterbot.model.Model;
 import edu.northeastern.cs5500.starterbot.service.MongoDBService;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 public class MongoDBRepository<T extends Model> implements GenericRepository<T> {
@@ -41,7 +40,7 @@ public class MongoDBRepository<T extends Model> implements GenericRepository<T> 
         collection.insertOne(item);
         return item;
     }
-    
+
     @Override
     public T update(@Nonnull T item) {
         return collection.findOneAndReplace(eq(MONGODB_ID_FIELD, item.getId()), item);

@@ -2,18 +2,16 @@ package edu.northeastern.cs5500.starterbot.controller;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
-
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
@@ -29,8 +27,10 @@ public class ListingController {
             Listing listing = new Listing();
             listing.setTitle("Keyboard");
             listing.setUrl(null);
-            listing.setDescription(null);;
-            listing.setImages(null);;
+            listing.setDescription(null);
+            ;
+            listing.setImages(null);
+            ;
             listing.setColor(null);
             listing.setDescription(null);
             this.listingRepository.add(listing);
@@ -73,7 +73,8 @@ public class ListingController {
         return findIterableToMessageEmbedList(findListingsForMemberId(discordUserId));
     }
 
-    // Helper method for getListingMessagesForMemberId and deleteListingsForUser. It searches for the listings
+    // Helper method for getListingMessagesForMemberId and deleteListingsForUser. It searches for
+    // the listings
     // of the discordUserId and returns the results as a FindIterable of the Listings object.
     public FindIterable<Listing> findListingsForMemberId(String discordUserId) {
         Bson filter = Filters.eq("discordUserId", discordUserId);
@@ -92,7 +93,7 @@ public class ListingController {
     public List<List<MessageEmbed>> getAllListings() {
         Collection<Listing> lists = this.listingRepository.getAll();
         List<List<MessageEmbed>> allListingMessages = new ArrayList<>(new ArrayList<>());
-        for (Listing l: lists) {
+        for (Listing l : lists) {
             allListingMessages.add(listingToMessageEmbed(l));
         }
         return allListingMessages;
@@ -106,7 +107,7 @@ public class ListingController {
     // Helper function that converts the result of the filter into a MessageEmbed
     public List<List<MessageEmbed>> findIterableToMessageEmbedList(FindIterable<Listing> listing) {
         List<List<MessageEmbed>> allListingMessages = new ArrayList<>(new ArrayList<>());
-        for (Listing l: listing) {
+        for (Listing l : listing) {
             allListingMessages.add(listingToMessageEmbed(l));
         }
         return allListingMessages;
@@ -118,9 +119,7 @@ public class ListingController {
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
                         .setColor(listing.getColor())
-                        .setTitle(
-                                listing.getTitle(),
-                                listing.getUrl())
+                        .setTitle(listing.getTitle(), listing.getUrl())
                         .setImage(listing.getImages().get(0));
         for (Field key : listing.getFields()) {
             if ("Description".equals(key.getName())) {
@@ -144,5 +143,4 @@ public class ListingController {
         }
         return listingsMessage;
     }
-
 }
