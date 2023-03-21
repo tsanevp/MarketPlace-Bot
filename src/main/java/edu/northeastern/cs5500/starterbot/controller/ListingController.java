@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -53,18 +55,40 @@ public class ListingController {
         this.listingRepository.add(listing);
     }
 
-    public List<List<MessageEmbed>> getListingsForMemberId(String discordUserId) {
-        Bson filter = Filters.eq("discordUserId", discordUserId);
-        FindIterable<Listing> listingsForUser = this.listingRepository.filter(filter);
-        return findIterableToMessageEmbedList(listingsForUser);
+    // Deletes the listing of a specific user in the collection.
+    public void deleteListingsForUser(String discordMemberId) {
+        FindIterable<Listing> listingsToDelete = findListingsForMemberId(discordMemberId);
+        for (Listing l : listingsToDelete) {
+            this.listingRepository.delete(l.getId());
+        }
     }
 
+    // Deletes a specific listing in the collection.
+    public void deleteListingById(@Nonnull ObjectId id) {
+        this.listingRepository.delete(id);
+    }
+
+    // Returns a list of MessageEmbed listings of a specifc user
+    public List<List<MessageEmbed>> getListingsMessagesForMemberId(String discordUserId) {
+        return findIterableToMessageEmbedList(findListingsForMemberId(discordUserId));
+    }
+
+    // Helper method for getListingMessagesForMemberId and deleteListingsForUser. It searches for the listings
+    // of the discordUserId and returns the results as a FindIterable of the Listings object.
+    public FindIterable<Listing> findListingsForMemberId(String discordUserId) {
+        Bson filter = Filters.eq("discordUserId", discordUserId);
+        FindIterable<Listing> listingsForUser = this.listingRepository.filter(filter);
+        return listingsForUser;
+    }
+
+    // Returns a list of MessageEmbed listings of a specific keyword
     public List<List<MessageEmbed>> getListingsForKeyword(String keyword) {
         Bson filter = Filters.text(keyword);
         FindIterable<Listing> listingForKeyword = this.listingRepository.filter(filter);
         return findIterableToMessageEmbedList(listingForKeyword);
     }
 
+    // Returns all listings in the collection.
     public List<List<MessageEmbed>> getAllListings() {
         Collection<Listing> lists = this.listingRepository.getAll();
         List<List<MessageEmbed>> allListingMessages = new ArrayList<>(new ArrayList<>());
@@ -74,6 +98,7 @@ public class ListingController {
         return allListingMessages;
     }
 
+    // Returns the listing MessageEmbed when given the object id.
     public List<MessageEmbed> getListingById(ObjectId id) {
         return listingToMessageEmbed(this.listingRepository.get(id));
     }
