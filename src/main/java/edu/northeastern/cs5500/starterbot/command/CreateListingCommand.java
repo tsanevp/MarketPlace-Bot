@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     private static final String CURRENCY_USED = "USD ";
 
     @Inject UserController userController;
+    @Inject ListingController listingController;
 
     @Inject
     public CreateListingCommand() {
@@ -229,6 +231,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
             messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getId()));
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
+            listingController.setListing(
+                    userController.getCurrentListing(user.getId()), user.getId());
 
         } else if ("Edit".equals(event.getButton().getLabel())) {
             // If Edit is pressed, pulls the saved user inputs from the user object
