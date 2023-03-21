@@ -22,19 +22,6 @@ public class ListingController {
     @Inject
     ListingController(GenericRepository<Listing> listingRepository) {
         this.listingRepository = listingRepository;
-
-        if (listingRepository.count() == 0) {
-            Listing listing = new Listing();
-            listing.setTitle("Keyboard");
-            listing.setUrl(null);
-            listing.setDescription(null);
-            ;
-            listing.setImages(null);
-            ;
-            listing.setColor(null);
-            listing.setDescription(null);
-            this.listingRepository.add(listing);
-        }
     }
 
     public void setListing(List<MessageEmbed> currentListings, String discordUserId) {
