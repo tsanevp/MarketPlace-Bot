@@ -2,6 +2,7 @@ package edu.northeastern.cs5500.starterbot.repository;
 
 import static com.mongodb.client.model.Filters.eq;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import edu.northeastern.cs5500.starterbot.model.Model;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 public class MongoDBRepository<T extends Model> implements GenericRepository<T> {
@@ -57,5 +59,9 @@ public class MongoDBRepository<T extends Model> implements GenericRepository<T> 
     @Override
     public long count() {
         return collection.countDocuments();
+    }
+
+    public FindIterable<T> filter(Bson filter) {
+        return collection.find(filter);
     }
 }
