@@ -221,17 +221,17 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
         if ("Post".equals(event.getButton().getLabel())) {
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-            
+
             // Pulls the listing information from MongoDB and then builds/sets the embed
             messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getId()));
-            
+
             // Send the listing to the "trading-channel"
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
-        
+
             // Store the listing in the ListingControllerDB
             listingController.setListing(
                     userController.getCurrentListing(user.getId()), user.getId());
-            
+
             // Replace the temp embed with a success message
             buttonEvent
                     .setEmbeds(
@@ -242,7 +242,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                     .build())
                     .queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
-            // Replace the temp embed with instructions on how to edit the listing, have to resubmit one
+            // Replace the temp embed with instructions on how to edit the listing, have to resubmit
+            // one
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()
@@ -255,7 +256,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                     .build())
                     .queue();
         } else {
-            // Cancels the /createListing event    
+            // Cancels the /createListing event
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()

@@ -1,9 +1,7 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.controller.UserController;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -20,15 +18,9 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.Command.Type;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu.Builder;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
@@ -53,12 +45,14 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
 
-        // Set the guildID for each existing member, this will also add each member to the collection
+        // Set the guildID for each existing member, this will also add each member to the
+        // collection
         for (Member member : event.getGuild().getMembers()) {
             userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
         }
 
-        // Ask the guild owner whether they want to create a new trading-channel or use an existing channel
+        // Ask the guild owner whether they want to create a new trading-channel or use an existing
+        // channel
         User owner = event.getGuild().getOwner().getUser();
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
