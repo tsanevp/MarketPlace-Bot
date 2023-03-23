@@ -2,6 +2,7 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -18,9 +20,15 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.Command.Type;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu.Builder;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
@@ -45,12 +53,13 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
 
+        // Set the guildID for each existing member, this will also add each member to the collection
         for (Member member : event.getGuild().getMembers()) {
             userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
         }
 
+        // Ask the guild owner whether they want to create a new trading-channel or use an existing channel
         User owner = event.getGuild().getOwner().getUser();
-        // Sends DM to user who called /createlisting with their listing information
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
                         .setTitle(
@@ -66,24 +75,20 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                                         "Use Existing Channel"))
                         .setEmbeds(embedBuilder.build());
 
+        // Send the message to the owner
         owner.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        // Define the owner and pull the Guild ID from the user collection
         User user = event.getUser();
-        // Pulls the Guild ID from the user object
         Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getId()));
-        // Disable the buttons so that they can only be selected once
-        List<Button> buttons = new ArrayList<>();
-        for (Button button : event.getMessage().getButtons()) {
-            button = button.withDisabled(true);
-            buttons.add(button);
-        }
-        event.deferEdit().setActionRow(buttons).queue();
-        // Creates a new text channel named "trading-channel"
+
+        event.deferEdit().setComponents().queue();
+        // Checks to see if creation of a new trading-channel is selected
         if ("Create New Channel".equals(event.getButton().getLabel())) {
-            // First checks if a channel named trading-channel already exists on the server
+            // Checks if a channel named trading-channel already exists on the server
             for (GuildChannel guildChannel : guild.getTextChannels()) {
                 if ("trading-channel".equals(guildChannel.getName())) {
                     user.openPrivateChannel()
@@ -95,7 +100,16 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             }
             // Create new channel named "trading-channel" and added it to "Text Channels" grouping
             Category category = guild.getCategoriesByName("text channels", true).get(0);
-            TextChannel textChannel = category.createTextChannel("trading-channel").complete();
+            EnumSet<Permission> deny =
+                    EnumSet.of(
+                            Permission.MESSAGE_SEND,
+                            Permission.CREATE_PRIVATE_THREADS,
+                            Permission.MESSAGE_MANAGE,
+                            Permission.MANAGE_THREADS);
+            TextChannel textChannel =
+                    category.createTextChannel("trading-channel")
+                            .addPermissionOverride(guild.getPublicRole(), null, deny)
+                            .complete();
             textChannel.getManager().setParent(category);
             user.openPrivateChannel()
                     .complete()
