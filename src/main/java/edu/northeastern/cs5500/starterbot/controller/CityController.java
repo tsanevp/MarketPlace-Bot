@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class CityController {
     private final HttpClient client = HttpClient.newHttpClient();
+    private static final int MAX_MENU_OPTIONS = 25;
 
     public CityController() {
         // Defined public and empty to call API
@@ -33,16 +34,16 @@ public class CityController {
 
         if (citiesNested.isPresent()) {
             List<List<String>> cities = citiesNested.get();
-
             cities.remove(0);
-            for (List<String> city : cities) {
-                if (Integer.parseInt(city.get(1)) > 200000) {
-                    int index = city.get(0).indexOf(",");
-                    citiesCleanedUp.add(city.get(0).substring(0, index - 5));
-                }
+            cities.sort(
+                    (pop1, pop2) ->
+                            Integer.parseInt(pop2.get(1)) - (Integer.parseInt(pop1.get(1))));
+            for (int i = 0; i < MAX_MENU_OPTIONS; i++) {
+                String city = cities.get(i).get(0);
+                int index = city.indexOf(",");
+                citiesCleanedUp.add(city.substring(0, index - 5));
             }
         }
-        System.out.println(citiesCleanedUp);
         return citiesCleanedUp;
     }
 
