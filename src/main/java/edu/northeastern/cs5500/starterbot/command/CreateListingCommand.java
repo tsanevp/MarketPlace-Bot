@@ -218,7 +218,11 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
         Guild guild = event.getGuild();
-        TextChannel textChannel = guild.getTextChannelsByName(userController.getTradingChannel(event.getGuild().getOwnerId()), true).get(0);
+        TextChannel textChannel =
+                guild.getTextChannelsByName(
+                                userController.getTradingChannel(event.getGuild().getOwnerId()),
+                                true)
+                        .get(0);
 
         // Remove the buttons so they are no longer clickable
         MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();

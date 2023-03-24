@@ -113,7 +113,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                                     guild.getName()))
                     .queue();
             userController.setTradingChannel(guild.getOwnerId(), "trading-channel");
-        
+
         } else {
             // Create a dropdown with all the existing channels a user can select as their trading
             // channel
