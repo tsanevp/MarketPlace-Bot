@@ -15,6 +15,9 @@ public class User implements Model {
     // This is the ID of the guild the user is a part of
     String guildId;
 
+    // This is the set channel used for trading
+    String tradingChannel;
+
     // The location the user lives at
     String locationOfResidence;
 
