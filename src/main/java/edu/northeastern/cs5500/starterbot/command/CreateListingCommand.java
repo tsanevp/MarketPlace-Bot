@@ -122,6 +122,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
+        // need to delete after testing
+        userController.setTradingChannel(event.getGuild().getOwnerId(), "trading-channel");
+
         log.info("event: /createlisting");
         var title = Objects.requireNonNull(event.getOption("title"));
         var cost = Objects.requireNonNull(event.getOption("item_cost"));
@@ -215,7 +218,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
         Guild guild = event.getGuild();
-        TextChannel textChannel = guild.getTextChannelsByName("trading-channel", true).get(0);
+        TextChannel textChannel = guild.getTextChannelsByName(userController.getTradingChannel(event.getGuild().getOwnerId()), true).get(0);
 
         // Remove the buttons so they are no longer clickable
         MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();

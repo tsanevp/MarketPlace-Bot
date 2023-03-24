@@ -37,6 +37,18 @@ public class UserController {
     }
 
     @Nullable
+    public String getTradingChannel(String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getTradingChannel();
+    }
+
+    public void setTradingChannel(String discordMemberId, String tradingChannel) {
+        User user = getUserForMemberId(discordMemberId);
+
+        user.setTradingChannel(tradingChannel);
+        userRepository.update(user);
+    }
+
+    @Nullable
     public String getGuildIdForUser(String discordMemberId) {
         return getUserForMemberId(discordMemberId).getGuildId();
     }

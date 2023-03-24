@@ -112,12 +112,14 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                                     "A new channel named \"trading-channel\" has been created in your server %s.",
                                     guild.getName()))
                     .queue();
+            userController.setTradingChannel(guild.getOwnerId(), "trading-channel");
+        
         } else {
             // Create a dropdown with all the existing channels a user can select as their trading
             // channel
             Builder menu =
                     StringSelectMenu.create(getName())
-                            .setPlaceholder("Select Existing Channel To Assign For Sales");
+                            .setPlaceholder("Select Existing Channel To Assign For Trading");
             for (GuildChannel guildChannel : guild.getTextChannels()) {
                 menu.addOption(guildChannel.getName(), guildChannel.getName());
             }
@@ -157,5 +159,6 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                 .sendMessage(
                         String.format("%s has been set as the main trading channel!", response))
                 .queue();
+        userController.setTradingChannel(event.getGuild().getOwnerId(), response);
     }
 }
