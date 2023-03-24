@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Singleton
 @Slf4j
 public class NewMember implements NewMemberHandler, StringSelectHandler {
+    private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject UserController userController;
 
@@ -61,7 +62,7 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
                                 String.format(
                                         "Hello %s! For potential future sales and purchases, please select your preferred transactional currecny below.",
                                         event.getUser().getName()))
-                        .setColor(0x00FFFF);
+                        .setColor(EMBED_COLOR);
 
         MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
         messageCreateBuilder =
