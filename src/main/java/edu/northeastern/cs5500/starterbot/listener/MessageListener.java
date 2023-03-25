@@ -64,7 +64,7 @@ public class MessageListener extends ListenerAdapter {
         String handlerName = id.split(":", 2)[0];
 
         for (ButtonHandler buttonHandler : buttons) {
-            if (buttonHandler.getName().equals(handlerName)) {
+            if (buttonHandler.getName().contains(handlerName)) {
                 buttonHandler.onButtonInteraction(event);
                 return;
             }
@@ -79,13 +79,16 @@ public class MessageListener extends ListenerAdapter {
         String handlerName = event.getComponent().getId();
 
         for (StringSelectHandler stringSelectHandler : stringSelects) {
-            if (stringSelectHandler.getName().equals(handlerName)) {
+            System.out.println("one: " + stringSelectHandler.getName());
+            System.out.println("two: " + handlerName);
+
+            if (stringSelectHandler.getName().contains(handlerName)) {
                 stringSelectHandler.onStringSelectInteraction(event);
                 return;
             }
         }
 
-        log.error("Unknown button handler: {}", handlerName);
+        log.error("Unknown string select handler: {}", handlerName);
     }
 
     @Override

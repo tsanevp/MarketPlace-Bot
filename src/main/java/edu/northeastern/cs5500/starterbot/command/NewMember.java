@@ -90,6 +90,6 @@ public class NewMember implements NewMemberHandler, StringSelectHandler {
                 .complete()
                 .sendMessage(String.format("%s has been set as your trading currency!", response))
                 .queue();
-        userController.setLocationOfResidence(event.getUser().getId(), response);
+        userController.setCityOfResidence(event.getUser().getId(), response);
     }
 }

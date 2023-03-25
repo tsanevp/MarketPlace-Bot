@@ -1,7 +1,12 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.model.States;
+
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -38,17 +43,40 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     @Nonnull
     public String getName() {
-        return "newguildjoined";
+        return "newguildjoinedstateselect1stateselect2cities";
     }
 
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
 
+        Builder statesFirstHalf =
+            StringSelectMenu.create("stateselect1")
+                .setPlaceholder("Select what State you live in (1-25):");
+        Builder statesSecondHalf =
+            StringSelectMenu.create("stateselect2")
+                .setPlaceholder("Select what State you live in (26-50):");
+        int count = 1;
+        for (States state : States.values()) {
+            if (!state.equals(States.UNKNOWN)) {
+                if (count <= 25) {
+                        statesFirstHalf.addOption(state.name(), state.name());
+                } else {
+                        statesSecondHalf.addOption(state.name(), state.name());
+                }
+            }
+            count++;
+        }
+         
+        MessageCreateBuilder stateSelections =
+                new MessageCreateBuilder().addActionRow(statesFirstHalf.build()).addActionRow(statesSecondHalf.build());
         // Set the guildID for each existing member, this will also add each member to the
         // collection
         for (Member member : event.getGuild().getMembers()) {
             userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
+            if (!member.getId().equals(event.getJDA().getSelfUser().getId())) {
+                member.getUser().openPrivateChannel().complete().sendMessage(stateSelections.build()).queue();
+            }
         }
 
         // Ask the guild owner whether they want to create a new trading-channel or use an existing
@@ -118,7 +146,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
             // Create a dropdown with all the existing channels a user can select as their trading
             // channel
             Builder menu =
-                    StringSelectMenu.create(getName())
+                    StringSelectMenu.create("newguildjoined")
                             .setPlaceholder("Select Existing Channel To Assign For Trading");
             for (GuildChannel guildChannel : guild.getTextChannels()) {
                 menu.addOption(guildChannel.getName(), guildChannel.getName());
@@ -140,25 +168,54 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
 
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        // Here, need to instead save the drop down selection in the DB collection maintaining the
-        // guild information
-        // The selection will be saved as the channel to POST new listing in
-        final String response = event.getInteraction().getValues().get(0);
-        Objects.requireNonNull(response);
-        event.deferEdit()
-                .setActionRow(
-                        StringSelectMenu.create(getName())
-                                .setPlaceholder(response)
-                                .addOption(response, response)
-                                .build()
-                                .withDisabled(true))
-                .queue();
-        event.getUser()
-                .openPrivateChannel()
-                .complete()
-                .sendMessage(
-                        String.format("%s has been set as the main trading channel!", response))
-                .queue();
-        userController.setTradingChannel(event.getGuild().getOwnerId(), response);
+        // This if-statement is only entered if the admin interacts with channel selection dropdwon
+        if (event.getComponent().getId().equals("newguildjoined")) {
+                final String response = event.getInteraction().getValues().get(0);
+                Objects.requireNonNull(response);
+                event.deferEdit()
+                        .setActionRow(
+                                StringSelectMenu.create(getName())
+                                        .setPlaceholder(response)
+                                        .addOption(response, response)
+                                        .build()
+                                        .withDisabled(true))
+                        .queue();
+                event.getUser()
+                        .openPrivateChannel()
+                        .complete()
+                        .sendMessage(
+                                String.format("%s has been set as the main trading channel!", response))
+                        .queue();
+                userController.setTradingChannel(event.getUser().getId(), response);
+        } else if (event.getComponent().getId().equals("cities")) {
+                System.out.println(event.getInteraction().getValues().get(0));
+                userController.setCityOfResidence(event.getUser().getId(), event.getInteraction().getValues().get(0));
+                // event.deferEdit().setComponents().queue();
+
+                event.reply("hahaha").queue();
+
+        } else {
+                // MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
+                try {
+                        CityController cityController = new CityController();
+                        List<String> cities =
+                                cityController.getCitiesByState(
+                                        States.valueOfName(event.getInteraction().getValues().get(0)).getStateCode());
+                        Builder menu =
+                                StringSelectMenu.create("cities")
+                                        .setPlaceholder("Select The City You Live In");
+                        for (String city : cities) {
+                            menu.addOption(city, city);
+                        }
+                        MessageCreateBuilder messageCreateBuilder =
+                                new MessageCreateBuilder().addActionRow(menu.build());
+                        event.reply(messageCreateBuilder.build()).queue();
+            
+                } catch (IOException | InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                }  
+        }
+
     }
 }
