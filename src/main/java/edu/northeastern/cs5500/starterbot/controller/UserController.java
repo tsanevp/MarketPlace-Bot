@@ -53,16 +53,28 @@ public class UserController {
         return getUserForMemberId(discordMemberId).getGuildId();
     }
 
-    public void setLocationOfResidence(String discordMemberId, String locationOfResidence) {
+    public void setStateOfResidence(String discordMemberId, String stateOfResidence) {
         User user = getUserForMemberId(discordMemberId);
 
-        user.setLocationOfResidence(locationOfResidence);
+        user.setStateOfResidence(stateOfResidence);
         userRepository.update(user);
     }
 
     @Nullable
-    public String getLocationOfResidence(String discordMemberId) {
-        return getUserForMemberId(discordMemberId).getLocationOfResidence();
+    public String getStateOfResidence(String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getStateOfResidence();
+    }
+
+    public void setCityOfResidence(String discordMemberId, String cityOfResidence) {
+        User user = getUserForMemberId(discordMemberId);
+
+        user.setCityOfResidence(cityOfResidence);
+        userRepository.update(user);
+    }
+
+    @Nullable
+    public String getCityOfResidence(String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getCityOfResidence();
     }
 
     public void setCurrentListingAsString(String discordMemberId, String currentListingAsString) {

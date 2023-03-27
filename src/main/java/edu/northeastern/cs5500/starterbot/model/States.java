@@ -14,7 +14,6 @@ public enum States {
     COLORADO("Colorado", "CO", "08"),
     CONNECTICUT("Connecticut", "CT", "09"),
     DELAWARE("Delaware", "DE", "10"),
-    DISTRICT_OF_COLUMBIA("District of Columbia", "DC", "11"),
     FLORIDA("Florida", "FL", "12"),
     GEORGIA("Georgia", "GA", "13"),
     HAWAII("Hawaii", "HI", "15"),

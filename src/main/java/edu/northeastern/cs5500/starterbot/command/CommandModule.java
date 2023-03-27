@@ -14,6 +14,12 @@ public class CommandModule {
 
     @Provides
     @IntoSet
+    public StringSelectHandler provideLocation(Location stringSelectLocation) {
+        return stringSelectLocation;
+    }
+
+    @Provides
+    @IntoSet
     public StringSelectHandler provideNewGuildJoinedHandler(
             NewGuildJoined stringSelectGuildJoined) {
         return stringSelectGuildJoined;
@@ -27,12 +33,6 @@ public class CommandModule {
 
     @Provides
     public NewMemberHandler provideNewMember(NewMember newMember) {
-        return newMember;
-    }
-
-    @Provides
-    @IntoSet
-    public StringSelectHandler provideDropdownNewMemberHandler(NewMember newMember) {
         return newMember;
     }
 

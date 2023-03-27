@@ -15,11 +15,14 @@ public class User implements Model {
     // This is the ID of the guild the user is a part of
     String guildId;
 
-    // This is the set channel used for trading
+    // This is the name of the channel used for trading
     String tradingChannel;
 
-    // The location the user lives at
-    String locationOfResidence;
+    // The state the user lives in
+    String stateOfResidence;
+
+    // The city the user lives in
+    String cityOfResidence;
 
     // This is the current listing in string format
     String currentListingAsString;

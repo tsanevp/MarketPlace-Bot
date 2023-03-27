@@ -77,6 +77,8 @@ public class MessageListener extends ListenerAdapter {
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
         log.info("onStringSelectInteraction: {}", event.getComponent().getId());
         String handlerName = event.getComponent().getId();
+        Objects.requireNonNull(handlerName);
+        handlerName = handlerName.split(":", 2)[0];
 
         for (StringSelectHandler stringSelectHandler : stringSelects) {
             if (stringSelectHandler.getName().equals(handlerName)) {
@@ -85,7 +87,7 @@ public class MessageListener extends ListenerAdapter {
             }
         }
 
-        log.error("Unknown button handler: {}", handlerName);
+        log.error("Unknown string select handler: {}", handlerName);
     }
 
     @Override
