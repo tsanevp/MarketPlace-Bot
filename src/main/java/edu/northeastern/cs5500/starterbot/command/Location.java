@@ -16,7 +16,10 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 public class Location implements StringSelectHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
+    private static final Integer MAX_MENU_SELECTIONS = 25;
+
     @Inject UserController userController;
+    @Inject CityController cityController;
 
     @Inject
     public Location() {
@@ -31,14 +34,16 @@ public class Location implements StringSelectHandler {
 
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
+        // Use index 1 to obtain ID of drop-down menu used
         String id = event.getComponentId();
         Objects.requireNonNull(id);
         String handlerName = id.split(":", 2)[1];
+
         if ("cities".equals(handlerName)) {
             userController.setCityOfResidence(
                     event.getUser().getId(), event.getInteraction().getValues().get(0));
             event.deferEdit()
-                    .setComponents()    
+                    .setComponents()
                     .setEmbeds(
                             new EmbedBuilder()
                                     .setDescription(
@@ -48,28 +53,13 @@ public class Location implements StringSelectHandler {
                     .queue();
         } else {
             try {
-                CityController cityController = new CityController();
                 userController.setStateOfResidence(
                         event.getUser().getId(),
                         States.valueOfName(event.getInteraction().getValues().get(0))
                                 .getAbbreviation());
-                event.deferEdit()
-                        .setComponents()
-                        .queue();
+                event.deferEdit().setComponents().queue();
 
-                List<String> cities =
-                        cityController.getCitiesByState(
-                                States.valueOfName(event.getInteraction().getValues().get(0))
-                                        .getStateCode());
-                Builder menu =
-                        StringSelectMenu.create(this.getName() + ":cities")
-                                .setPlaceholder("Select The City You Live In");
-                for (String city : cities) {
-                    Objects.requireNonNull(city);    
-                    menu.addOption(city, city);
-                }
-                MessageCreateBuilder messageCreateBuilder =
-                        new MessageCreateBuilder().addActionRow(menu.build());
+                MessageCreateBuilder messageCreateBuilder = createCityMessageBuilder(event);
                 event.getUser()
                         .openPrivateChannel()
                         .complete()
@@ -81,6 +71,7 @@ public class Location implements StringSelectHandler {
         }
     }
 
+    // Creates the two State menu selection drop downs
     public MessageCreateBuilder createStatesMessageBuilder() {
         Builder statesFirstHalf =
                 StringSelectMenu.create(this.getName() + ":stateselect1")
@@ -92,7 +83,7 @@ public class Location implements StringSelectHandler {
         for (States state : States.values()) {
             if (!state.equals(States.UNKNOWN)) {
                 String stateName = Objects.requireNonNull(state.name());
-                if (count <= 25) {
+                if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);
                 } else {
                     statesSecondHalf.addOption(stateName, stateName);
@@ -103,5 +94,22 @@ public class Location implements StringSelectHandler {
         return new MessageCreateBuilder()
                 .addActionRow(statesFirstHalf.build())
                 .addActionRow(statesSecondHalf.build());
+    }
+
+    // Creates the City menu selection drop down
+    private MessageCreateBuilder createCityMessageBuilder(
+            @Nonnull StringSelectInteractionEvent event) throws IOException, InterruptedException {
+        List<String> cities =
+                cityController.getCitiesByState(
+                        States.valueOfName(event.getInteraction().getValues().get(0))
+                                .getStateCode());
+        Builder menu =
+                StringSelectMenu.create(this.getName() + ":cities")
+                        .setPlaceholder("Select The City You Live In");
+        for (String city : cities) {
+            Objects.requireNonNull(city);
+            menu.addOption(city, city);
+        }
+        return new MessageCreateBuilder().addActionRow(menu.build());
     }
 }

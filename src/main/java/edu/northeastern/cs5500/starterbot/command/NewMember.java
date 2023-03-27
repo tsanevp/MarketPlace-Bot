@@ -44,10 +44,13 @@ public class NewMember implements NewMemberHandler {
                                         event.getUser().getName()))
                         .setColor(EMBED_COLOR);
 
+        // Create the new user Message to send. Includes the built State location selection menus
         MessageCreateBuilder newMemberIntroMsg =
                 location.createStatesMessageBuilder()
                         .mention(event.getUser())
                         .addEmbeds(embedBuilder.build());
+
+        // Send the message to the user
         event.getUser()
                 .openPrivateChannel()
                 .complete()

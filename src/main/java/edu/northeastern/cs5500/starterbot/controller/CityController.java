@@ -13,12 +13,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 public class CityController {
     private final HttpClient client = HttpClient.newHttpClient();
     private static final int MAX_MENU_OPTIONS = 25;
 
+    @Inject
     public CityController() {
         // Defined public and empty to call API
     }

@@ -36,12 +36,6 @@ public class CommandModule {
         return newMember;
     }
 
-    // @Provides
-    // @IntoSet
-    // public StringSelectHandler provideDropdownNewMemberHandler(NewMember newMember) {
-    //     return newMember;
-    // }
-
     @Provides
     @IntoSet
     public SlashCommandHandler provideCreateListingCommand(

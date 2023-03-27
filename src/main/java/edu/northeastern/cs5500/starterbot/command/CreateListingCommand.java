@@ -73,12 +73,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         "will_ship_internationally",
                         "Are you willing to ship your item internationally?",
                         true)
-                // .addOption(
-                //         OptionType.STRING,
-                //         "location",
-                //         "What Country and State/Region are you in? Format:{Country,
-                // State/region}",
-                //         true)
                 .addOption(
                         OptionType.STRING,
                         "description",
@@ -131,40 +125,77 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var cost = Objects.requireNonNull(event.getOption("item_cost"));
         var shippingCost = Objects.requireNonNull(event.getOption("shipping_cost_included"));
         var shipping = Objects.requireNonNull(event.getOption("will_ship_internationally"));
-        // var location = Objects.requireNonNull(event.getOption("location"));
         var condition = Objects.requireNonNull(event.getOption("condition"));
         var description = Objects.requireNonNull(event.getOption("description"));
 
         // Stores the user input as a string to the user object, which is saved in the DB
         userController.setCurrentListingAsString(event.getUser().getId(), event.getCommandString());
 
-        // Stores the Guild ID to user object, which is saved in the DB
+        // Build the embed that represents the user's listing
+        List<MessageEmbed> embedBuilderlist =
+                Objects.requireNonNull(
+                        buildListingEmbed(
+                                event,
+                                title,
+                                cost,
+                                shippingCost,
+                                shipping,
+                                condition,
+                                description));
+
+        // Temp save embed to mongoDB
+        userController.setCurrentListing(event.getUser().getId(), embedBuilderlist);
+
+        // Create a message builder to add embeds and action buttons user must interact with
+        MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
+        messageCreateBuilder =
+                messageCreateBuilder
+                        .addActionRow(
+                                Button.success(this.getName() + ":ok", "Post"),
+                                Button.primary(this.getName() + ":edit", "Edit"),
+                                Button.danger(this.getName() + ":cancel", "Cancel"))
+                        .setEmbeds(embedBuilderlist);
+
+        // Responds with Ephemeral message (message visible only to user who called /createlisting)
+        event.reply(messageCreateBuilder.build()).setEphemeral(true).queue();
+    }
+
+    // Method to build the listing embed
+    private List<MessageEmbed> buildListingEmbed(
+            SlashCommandInteractionEvent event,
+            @Nonnull OptionMapping title,
+            @Nonnull OptionMapping cost,
+            @Nonnull OptionMapping shippingCost,
+            @Nonnull OptionMapping shipping,
+            @Nonnull OptionMapping condition,
+            @Nonnull OptionMapping description) {
+
+        // Stores the Guild ID to user object, which is saved in the DB - remove soon
         if (userController.getGuildIdForUser(event.getUser().getId()) == null) {
-            userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
+            userController.setGuildIdForUser(
+                    event.getUser().getId(), Objects.requireNonNull(event.getGuild()).getId());
         }
 
         // Create a List of the image variables
         ArrayList<OptionMapping> images = new ArrayList<>();
         for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
-            if (event.getOption(String.format("image%s", i)) != null) {
-                images.add(event.getOption(String.format("image%s", i)));
+            if (event.getOption(Objects.requireNonNull(String.format("image%s", i))) != null) {
+                images.add(event.getOption(Objects.requireNonNull(String.format("image%s", i))));
             }
         }
 
         // Reformat the date & time of when the listing was posted
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+        LocalDateTime currentdateTime = LocalDateTime.now();
 
         // Reformat the title to include the location of the user
         StringBuilder titleReformatted = new StringBuilder(title.getAsString());
-        // if (!location.getAsString().isEmpty()) {
         titleReformatted.insert(
                 0,
                 String.format(
                         "[%s, %s]",
                         userController.getCityOfResidence(event.getUser().getId()),
                         userController.getStateOfResidence(event.getUser().getId())));
-        // }
 
         // Reformat the cost title to include + Shipping if shipping is included in the cost
         StringBuilder costTitleReformatted = new StringBuilder("Cost:");
@@ -191,59 +222,57 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             if (i == 0) {
                 embedBuilder
                         .setColor(EMBED_COLOR)
-                        .addField(costTitleReformatted.toString(), costReformatted.toString(), true)
-                        .addField("Ships International:", shipsInternationally.toString(), true)
+                        .addField(
+                                Objects.requireNonNull(costTitleReformatted.toString()),
+                                Objects.requireNonNull(costReformatted.toString()),
+                                true)
+                        .addField(
+                                "Ships International:",
+                                Objects.requireNonNull(shipsInternationally.toString()),
+                                true)
                         .addField("Condition:", condition.getAsString(), true)
                         .addField("Description:", description.getAsString(), false)
                         .addField("Posted By:", event.getUser().getName(), true)
-                        .addField("Date Posted:", dtf.format(now), true);
+                        .addField(
+                                "Date Posted:",
+                                Objects.requireNonNull(dateTimeFormatter.format(currentdateTime)),
+                                true);
             }
             embedBuilder
                     .setTitle(titleReformatted.toString(), images.get(0).getAsAttachment().getUrl())
                     .setImage(images.get(i).getAsAttachment().getUrl());
             embedBuilderlist.add(embedBuilder.build());
         }
-
-        // Create a message builder to add embeds and action buttons user must interact with
-        MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-        messageCreateBuilder =
-                messageCreateBuilder
-                        .addActionRow(
-                                Button.success(this.getName() + ":ok", "Post"),
-                                Button.primary(this.getName() + ":edit", "Edit"),
-                                Button.danger(this.getName() + ":cancel", "Cancel"))
-                        .setEmbeds(embedBuilderlist);
-
-        userController.setCurrentListing(event.getUser().getId(), embedBuilderlist);
-
-        // Responds with Ephemeral message (message visible only to user who called /createlisting)
-        event.reply(messageCreateBuilder.build()).setEphemeral(true).queue();
+        return embedBuilderlist;
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
-        Guild guild = event.getGuild();
+        Guild guild = Objects.requireNonNull(event.getGuild());
         TextChannel textChannel =
                 guild.getTextChannelsByName(
-                                userController.getTradingChannel(event.getGuild().getOwnerId()),
+                                Objects.requireNonNull(
+                                        userController.getTradingChannel(guild.getOwnerId())),
                                 true)
                         .get(0);
 
         // Remove the buttons so they are no longer clickable
         MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
+
         if ("Post".equals(event.getButton().getLabel())) {
             MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
 
             // Pulls the listing information from MongoDB and then builds/sets the embed
-            messageCreateBuilder.setEmbeds(userController.getCurrentListing(user.getId()));
+            List<MessageEmbed> embedToPost =
+                    Objects.requireNonNull(userController.getCurrentListing(user.getId()));
+            messageCreateBuilder.setEmbeds(embedToPost);
 
             // Send the listing to the "trading-channel"
             textChannel.sendMessage(messageCreateBuilder.build()).queue();
 
             // Store the listing in the ListingControllerDB
-            listingController.setListing(
-                    userController.getCurrentListing(user.getId()), user.getId());
+            listingController.setListing(embedToPost, user.getId());
 
             // Replace the temp embed with a success message
             buttonEvent
@@ -255,14 +284,13 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                     .build())
                     .queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
-            // Replace the temp embed with instructions on how to edit the listing, have to resubmit
-            // one
+            // Replace temp embed with instructions on how to edit the listing, must resubmit one
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()
                                     .setDescription(
                                             String.format(
-                                                    "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. \n\n%s",
+                                                    "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. %n%n%s",
                                                     userController.getCurrentListingAsString(
                                                             user.getId())))
                                     .setColor(EMBED_COLOR)
@@ -279,6 +307,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                     .build())
                     .queue();
         }
+        // Set all the temp embed variables back to null
         userController.setCurrentListing(user.getId(), null);
         userController.setCurrentListingAsString(user.getId(), null);
     }
