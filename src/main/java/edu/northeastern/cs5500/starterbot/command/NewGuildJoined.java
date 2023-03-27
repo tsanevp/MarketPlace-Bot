@@ -1,12 +1,7 @@
 package edu.northeastern.cs5500.starterbot.command;
 
-import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
-import edu.northeastern.cs5500.starterbot.model.States;
-
-import java.io.IOException;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -32,7 +27,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 @Slf4j
 public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, StringSelectHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
+    private static final String TRADING_CHANNEL_ID = "trading-channel";
 
+    @Inject Location location;
     @Inject UserController userController;
 
     @Inject
@@ -43,45 +40,16 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     @Nonnull
     public String getName() {
-        return "newguildjoinedstateselect1stateselect2cities";
+        return "newguildjoined";
     }
 
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
 
-        Builder statesFirstHalf =
-            StringSelectMenu.create("stateselect1")
-                .setPlaceholder("Select what State you live in (1-25):");
-        Builder statesSecondHalf =
-            StringSelectMenu.create("stateselect2")
-                .setPlaceholder("Select what State you live in (26-50):");
-        int count = 1;
-        for (States state : States.values()) {
-            if (!state.equals(States.UNKNOWN)) {
-                if (count <= 25) {
-                        statesFirstHalf.addOption(state.name(), state.name());
-                } else {
-                        statesSecondHalf.addOption(state.name(), state.name());
-                }
-            }
-            count++;
-        }
-         
-        MessageCreateBuilder stateSelections =
-                new MessageCreateBuilder().addActionRow(statesFirstHalf.build()).addActionRow(statesSecondHalf.build());
-        // Set the guildID for each existing member, this will also add each member to the
-        // collection
-        for (Member member : event.getGuild().getMembers()) {
-            userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
-            if (!member.getId().equals(event.getJDA().getSelfUser().getId())) {
-                member.getUser().openPrivateChannel().complete().sendMessage(stateSelections.build()).queue();
-            }
-        }
-
         // Ask the guild owner whether they want to create a new trading-channel or use an existing
         // channel
-        User owner = event.getGuild().getOwner().getUser();
+        User owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
                         .setTitle(
@@ -99,20 +67,35 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
 
         // Send the message to the owner
         owner.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
+
+        MessageCreateBuilder stateSelections = location.createStatesMessageBuilder();
+        // Set the guildID for each existing member, this will also add each member to the
+        // collection
+        for (Member member : event.getGuild().getMembers()) {
+            userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
+            if (!member.getId().equals(event.getJDA().getSelfUser().getId())) {
+                member.getUser()
+                        .openPrivateChannel()
+                        .complete()
+                        .sendMessage(stateSelections.build())
+                        .queue();
+            }
+        }
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         // Define the owner and pull the Guild ID from the user collection
         User user = event.getUser();
-        Guild guild = event.getJDA().getGuildById(userController.getGuildIdForUser(user.getId()));
+        Guild guild = event.getJDA().getGuildById(Objects.requireNonNull(userController.getGuildIdForUser(user.getId())));
+        Objects.requireNonNull(guild);
 
         event.deferEdit().setComponents().queue();
         // Checks to see if creation of a new trading-channel is selected
         if ("Create New Channel".equals(event.getButton().getLabel())) {
             // Checks if a channel named trading-channel already exists on the server
             for (GuildChannel guildChannel : guild.getTextChannels()) {
-                if ("trading-channel".equals(guildChannel.getName())) {
+                if (TRADING_CHANNEL_ID.equals(guildChannel.getName())) {
                     user.openPrivateChannel()
                             .complete()
                             .sendMessage("\"trading-channel\" already exists on your server.")
@@ -129,7 +112,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                             Permission.MESSAGE_MANAGE,
                             Permission.MANAGE_THREADS);
             TextChannel textChannel =
-                    category.createTextChannel("trading-channel")
+                    category.createTextChannel(TRADING_CHANNEL_ID)
                             .addPermissionOverride(guild.getPublicRole(), null, deny)
                             .complete();
             textChannel.getManager().setParent(category);
@@ -140,7 +123,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
                                     "A new channel named \"trading-channel\" has been created in your server %s.",
                                     guild.getName()))
                     .queue();
-            userController.setTradingChannel(guild.getOwnerId(), "trading-channel");
+            userController.setTradingChannel(guild.getOwnerId(), TRADING_CHANNEL_ID);
 
         } else {
             // Create a dropdown with all the existing channels a user can select as their trading
@@ -168,54 +151,22 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
 
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        // This if-statement is only entered if the admin interacts with channel selection dropdwon
-        if (event.getComponent().getId().equals("newguildjoined")) {
-                final String response = event.getInteraction().getValues().get(0);
-                Objects.requireNonNull(response);
-                event.deferEdit()
-                        .setActionRow(
-                                StringSelectMenu.create(getName())
-                                        .setPlaceholder(response)
-                                        .addOption(response, response)
-                                        .build()
-                                        .withDisabled(true))
-                        .queue();
-                event.getUser()
-                        .openPrivateChannel()
-                        .complete()
-                        .sendMessage(
-                                String.format("%s has been set as the main trading channel!", response))
-                        .queue();
-                userController.setTradingChannel(event.getUser().getId(), response);
-        } else if (event.getComponent().getId().equals("cities")) {
-                System.out.println(event.getInteraction().getValues().get(0));
-                userController.setCityOfResidence(event.getUser().getId(), event.getInteraction().getValues().get(0));
-                // event.deferEdit().setComponents().queue();
-
-                event.reply("hahaha").queue();
-
-        } else {
-                // MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
-                try {
-                        CityController cityController = new CityController();
-                        List<String> cities =
-                                cityController.getCitiesByState(
-                                        States.valueOfName(event.getInteraction().getValues().get(0)).getStateCode());
-                        Builder menu =
-                                StringSelectMenu.create("cities")
-                                        .setPlaceholder("Select The City You Live In");
-                        for (String city : cities) {
-                            menu.addOption(city, city);
-                        }
-                        MessageCreateBuilder messageCreateBuilder =
-                                new MessageCreateBuilder().addActionRow(menu.build());
-                        event.reply(messageCreateBuilder.build()).queue();
-            
-                } catch (IOException | InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                }  
-        }
-
+        final String response = event.getInteraction().getValues().get(0);
+        Objects.requireNonNull(response);
+        event.deferEdit()
+                .setActionRow(
+                        StringSelectMenu.create(getName())
+                                .setPlaceholder(response)
+                                .addOption(response, response)
+                                .build()
+                                .withDisabled(true))
+                .queue();
+        event.getUser()
+                .openPrivateChannel()
+                .complete()
+                .sendMessage(
+                        String.format("%s has been set as the main trading channel!", response))
+                .queue();
+        userController.setTradingChannel(event.getUser().getId(), response);
     }
 }

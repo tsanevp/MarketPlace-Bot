@@ -73,11 +73,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         "will_ship_internationally",
                         "Are you willing to ship your item internationally?",
                         true)
-                .addOption(
-                        OptionType.STRING,
-                        "location",
-                        "What Country and State/Region are you in? Format:{Country, State/region}",
-                        true)
+                // .addOption(
+                //         OptionType.STRING,
+                //         "location",
+                //         "What Country and State/Region are you in? Format:{Country,
+                // State/region}",
+                //         true)
                 .addOption(
                         OptionType.STRING,
                         "description",
@@ -130,7 +131,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var cost = Objects.requireNonNull(event.getOption("item_cost"));
         var shippingCost = Objects.requireNonNull(event.getOption("shipping_cost_included"));
         var shipping = Objects.requireNonNull(event.getOption("will_ship_internationally"));
-        var location = Objects.requireNonNull(event.getOption("location"));
+        // var location = Objects.requireNonNull(event.getOption("location"));
         var condition = Objects.requireNonNull(event.getOption("condition"));
         var description = Objects.requireNonNull(event.getOption("description"));
 
@@ -156,9 +157,14 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         // Reformat the title to include the location of the user
         StringBuilder titleReformatted = new StringBuilder(title.getAsString());
-        if (!location.getAsString().isEmpty()) {
-            titleReformatted.insert(0, String.format("[%s]", location.getAsString()));
-        }
+        // if (!location.getAsString().isEmpty()) {
+        titleReformatted.insert(
+                0,
+                String.format(
+                        "[%s, %s]",
+                        userController.getCityOfResidence(event.getUser().getId()),
+                        userController.getStateOfResidence(event.getUser().getId())));
+        // }
 
         // Reformat the cost title to include + Shipping if shipping is included in the cost
         StringBuilder costTitleReformatted = new StringBuilder("Cost:");
