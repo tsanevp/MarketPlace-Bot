@@ -38,33 +38,30 @@ public class Location implements StringSelectHandler {
         String id = event.getComponentId();
         Objects.requireNonNull(id);
         String handlerName = id.split(":", 2)[1];
+        String userId = event.getUser().getId();
 
         if ("cities".equals(handlerName)) {
-            userController.setCityOfResidence(
-                    event.getUser().getId(), event.getInteraction().getValues().get(0));
+            userController.setCityOfResidence(userId, event.getInteraction().getValues().get(0));
             event.deferEdit()
                     .setComponents()
                     .setEmbeds(
                             new EmbedBuilder()
                                     .setDescription(
-                                            "The selected city and state have been set as your general location.")
+                                            String.format(
+                                                    "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
+                                                    userController.getCityOfResidence(userId),
+                                                    userController.getStateOfResidence(userId)))
                                     .setColor(EMBED_COLOR)
                                     .build())
                     .queue();
         } else {
             try {
                 userController.setStateOfResidence(
-                        event.getUser().getId(),
+                        userId,
                         States.valueOfName(event.getInteraction().getValues().get(0))
                                 .getAbbreviation());
-                event.deferEdit().setComponents().queue();
-
                 MessageCreateBuilder messageCreateBuilder = createCityMessageBuilder(event);
-                event.getUser()
-                        .openPrivateChannel()
-                        .complete()
-                        .sendMessage(messageCreateBuilder.build())
-                        .queue();
+                event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
