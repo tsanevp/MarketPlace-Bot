@@ -118,7 +118,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         // need to delete after testing
-        userController.setTradingChannel(event.getGuild().getOwnerId(), "trading-channel");
+        userController.setTradingChannel(
+                Objects.requireNonNull(event.getGuild()).getOwnerId(), "trading-channel");
 
         log.info("event: /createlisting");
         var title = Objects.requireNonNull(event.getOption("title"));

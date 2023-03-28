@@ -8,6 +8,8 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -97,7 +99,7 @@ public class UserController {
             int i = 0;
             DBObject imagesDbObject = new BasicDBObject();
             for (MessageEmbed messageEmbed : currentListings) {
-                imagesDbObject.put(IMAGE_FIELD_NAME + i, messageEmbed.getImage().getUrl());
+                imagesDbObject.put(IMAGE_FIELD_NAME + i, Objects.requireNonNull(messageEmbed.getImage()).getUrl());
                 i++;
             }
             DBObject embedDbObject =
@@ -131,11 +133,13 @@ public class UserController {
                                 (String) currentObject.get(TITLE_URL_FIELD_NAME))
                         .setImage((String) imagesDbObject.get(IMAGE_FIELD_NAME + 0));
         for (String key : fieldsDbObject.keySet()) {
+            Objects.requireNonNull(key);
+            String fieldsDbObjectKey = Objects.requireNonNull((String) fieldsDbObject.get(key));
             if (DESCRIPTION_FIELD_NAME.equals(key)) {
-                embedBuilder.addField(key, (String) fieldsDbObject.get(key), false);
+                embedBuilder.addField(key, fieldsDbObjectKey, false);
                 continue;
             }
-            embedBuilder.addField(key, (String) fieldsDbObject.get(key), true);
+            embedBuilder.addField(key, fieldsDbObjectKey, true);
         }
 
         MessageEmbed messageEmbed = embedBuilder.build();
