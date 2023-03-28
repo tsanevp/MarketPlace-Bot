@@ -43,7 +43,8 @@ public class UpdateLocationCommand implements SlashCommandHandler {
 
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
-                        .setDescription("To update your State and City, plese select the correct values from the drop-down menus below.")
+                        .setDescription(
+                                "To update your State and City, plese select the correct values from the drop-down menus below.")
                         .setColor(EMBED_COLOR);
 
         // Create the new user Message to send. Includes the built State location selection menus
