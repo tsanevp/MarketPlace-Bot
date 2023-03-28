@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -99,7 +98,9 @@ public class UserController {
             int i = 0;
             DBObject imagesDbObject = new BasicDBObject();
             for (MessageEmbed messageEmbed : currentListings) {
-                imagesDbObject.put(IMAGE_FIELD_NAME + i, Objects.requireNonNull(messageEmbed.getImage()).getUrl());
+                imagesDbObject.put(
+                        IMAGE_FIELD_NAME + i,
+                        Objects.requireNonNull(messageEmbed.getImage()).getUrl());
                 i++;
             }
             DBObject embedDbObject =
