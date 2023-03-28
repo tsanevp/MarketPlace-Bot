@@ -7,6 +7,7 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -30,7 +31,7 @@ public class ListingController {
 
         ArrayList<String> images = new ArrayList<>();
         for (MessageEmbed messageEmbed : currentListings) {
-            images.add(messageEmbed.getImage().getUrl());
+            images.add(Objects.requireNonNull(messageEmbed.getImage()).getUrl());
         }
         listing.setImages(images);
         listing.setTitle(currentListingAsBuilder.getTitle());
@@ -46,7 +47,7 @@ public class ListingController {
     public void deleteListingsForUser(String discordMemberId) {
         FindIterable<Listing> listingsToDelete = findListingsForMemberId(discordMemberId);
         for (Listing l : listingsToDelete) {
-            this.listingRepository.delete(l.getId());
+            this.listingRepository.delete(Objects.requireNonNull(l.getId()));
         }
     }
 
@@ -65,8 +66,7 @@ public class ListingController {
     // of the discordUserId and returns the results as a FindIterable of the Listings object.
     public FindIterable<Listing> findListingsForMemberId(String discordUserId) {
         Bson filter = Filters.eq("discordUserId", discordUserId);
-        FindIterable<Listing> listingsForUser = this.listingRepository.filter(filter);
-        return listingsForUser;
+        return this.listingRepository.filter(filter);
     }
 
     // Returns a list of MessageEmbed listings of a specific keyword
@@ -88,6 +88,7 @@ public class ListingController {
 
     // Returns the listing MessageEmbed when given the object id.
     public List<MessageEmbed> getListingById(ObjectId id) {
+        Objects.requireNonNull(id);
         return listingToMessageEmbed(this.listingRepository.get(id));
     }
 
@@ -109,11 +110,14 @@ public class ListingController {
                         .setTitle(listing.getTitle(), listing.getUrl())
                         .setImage(listing.getImages().get(0));
         for (Field key : listing.getFields()) {
-            if ("Description".equals(key.getName())) {
-                embedBuilder.addField(key.getName(), key.getValue(), false);
+            String keyName = Objects.requireNonNull(key.getName());
+            String keyValue = Objects.requireNonNull(key.getValue());
+
+            if ("Description".equals(keyName)) {
+                embedBuilder.addField(keyName, keyValue, false);
                 continue;
             }
-            embedBuilder.addField(key.getName(), key.getValue(), true);
+            embedBuilder.addField(keyName, keyValue, true);
         }
 
         MessageEmbed messageEmbed = embedBuilder.build();

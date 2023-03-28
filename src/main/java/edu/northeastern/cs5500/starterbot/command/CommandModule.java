@@ -52,25 +52,8 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public SlashCommandHandler provideButtonCommand(ButtonCommand buttonCommand) {
-        return buttonCommand;
-    }
-
-    @Provides
-    @IntoSet
-    public SlashCommandHandler provideDropdownCommand(DropdownCommand dropdownCommand) {
-        return dropdownCommand;
-    }
-
-    @Provides
-    @IntoSet
-    public ButtonHandler provideButtonCommandClickHandler(ButtonCommand buttonCommand) {
-        return buttonCommand;
-    }
-
-    @Provides
-    @IntoSet
-    public StringSelectHandler provideDropdownCommandMenuHandler(DropdownCommand dropdownCommand) {
-        return dropdownCommand;
+    public SlashCommandHandler provideUpdateLocationCommand(
+            UpdateLocationCommand updateLocationCommand) {
+        return updateLocationCommand;
     }
 }
