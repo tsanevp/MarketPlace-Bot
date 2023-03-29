@@ -10,14 +10,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 public class CityController {
     private final HttpClient client = HttpClient.newHttpClient();
     private static final int MAX_MENU_OPTIONS = 25;
 
+    @Inject
     public CityController() {
         // Defined public and empty to call API
     }
@@ -39,11 +42,13 @@ public class CityController {
                     (pop1, pop2) ->
                             Integer.parseInt(pop2.get(1)) - (Integer.parseInt(pop1.get(1))));
             for (int i = 0; i < MAX_MENU_OPTIONS; i++) {
+                if (i == cities.size()) break;
                 String city = cities.get(i).get(0);
                 int index = city.indexOf(",");
                 citiesCleanedUp.add(city.substring(0, index - 5));
             }
         }
+        Collections.sort(citiesCleanedUp);
         return citiesCleanedUp;
     }
 

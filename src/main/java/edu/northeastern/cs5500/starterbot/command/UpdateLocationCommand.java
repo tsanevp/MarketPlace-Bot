@@ -6,42 +6,45 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
 @Slf4j
-public class NewMember implements NewMemberHandler {
+public class UpdateLocationCommand implements SlashCommandHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject Location location;
     @Inject UserController userController;
 
     @Inject
-    public NewMember() {
+    public UpdateLocationCommand() {
         // Defined public and empty for Dagger injection
     }
 
     @Override
     @Nonnull
     public String getName() {
-        return "newmember";
+        return "updatelocation";
     }
 
     @Override
-    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        log.info("event: newmember");
+    @Nonnull
+    public CommandData getCommandData() {
+        return Commands.slash(
+                getName(), "Update your location by selecting you new State &/or City");
+    }
 
-        // Assigns the Guild ID to the user object when a user first joins
-        userController.setGuildIdForUser(event.getUser().getId(), event.getGuild().getId());
+    @Override
+    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
+        log.info("event: updatelocation");
 
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
-                        .setTitle(String.format("Welcome to %s!", event.getGuild().getName()))
                         .setDescription(
-                                String.format(
-                                        "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
-                                        event.getUser().getName()))
+                                "To update your State and City, plese select the correct values from the drop-down menus below.")
                         .setColor(EMBED_COLOR);
 
         // Create the new user Message to send. Includes the built State location selection menus
@@ -51,10 +54,6 @@ public class NewMember implements NewMemberHandler {
                         .addEmbeds(embedBuilder.build());
 
         // Send the message to the user
-        event.getUser()
-                .openPrivateChannel()
-                .complete()
-                .sendMessage(newMemberIntroMsg.build())
-                .queue();
+        event.reply(newMemberIntroMsg.build()).setEphemeral(true).queue();
     }
 }
