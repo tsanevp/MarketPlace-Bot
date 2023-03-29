@@ -4,11 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+
+import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import com.mongodb.DBObject;
 
 @Data
 public class Listing implements Model {
     ObjectId id;
+
+    Long messageId;
 
     String discordUserId;
 
@@ -22,5 +28,5 @@ public class Listing implements Model {
 
     Integer color;
 
-    List<MessageEmbed.Field> fields;
+    Document fields;
 }

@@ -20,4 +20,6 @@ public interface GenericRepository<T> {
     public long count();
 
     public FindIterable<T> filter(Bson filter);
+
+    public Long countDocuments(Bson bsonFilterByMembersId);
 }
