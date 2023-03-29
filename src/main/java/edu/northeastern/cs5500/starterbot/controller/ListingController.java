@@ -10,11 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import org.bson.Document;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
@@ -27,7 +26,8 @@ public class ListingController {
         this.listingRepository = listingRepository;
     }
 
-    public void setListing(List<MessageEmbed> currentListings, Long messageId, String discordUserId) {
+    public void setListing(
+            List<MessageEmbed> currentListings, Long messageId, String discordUserId) {
         Listing listing = new Listing();
         MessageEmbed currentListingAsBuilder = currentListings.get(0);
 
