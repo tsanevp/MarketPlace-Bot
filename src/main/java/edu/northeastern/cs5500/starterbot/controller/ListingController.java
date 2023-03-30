@@ -6,13 +6,14 @@ import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
@@ -25,54 +26,74 @@ public class ListingController {
         this.listingRepository = listingRepository;
     }
 
-    public void setListing(List<MessageEmbed> currentListings, String discordUserId) {
+    public void setListing(
+            List<MessageEmbed> currentListings, Long messageId, String discordUserId) {
         Listing listing = new Listing();
         MessageEmbed currentListingAsBuilder = currentListings.get(0);
 
         ArrayList<String> images = new ArrayList<>();
         for (MessageEmbed messageEmbed : currentListings) {
-            images.add(Objects.requireNonNull(messageEmbed.getImage()).getUrl());
+            images.add(messageEmbed.getImage().getUrl());
         }
         listing.setImages(images);
+        listing.setMessageId(messageId);
         listing.setTitle(currentListingAsBuilder.getTitle());
         listing.setUrl(currentListingAsBuilder.getUrl());
         listing.setColor(currentListingAsBuilder.getColorRaw());
         listing.setDiscordUserId(discordUserId);
         listing.setDescription(currentListingAsBuilder.getDescription());
-        listing.setFields(currentListingAsBuilder.getFields());
+        Document fieldsDocument = new Document();
+        for (Field field : currentListingAsBuilder.getFields()) {
+            fieldsDocument.append(field.getName(), field.getValue());
+        }
+        listing.setFields(fieldsDocument);
         this.listingRepository.add(listing);
     }
 
     // Deletes the listing of a specific user in the collection.
     public void deleteListingsForUser(String discordMemberId) {
-        FindIterable<Listing> listingsToDelete = findListingsForMemberId(discordMemberId);
+        FindIterable<Listing> listingsToDelete = filterListingsByMembersId(discordMemberId);
         for (Listing l : listingsToDelete) {
-            this.listingRepository.delete(Objects.requireNonNull(l.getId()));
+            this.listingRepository.delete(l.getId());
         }
     }
 
     // Deletes a specific listing in the collection.
-    public void deleteListingById(@Nonnull ObjectId id) {
-        this.listingRepository.delete(id);
+    public void deleteListingById(@Nonnull ObjectId ObjectId) {
+        this.listingRepository.delete(ObjectId);
     }
 
     // Returns a list of MessageEmbed listings of a specifc user
     public List<List<MessageEmbed>> getListingsMessagesForMemberId(String discordUserId) {
-        return findIterableToMessageEmbedList(findListingsForMemberId(discordUserId));
+        FindIterable<Listing> listings = filterListingsByMembersId(discordUserId);
+        if (listings == null) {
+            return Collections.emptyList();
+        }
+        return findIterableToMessageEmbedList(listings);
     }
 
     // Helper method for getListingMessagesForMemberId and deleteListingsForUser. It searches for
     // the listings
     // of the discordUserId and returns the results as a FindIterable of the Listings object.
-    public FindIterable<Listing> findListingsForMemberId(String discordUserId) {
-        Bson filter = Filters.eq("discordUserId", discordUserId);
-        return this.listingRepository.filter(filter);
+    public FindIterable<Listing> filterListingsByMembersId(String discordUserId) {
+        return this.listingRepository.filter(getBsonFilterByMembersId(discordUserId));
+    }
+
+    public Long countListingsByMemberId(String discordUserId) {
+        return this.listingRepository.countDocuments(getBsonFilterByMembersId(discordUserId));
+    }
+
+    public Bson getBsonFilterByMembersId(String discordUserId) {
+        return Filters.eq("discordUserId", discordUserId);
     }
 
     // Returns a list of MessageEmbed listings of a specific keyword
     public List<List<MessageEmbed>> getListingsForKeyword(String keyword) {
         Bson filter = Filters.text(keyword);
         FindIterable<Listing> listingForKeyword = this.listingRepository.filter(filter);
+        if (listingForKeyword == null) {
+            return Collections.emptyList();
+        }
         return findIterableToMessageEmbedList(listingForKeyword);
     }
 
@@ -81,43 +102,61 @@ public class ListingController {
         Collection<Listing> lists = this.listingRepository.getAll();
         List<List<MessageEmbed>> allListingMessages = new ArrayList<>(new ArrayList<>());
         for (Listing l : lists) {
-            allListingMessages.add(listingToMessageEmbed(l));
+            allListingMessages.add(toMessageEmbed(l));
         }
         return allListingMessages;
     }
 
     // Returns the listing MessageEmbed when given the object id.
     public List<MessageEmbed> getListingById(ObjectId id) {
-        Objects.requireNonNull(id);
-        return listingToMessageEmbed(this.listingRepository.get(id));
+        return toMessageEmbed(this.listingRepository.get(id));
     }
 
     // Helper function that converts the result of the filter into a MessageEmbed
     public List<List<MessageEmbed>> findIterableToMessageEmbedList(FindIterable<Listing> listing) {
         List<List<MessageEmbed>> allListingMessages = new ArrayList<>(new ArrayList<>());
         for (Listing l : listing) {
-            allListingMessages.add(listingToMessageEmbed(l));
+            allListingMessages.add(toMessageEmbed(l));
         }
         return allListingMessages;
     }
 
+    public Listing toListingObject(List<MessageEmbed> currentListings) {
+        MessageEmbed currentListingAsBuilder = currentListings.get(0);
+        ArrayList<String> imagesString = new ArrayList<>();
+        for (MessageEmbed messageEmbed : currentListings) {
+            imagesString.add(messageEmbed.getImage().getUrl());
+        }
+        Listing listing = new Listing();
+        listing.setImages(imagesString);
+        listing.setMessageId(Long.valueOf(currentListingAsBuilder.getFooter().toString()));
+        listing.setTitle(currentListingAsBuilder.getTitle());
+        listing.setUrl(currentListingAsBuilder.getUrl());
+        listing.setColor(currentListingAsBuilder.getColorRaw());
+        listing.setDescription(currentListingAsBuilder.getDescription());
+        List<Field> listingFields = currentListingAsBuilder.getFields();
+        Document fieldsDocument = new Document();
+        for (Field field : listingFields) {
+            fieldsDocument.append(field.getName(), field.getValue());
+        }
+        listing.setFields(fieldsDocument);
+        return listing;
+    }
+
     // Helper function that turns Listing object to a MessageEmbed and returns it.
-    public List<MessageEmbed> listingToMessageEmbed(Listing listing) {
+    public List<MessageEmbed> toMessageEmbed(Listing listing) {
         List<MessageEmbed> listingsMessage = new ArrayList<>();
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
                         .setColor(listing.getColor())
                         .setTitle(listing.getTitle(), listing.getUrl())
                         .setImage(listing.getImages().get(0));
-        for (Field key : listing.getFields()) {
-            String keyName = Objects.requireNonNull(key.getName());
-            String keyValue = Objects.requireNonNull(key.getValue());
-
-            if ("Description".equals(keyName)) {
-                embedBuilder.addField(keyName, keyValue, false);
+        for (String key : listing.getFields().keySet()) {
+            if ("Description".equals(key)) {
+                embedBuilder.addField(key, (String) listing.getFields().get(key), false);
                 continue;
             }
-            embedBuilder.addField(keyName, keyValue, true);
+            embedBuilder.addField(key, (String) listing.getFields().get(key), true);
         }
 
         MessageEmbed messageEmbed = embedBuilder.build();
