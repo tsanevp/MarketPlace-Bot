@@ -53,9 +53,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
 
         if (this.listingController.countListingsByMemberId(user.getId()) != 0) {
             for (Listing list : listing) {
-                MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-                messageCreateBuilder =
-                        messageCreateBuilder
+                MessageCreateBuilder messageCreateBuilder =
+                        new MessageCreateBuilder()
                                 .addActionRow(
                                         Button.danger(
                                                 this.getName()

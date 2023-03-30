@@ -66,11 +66,10 @@ public class ListingController {
     // Returns a list of MessageEmbed listings of a specifc user
     public List<List<MessageEmbed>> getListingsMessagesForMemberId(String discordUserId) {
         FindIterable<Listing> listings = filterListingsByMembersId(discordUserId);
-        if (listings != null) {
-            return findIterableToMessageEmbedList(listings);
-        } else {
+        if (listings == null) {
             return Collections.emptyList();
         }
+        return findIterableToMessageEmbedList(listings);
     }
 
     // Helper method for getListingMessagesForMemberId and deleteListingsForUser. It searches for
@@ -92,11 +91,10 @@ public class ListingController {
     public List<List<MessageEmbed>> getListingsForKeyword(String keyword) {
         Bson filter = Filters.text(keyword);
         FindIterable<Listing> listingForKeyword = this.listingRepository.filter(filter);
-        if (listingForKeyword != null) {
-            return findIterableToMessageEmbedList(listingForKeyword);
-        } else {
+        if (listingForKeyword == null) {
             return Collections.emptyList();
         }
+        return findIterableToMessageEmbedList(listingForKeyword);
     }
 
     // Returns all listings in the collection.
