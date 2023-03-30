@@ -270,10 +270,14 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             messageCreateBuilder.setEmbeds(embedToPost);
 
             // Send the listing to the "trading-channel"
-            textChannel.sendMessage(messageCreateBuilder.build()).queue((message) -> {
-                // Store the listing and messageId in the ListingControllerDB
-                listingController.setListing(embedToPost, message.getIdLong(), user.getId());
-            });
+            textChannel
+                    .sendMessage(messageCreateBuilder.build())
+                    .queue(
+                            (message) -> {
+                                // Store the listing and messageId in the ListingControllerDB
+                                listingController.setListing(
+                                        embedToPost, message.getIdLong(), user.getId());
+                            });
 
             // Replace the temp embed with a success message
             buttonEvent
