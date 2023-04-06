@@ -23,7 +23,7 @@ public class CityController {
             return Collections.emptyList();
         }
 
-        cities.sort((left, right) -> Integer.compare(left.getPopulation(), right.getPopulation()));
+        cities.sort((left, right) -> Integer.compare(right.getPopulation(), left.getPopulation()));
 
         List<String> result = new ArrayList<>();
 
