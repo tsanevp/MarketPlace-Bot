@@ -1,0 +1,21 @@
+package edu.northeastern.cs5500.starterbot.service.response;
+
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nonnull;
+import lombok.Data;
+
+@Data
+public class CityResponse {
+    @Nonnull final String name;
+    final int population;
+    final int stateCode;
+    @Nonnull final String zipCode;
+
+    public CityResponse(List<String> cityData) {
+        this.name = Objects.requireNonNull(cityData.get(0));
+        this.population = Integer.parseInt(cityData.get(1));
+        this.stateCode = Integer.parseInt(cityData.get(2));
+        this.zipCode = Objects.requireNonNull(cityData.get(3));
+    }
+}
