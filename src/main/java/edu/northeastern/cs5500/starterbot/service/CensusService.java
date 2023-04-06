@@ -79,7 +79,14 @@ public class CensusService {
             return cities;
         }
 
+        boolean isHeader = true;
+
         for (List<String> city : response) {
+            if (isHeader) {
+                // Skip the first row of the response, which is the header
+                isHeader = false;
+                continue;
+            }
             cities.add(new CityResponse(city));
         }
 
