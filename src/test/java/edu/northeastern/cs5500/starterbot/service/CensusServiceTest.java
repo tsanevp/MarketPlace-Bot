@@ -41,4 +41,9 @@ class CensusServiceTest {
         }
         fail("Los Angeles not found in CA");
     }
+
+    @Test
+    void testInvalidState() {
+        assertThat(censusService.getCitiesByState("invalid")).isNull();
+    }
 }
