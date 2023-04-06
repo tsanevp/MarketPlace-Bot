@@ -25,8 +25,7 @@ public class MongoDBService implements Service {
         final String databaseURI =
                 processBuilder
                         .environment()
-                        .get(
-                                "mongodb+srv://MarketPlaceAdmin:diYgVZ8LLMcb0tDt@marketplace.oi8ceoo.mongodb.net/MarketPlace");
+                        .get("MONGODB_URI");
         if (databaseURI != null) {
             return databaseURI;
         }
