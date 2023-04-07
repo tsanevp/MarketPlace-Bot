@@ -21,7 +21,6 @@ public class MongoDBService implements Service {
 
     static String getDatabaseURI() {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        // final String databaseURI = processBuilder.environment().get("MONGODB_URI");
         final String databaseURI = processBuilder.environment().get("MONGODB_URI");
         if (databaseURI != null) {
             return databaseURI;
@@ -38,10 +37,7 @@ public class MongoDBService implements Service {
                         MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
-        // ConnectionString connectionString = new ConnectionString(getDatabaseURI());
-        ConnectionString connectionString =
-                new ConnectionString(
-                        "mongodb+srv://MarketPlaceAdmin:diYgVZ8LLMcb0tDt@marketplace.oi8ceoo.mongodb.net/MarketPlace");
+        ConnectionString connectionString = new ConnectionString(getDatabaseURI());
 
         MongoClientSettings mongoClientSettings =
                 MongoClientSettings.builder()
