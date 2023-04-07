@@ -22,11 +22,7 @@ public class MongoDBService implements Service {
     static String getDatabaseURI() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         // final String databaseURI = processBuilder.environment().get("MONGODB_URI");
-        final String databaseURI =
-                processBuilder
-                        .environment()
-                        .get(
-                                "mongodb+srv://MarketPlaceAdmin:diYgVZ8LLMcb0tDt@marketplace.oi8ceoo.mongodb.net/MarketPlace");
+        final String databaseURI = processBuilder.environment().get("MONGODB_URI");
         if (databaseURI != null) {
             return databaseURI;
         }
