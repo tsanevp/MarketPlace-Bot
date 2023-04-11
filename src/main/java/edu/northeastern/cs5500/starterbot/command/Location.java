@@ -3,7 +3,6 @@ package edu.northeastern.cs5500.starterbot.command;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.States;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -26,22 +25,31 @@ public class Location implements StringSelectHandler {
         // Defined public and empty for Dagger injection
     }
 
+    /**
+     * Method to get the name of the command
+     *
+     * @return the name of the command
+     */
     @Override
     @Nonnull
     public String getName() {
         return "location";
     }
 
+    /**
+     * This method is called when a user either selects the state OR the city they are located in
+     *
+     * @param event the JDA onStringSelectInteraction event that we can pull info from
+     */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        // Use index 1 to obtain ID of drop-down menu used
-        String id = event.getComponentId();
-        Objects.requireNonNull(id);
-        String handlerName = id.split(":", 2)[1];
-        String userId = event.getUser().getId();
+        var id = Objects.requireNonNull(event.getComponentId());
+        var handlerName = id.split(":", 2)[1];
+        var userId = event.getUser().getId();
+        var selectedCityOrState = event.getInteraction().getValues().get(0);
 
         if ("cities".equals(handlerName)) {
-            userController.setCityOfResidence(userId, event.getInteraction().getValues().get(0));
+            userController.setCityOfResidence(userId, selectedCityOrState);
             event.deferEdit()
                     .setComponents()
                     .setEmbeds(
@@ -55,20 +63,20 @@ public class Location implements StringSelectHandler {
                                     .build())
                     .queue();
         } else {
-            try {
-                userController.setStateOfResidence(
-                        userId,
-                        States.valueOfName(event.getInteraction().getValues().get(0))
-                                .getAbbreviation());
-                MessageCreateBuilder messageCreateBuilder = createCityMessageBuilder(event);
-                event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            var stateAbbreviation = States.valueOfName(selectedCityOrState).getAbbreviation();
+
+            userController.setStateOfResidence(userId, stateAbbreviation);
+            MessageCreateBuilder messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
+            event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
         }
     }
 
-    // Creates the two State menu selection drop downs
+    /**
+     * This method is called to create two StringSelectMenus, each containing 25 states. From one of
+     * these drop-downs, the user must select the state they are located in
+     *
+     * @return MessageCreateBuilder that has each StringSelectMenu as an action row
+     */
     public MessageCreateBuilder createStatesMessageBuilder() {
         Builder statesFirstHalf =
                 StringSelectMenu.create(this.getName() + ":stateselect1")
@@ -93,14 +101,16 @@ public class Location implements StringSelectHandler {
                 .addActionRow(statesSecondHalf.build());
     }
 
-    // Creates the City menu selection drop down
-    private MessageCreateBuilder createCityMessageBuilder(
-            @Nonnull StringSelectInteractionEvent event) throws IOException, InterruptedException {
+    /**
+     * Method to create a StringSelectMenu with the MAX_MENU_SELECTIONS most populated cities for
+     * the given State
+     *
+     * @param stateAbbreviation the abbreviation of the State that we need to pull city data on
+     * @return A MessageCreateBuilder with the StringSelectMenu of cities for the given State
+     */
+    private MessageCreateBuilder createCityMessageBuilder(String stateAbbreviation) {
         List<String> cities =
-                cityController.getCitiesByState(
-                        States.valueOfName(event.getInteraction().getValues().get(0))
-                                .getStateCode(),
-                        MAX_MENU_SELECTIONS);
+                cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
         Builder menu =
                 StringSelectMenu.create(this.getName() + ":cities")
                         .setPlaceholder("Select The City You Live In");

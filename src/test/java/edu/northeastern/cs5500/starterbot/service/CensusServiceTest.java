@@ -3,6 +3,7 @@ package edu.northeastern.cs5500.starterbot.service;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 class CensusServiceTest {
@@ -33,6 +34,8 @@ class CensusServiceTest {
     @Test
     void testCaliforniaContainsLosAngeles() {
         var ca = censusService.getCitiesByState("ca");
+        Objects.requireNonNull(ca);
+
         assertThat(ca).isNotNull();
         for (var city : ca) {
             if (city.getName().equalsIgnoreCase("Los Angeles")) {

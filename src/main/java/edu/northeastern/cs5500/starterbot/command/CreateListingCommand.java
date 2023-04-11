@@ -134,15 +134,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         // Build the embed that represents the user's listing
         List<MessageEmbed> embedBuilderlist =
-                Objects.requireNonNull(
-                        buildListingEmbed(
-                                event,
-                                title,
-                                cost,
-                                shippingCost,
-                                shipping,
-                                condition,
-                                description));
+                buildListingEmbed(
+                        event, title, cost, shippingCost, shipping, condition, description);
 
         // Temp save embed to mongoDB
         userController.setCurrentListing(event.getUser().getId(), embedBuilderlist);
@@ -162,6 +155,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     }
 
     // Method to build the listing embed
+    @Nonnull
     private List<MessageEmbed> buildListingEmbed(
             SlashCommandInteractionEvent event,
             @Nonnull OptionMapping title,
