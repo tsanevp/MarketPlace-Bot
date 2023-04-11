@@ -1,27 +1,31 @@
 package edu.northeastern.cs5500.starterbot.model;
 
 import java.util.ArrayList;
+import javax.annotation.Nonnull;
+import lombok.Builder;
 import lombok.Data;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
 @Data
+@Builder
 public class Listing implements Model {
     ObjectId id;
 
-    Long messageId;
+    final long messageId;
 
-    String discordUserId;
+    @Nonnull final String discordUserId;
 
-    String title;
+    @Nonnull String title;
 
-    String url;
+    @Nonnull String url;
 
-    String description;
+    @Nonnull String description;
 
-    ArrayList<String> images;
+    @Nonnull ArrayList<String> images;
 
-    Integer color;
+    int color;
 
-    Document fields;
+    ListingFields fields;
 }
+
+//create tostring
