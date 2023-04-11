@@ -29,5 +29,7 @@ class LocationTest {
         assertThat(statesMessageBuilderAsString).isNotNull();
         assertThat(statesMessageBuilderAsString).contains("IDAHO");
         assertThat(statesMessageBuilderAsString).contains("NEW_YORK");
+        assertThat(statesMessageBuilderAsString).contains("WASHINGTON");
+        assertThat(statesMessageBuilderAsString).contains("ALABAMA");
     }
 }
