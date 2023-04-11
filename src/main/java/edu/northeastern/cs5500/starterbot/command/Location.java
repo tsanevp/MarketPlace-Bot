@@ -99,7 +99,8 @@ public class Location implements StringSelectHandler {
         List<String> cities =
                 cityController.getCitiesByState(
                         States.valueOfName(event.getInteraction().getValues().get(0))
-                                .getStateCode());
+                                .getStateCode(),
+                        MAX_MENU_SELECTIONS);
         Builder menu =
                 StringSelectMenu.create(this.getName() + ":cities")
                         .setPlaceholder("Select The City You Live In");

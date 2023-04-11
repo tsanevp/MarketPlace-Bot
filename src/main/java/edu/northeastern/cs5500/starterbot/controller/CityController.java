@@ -1,73 +1,40 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
+import edu.northeastern.cs5500.starterbot.service.CensusService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
+import javax.inject.Singleton;
 
+@Singleton
 public class CityController {
-    private final HttpClient client = HttpClient.newHttpClient();
-    private static final int MAX_MENU_OPTIONS = 25;
+    CensusService censusService;
 
     @Inject
-    public CityController() {
-        // Defined public and empty to call API
+    public CityController(CensusService censusService) {
+        this.censusService = censusService;
     }
 
-    public List<String> getCitiesByState(String stateCode)
-            throws IOException, InterruptedException {
-        String url =
-                String.format(
-                        "https://api.census.gov/data/2019/pep/population?get=NAME,POP&for=place:*&in=state:%s",
-                        stateCode);
-        Optional<List<List<String>>> citiesNested = this.apiCallHelper(url);
+    public List<String> getCitiesByState(String stateAbbreviation, int maxResults) {
+        var cities = censusService.getCitiesByState(stateAbbreviation);
 
-        List<String> citiesCleanedUp = new ArrayList<>();
+        if (cities == null) {
+            return Collections.emptyList();
+        }
 
-        if (citiesNested.isPresent()) {
-            List<List<String>> cities = citiesNested.get();
-            cities.remove(0);
-            cities.sort(
-                    (pop1, pop2) ->
-                            Integer.parseInt(pop2.get(1)) - (Integer.parseInt(pop1.get(1))));
-            for (int i = 0; i < MAX_MENU_OPTIONS; i++) {
-                if (i == cities.size()) break;
-                String city = cities.get(i).get(0);
-                int index = city.indexOf(",");
-                citiesCleanedUp.add(city.substring(0, index - 5));
+        cities.sort((left, right) -> Integer.compare(right.getPopulation(), left.getPopulation()));
+
+        List<String> result = new ArrayList<>();
+
+        for (var city : cities) {
+            if (result.size() >= maxResults) {
+                break;
             }
-        }
-        Collections.sort(citiesCleanedUp);
-        return citiesCleanedUp;
-    }
 
-    private Optional<List<List<String>>> apiCallHelper(String url)
-            throws IOException, InterruptedException {
-        HttpRequest req =
-                HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .setHeader("Accept", "application/html")
-                        .build();
-        HttpResponse<String> res = client.send(req, BodyHandlers.ofString());
-
-        if (res.statusCode() != HttpServletResponse.SC_OK) {
-            return Optional.empty();
+            result.add(city.getName());
         }
 
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<List<String>>>() {}.getType();
-
-        return Optional.ofNullable(gson.fromJson(res.body(), type));
+        return result;
     }
 }
