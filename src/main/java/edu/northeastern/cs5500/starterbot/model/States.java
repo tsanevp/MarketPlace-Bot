@@ -3,9 +3,9 @@ package edu.northeastern.cs5500.starterbot.model;
 import java.util.HashMap;
 import java.util.Map;
 
-// Credit of this enums class: https://gist.github.com/webdevwilson/5271984
+// This code is licensed under 'The Unlicense'. Link to liscense:
+// https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
 public enum States {
-    // The addition of state codes is implemented by us
     ALABAMA("Alabama", "AL", "01"),
     ALASKA("Alaska", "AK", "02"),
     ARIZONA("Arizona", "AZ", "04"),
@@ -70,7 +70,7 @@ public enum States {
     /** The set of states addressed by abbreviations. */
     private static final Map<String, States> STATES_BY_ABBR = new HashMap<>();
 
-    /* static initializer */
+    /* static initializer that maps the state abrv to it's enum's values */
     static {
         for (States state : values()) {
             STATES_BY_ABBR.put(state.getAbbreviation(), state);
@@ -123,6 +123,12 @@ public enum States {
         }
     }
 
+    /**
+     * Gets the enum constant's values for the specified name.
+     *
+     * @param name the state's name.
+     * @return the enum constant's values (name, abrv, state code).
+     */
     public static States valueOfName(final String name) {
         final String enumName = name.toUpperCase().replace(" ", "_");
         try {
@@ -132,6 +138,11 @@ public enum States {
         }
     }
 
+    /**
+     * Returns the state name as a string.
+     *
+     * @return the state name as a string.
+     */
     @Override
     public String toString() {
         return this.name;
