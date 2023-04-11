@@ -39,7 +39,6 @@ public class Bot {
         }
         @SuppressWarnings("null")
         @Nonnull
-        // Collection<GatewayIntent> intents = EnumSet.noneOf(GatewayIntent.class);
         JDA jda =
                 JDABuilder.createLight(token, GatewayIntent.GUILD_MEMBERS)
                         .addEventListeners(messageListener)

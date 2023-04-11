@@ -113,7 +113,6 @@ public enum States {
      *
      * @param abbr the state's abbreviation.
      * @return the enum constant with the specified abbreviation.
-     * @throws SunlightException if the abbreviation is invalid.
      */
     public static States valueOfAbbreviation(final String abbr) {
         final States state = STATES_BY_ABBR.get(abbr);

@@ -16,6 +16,14 @@ public class CityController {
         this.censusService = censusService;
     }
 
+    /**
+     * Method that calls CensusService and gets the cities for a given State. It then sorts the
+     * cities by population in descending order. It returns a list of cities the size of maxResults
+     *
+     * @param stateAbbreviation - The state to retrieve the cities for
+     * @param maxResults - The number of cities to add to the returned list
+     * @return A list of cities. The number of cities in the list depends on maxResults
+     */
     public List<String> getCitiesByState(String stateAbbreviation, int maxResults) {
         var cities = censusService.getCitiesByState(stateAbbreviation);
 
@@ -23,6 +31,7 @@ public class CityController {
             return Collections.emptyList();
         }
 
+        // Sort the cities in descending order, more populated cities appear first
         cities.sort((left, right) -> Integer.compare(right.getPopulation(), left.getPopulation()));
 
         List<String> result = new ArrayList<>();

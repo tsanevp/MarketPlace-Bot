@@ -13,13 +13,13 @@ public class CityResponse {
     @Nonnull final String zipCode;
 
     public CityResponse(List<String> cityData) {
-        @Nonnull String name = Objects.requireNonNull(cityData.get(0));
-        int lastComma = name.lastIndexOf(",");
+        @Nonnull String cityName = Objects.requireNonNull(cityData.get(0));
+        int lastComma = cityName.lastIndexOf(",");
         if (lastComma == -1) {
             throw new IllegalArgumentException(
-                    "Invalid city/town name (expected a ',' somewhere): " + name);
+                    "Invalid city/town name (expected a ',' somewhere): " + cityName);
         }
-        this.name = name.substring(0, lastComma - 5);
+        this.name = Objects.requireNonNull(cityName.substring(0, lastComma - 5));
 
         this.population = Integer.parseInt(cityData.get(1));
         this.stateCode = Integer.parseInt(cityData.get(2));
