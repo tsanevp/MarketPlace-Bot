@@ -18,8 +18,4 @@ public interface GenericRepository<T> {
     public Collection<T> getAll();
 
     public long count();
-
-    public FindIterable<T> filter(Bson filter);
-
-    public Long countDocuments(Bson bsonFilterByMembersId);
 }

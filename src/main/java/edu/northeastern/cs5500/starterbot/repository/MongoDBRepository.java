@@ -60,14 +60,4 @@ public class MongoDBRepository<T extends Model> implements GenericRepository<T> 
     public long count() {
         return collection.countDocuments();
     }
-
-    @Override
-    public Long countDocuments(Bson filter) {
-        return collection.countDocuments(filter);
-    }
-
-    @Override
-    public FindIterable<T> filter(Bson filter) {
-        return collection.find(filter);
-    }
 }
