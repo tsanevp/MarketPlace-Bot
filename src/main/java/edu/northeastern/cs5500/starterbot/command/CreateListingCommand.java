@@ -248,7 +248,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         TextChannel textChannel =
                 guild.getTextChannelsByName(
                                 Objects.requireNonNull(
-                                        userController.getTradingChannel(guild.getOwnerId())),
+                                        userController.getTradingChannelId(guild.getOwnerId())),
                                 true)
                         .get(0);
 
