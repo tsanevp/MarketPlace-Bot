@@ -28,7 +28,6 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     private static final String DEFAULT_TRADING_CHANNEL_NAME = "trading-channel";
     private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
             "Please call the /createtradingchannel bot command to create a new text channel with a name you specify. Without doing this, the bot cannot function.";
-    private static final String CREATE_NEW_CHANNEL_BUTTON_LABEL = "Bot Can Create The Channel";
 
     @Inject Location location;
     @Inject UserController userController;
@@ -64,8 +63,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
                 new MessageCreateBuilder()
                         .addActionRow(
                                 Button.success(
-                                        getName() + ":createnewchannel",
-                                        CREATE_NEW_CHANNEL_BUTTON_LABEL),
+                                        getName() + ":createnewchannel","Bot Can Create The Channel"),
                                 Button.primary(getName() + ":no", "I'll Create The Channel"))
                         .setEmbeds(introMessageEmbed)
                         .build();
@@ -100,33 +98,35 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
         // Delete buttons so no longer clickable
         event.deferEdit().setComponents().queue();
 
-        // Create new trading-channel was selected
-        if (CREATE_NEW_CHANNEL_BUTTON_LABEL.equals(event.getButton().getLabel())) {
-            // Checks if a channel named trading-channel already exists on the server
-            for (GuildChannel guildChannel : guild.getTextChannels()) {
-                if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
-                    sendPrivateMessage(
-                            owner,
-                            Objects.requireNonNull(
-                                    String.format(
-                                            "A text channel named %s already exists on your server. %s",
-                                            DEFAULT_TRADING_CHANNEL_NAME,
-                                            CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION)));
-                    return;
-                }
-            }
-            // Create the new "trading-channel". Move it under Text Channels
-            createNewTradingChannel(owner, guild, DEFAULT_TRADING_CHANNEL_NAME);
-        } else {
+        // Send instruction on how Guild Owner should create new trading channel
+        if ("I'll Create The Channel".equals(event.getButton().getLabel())) {
             sendPrivateMessage(owner, CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
+            return;
         }
+
+        // Checks if a channel named trading-channel already exists on the server
+        for (GuildChannel guildChannel : guild.getTextChannels()) {
+            if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
+                sendPrivateMessage(
+                        owner,
+                        Objects.requireNonNull(
+                                String.format(
+                                        "A text channel named %s already exists on your server. %s",
+                                        DEFAULT_TRADING_CHANNEL_NAME,
+                                        CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION)));
+                return;
+            }
+        }
+
+        // Create the new "trading-channel". Move it under Text Channels
+        createNewTradingChannel(owner, guild, DEFAULT_TRADING_CHANNEL_NAME);
     }
 
     /**
      * Opens a private channel with the user provided and send the given message.
      *
      * @param user - The user to send the private message to.
-     * @param messageToSend - The message to send the user.
+     * @param messageToSend - The message to send the user. String Type.
      */
     private void sendPrivateMessage(User user, @Nonnull String messageToSend) {
         user.openPrivateChannel().complete().sendMessage(messageToSend).queue();
@@ -136,7 +136,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
      * Opens a private channel with the user provided and send the given message.
      *
      * @param user - The user to send the private message to.
-     * @param messageToSend - The message to send the user.
+     * @param messageToSend - The message to send the user. MessageCreateData Type.
      */
     private void sendPrivateMessage(User user, @Nonnull MessageCreateData messageToSend) {
         user.openPrivateChannel().complete().sendMessage(messageToSend).queue();
