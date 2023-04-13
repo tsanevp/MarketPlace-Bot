@@ -9,11 +9,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import javax.annotation.processing.SupportedOptions;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -62,7 +62,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
 
         User user = event.getUser();
         var discordUserId = user.getId();
-        List<MessageCreateBuilder> listingsMessages = getListingsMessages(discordUserId);
+        List<MessageCreateBuilder> listingsMessages = getListingsMessages(discordUserId, event.getJDA());
         if (!listingsMessages.isEmpty()) {
             sendListingsMessageToUser(user, listingsMessages);
             event.reply("Your postings has been sent to your DM").setEphemeral(true).complete();
@@ -116,7 +116,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
     }
 
 
-    private List<MessageCreateBuilder> getListingsMessages(String discordUserId) {
+    private List<MessageCreateBuilder> getListingsMessages(String discordUserId, JDA jda) {
         Collection<Listing> listing = listingController.getListingsByMemberId(discordUserId);
         List<MessageCreateBuilder> messages = new ArrayList<>();
         if (!listing.isEmpty()) {
@@ -132,14 +132,14 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                                         Button.danger(
                                                 buttonId,
                                                 "Delete"))
-                                .setEmbeds(toMessageEmbed(list));
+                                .setEmbeds(toMessageEmbed(list, jda));
                 messages.add(messageCreateBuilder);
             }
         } 
         return messages;
     }
 
-    private List<MessageEmbed> toMessageEmbed(Listing listing) {
+    private List<MessageEmbed> toMessageEmbed(Listing listing, JDA jda) {
         List<MessageEmbed> listingsMessage = new ArrayList<>();
         EmbedBuilder embedBuilder =
                 new EmbedBuilder()
@@ -150,7 +150,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         embedBuilder
             .addField("Condition:", fields.getCondition(), true)
             .addField("Description:", fields.getDescription(), false)
-            .addField("Posted By:", fields.getPostedBy(), true)
+            .addField("Posted By:", Objects.requireNonNull(jda.getUserById(listing.getDiscordUserId())).getName(), true)
             .addField("Date Posted:", fields.getDatePosted(), false);
 
 
