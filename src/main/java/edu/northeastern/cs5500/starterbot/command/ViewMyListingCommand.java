@@ -61,12 +61,12 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var discordUserId = user.getId();
         List<MessageCreateBuilder> listingsMessages =
                 getListingsMessages(discordUserId, event.getJDA());
-        if (!listingsMessages.isEmpty()) {
-            sendListingsMessageToUser(user, listingsMessages);
-            event.reply("Your postings has been sent to your DM").setEphemeral(true).complete();
-        } else {
+        if (listingsMessages.isEmpty()) {
             event.reply("No postings available").setEphemeral(true).complete();
+            return;
         }
+        sendListingsMessageToUser(user, listingsMessages);
+        event.reply("Your postings has been sent to your DM").setEphemeral(true).complete();
     }
 
     @Override
@@ -76,8 +76,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var guildId = Objects.requireNonNull(userController.getGuildIdForUser(userId));
         Guild guild = Objects.requireNonNull(event.getJDA().getGuildById(guildId));
         MessageChannel channel =
-                guild.getTextChannelsByName(userController.getTradingChannel(user.getId()), true)
-                        .get(0);
+                guild.getTextChannelById(userController.getTradingChannelId(userId), true);
         MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
         String[] buttonIds = event.getButton().getId().split(":");
         deleteListingMessages(user, channel, new ObjectId(buttonIds[2]), buttonIds[1]);
@@ -109,17 +108,17 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
     private List<MessageCreateBuilder> getListingsMessages(String discordUserId, JDA jda) {
         Collection<Listing> listing = listingController.getListingsByMemberId(discordUserId);
         List<MessageCreateBuilder> messages = new ArrayList<>();
-        if (!listing.isEmpty()) {
-            for (Listing list : listing) {
-                String buttonId =
-                        String.format(
-                                "%s:%s:%X:delete", getName(), list.getMessageId(), list.getId());
-                MessageCreateBuilder messageCreateBuilder =
-                        new MessageCreateBuilder()
-                                .addActionRow(Button.danger(buttonId, "Delete"))
-                                .setEmbeds(toMessageEmbed(list, jda));
-                messages.add(messageCreateBuilder);
-            }
+        if (listing.isEmpty()) {
+            return messages;
+        }
+        for (Listing list : listing) {
+            String buttonId =
+                    String.format("%s:%s:%X:delete", getName(), list.getMessageId(), list.getId());
+            MessageCreateBuilder messageCreateBuilder =
+                    new MessageCreateBuilder()
+                            .addActionRow(Button.danger(buttonId, "Delete"))
+                            .setEmbeds(toMessageEmbed(list, jda));
+            messages.add(messageCreateBuilder);
         }
         return messages;
     }
