@@ -8,7 +8,6 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -29,8 +28,13 @@ public class ListingController {
         listingRepository.add(Objects.requireNonNull(listing));
     }
 
-    public Listing createListing(@Nonnull List<String> imagesUrl, long messageId, @Nonnull String title, @Nonnull String url, @Nonnull String discordUserId, 
-    ListingFields fields) {
+    public Listing createListing(
+            @Nonnull List<String> imagesUrl,
+            long messageId,
+            @Nonnull String title,
+            @Nonnull String url,
+            @Nonnull String discordUserId,
+            ListingFields fields) {
 
         ListingBuilder listingBuilder = Listing.builder();
         listingBuilder
@@ -44,14 +48,18 @@ public class ListingController {
         return listingBuilder.build();
     }
 
-    public ListingFields createListingFields(@Nonnegative int cost, boolean shippingIncluded, @Nonnull String condition, @Nonnull String description) {
+    public ListingFields createListingFields(
+            @Nonnegative int cost,
+            boolean shippingIncluded,
+            @Nonnull String condition,
+            @Nonnull String description) {
         ListingFieldsBuilder listingFieldsBuilder = ListingFields.builder();
         listingFieldsBuilder
-            .cost(cost)
-            .description(description)
-            .shippingIncluded(shippingIncluded)
-            .condition(condition);
-        
+                .cost(cost)
+                .description(description)
+                .shippingIncluded(shippingIncluded)
+                .condition(condition);
+
         return listingFieldsBuilder.build();
     }
 

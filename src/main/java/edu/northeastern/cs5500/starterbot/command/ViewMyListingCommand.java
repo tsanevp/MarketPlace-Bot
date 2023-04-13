@@ -1,9 +1,9 @@
 package edu.northeastern.cs5500.starterbot.command;
+
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,47 +41,40 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         // Defined public and empty for Dagger injection
     }
 
-    
     @Override
     @Nonnull
     public String getName() {
         return "viewmylisting";
     }
 
-    
     @Override
     @Nonnull
     public CommandData getCommandData() {
         return Commands.slash(getName(), "View all the listings that you have posted");
     }
 
-    
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         log.info("event: /viewmylisting");
 
         User user = event.getUser();
         var discordUserId = user.getId();
-        List<MessageCreateBuilder> listingsMessages = getListingsMessages(discordUserId, event.getJDA());
+        List<MessageCreateBuilder> listingsMessages =
+                getListingsMessages(discordUserId, event.getJDA());
         if (!listingsMessages.isEmpty()) {
             sendListingsMessageToUser(user, listingsMessages);
             event.reply("Your postings has been sent to your DM").setEphemeral(true).complete();
         } else {
             event.reply("No postings available").setEphemeral(true).complete();
         }
-
     }
 
-    
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         User user = event.getUser();
         var userId = user.getId();
         var guildId = Objects.requireNonNull(userController.getGuildIdForUser(userId));
-        Guild guild =
-                Objects.requireNonNull(
-                        event.getJDA()
-                                .getGuildById(guildId));
+        Guild guild = Objects.requireNonNull(event.getJDA().getGuildById(guildId));
         MessageChannel channel =
                 guild.getTextChannelsByName(userController.getTradingChannel(user.getId()), true)
                         .get(0);
@@ -98,44 +91,36 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                 .queue();
     }
 
-    
-    private void deleteListingMessages(User user, MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String buttonIds) {
+    private void deleteListingMessages(
+            User user,
+            MessageChannel channel,
+            @Nonnull ObjectId objectid,
+            @Nonnull String buttonIds) {
         listingController.deleteListingById(objectid);
         channel.deleteMessageById(buttonIds).queue();
     }
 
-
     private void sendListingsMessageToUser(User user, List<MessageCreateBuilder> listingsMessages) {
-        for (MessageCreateBuilder message: listingsMessages) {
-            user
-                .openPrivateChannel()
-                .complete()
-                .sendMessage(message.build())
-                .queue();
+        for (MessageCreateBuilder message : listingsMessages) {
+            user.openPrivateChannel().complete().sendMessage(message.build()).queue();
         }
     }
-
 
     private List<MessageCreateBuilder> getListingsMessages(String discordUserId, JDA jda) {
         Collection<Listing> listing = listingController.getListingsByMemberId(discordUserId);
         List<MessageCreateBuilder> messages = new ArrayList<>();
         if (!listing.isEmpty()) {
             for (Listing list : listing) {
-                String buttonId = String.format(
-                    "%s:%s:%X:delete",
-                    getName(),
-                    list.getMessageId(),
-                    list.getId());
+                String buttonId =
+                        String.format(
+                                "%s:%s:%X:delete", getName(), list.getMessageId(), list.getId());
                 MessageCreateBuilder messageCreateBuilder =
                         new MessageCreateBuilder()
-                                .addActionRow(
-                                        Button.danger(
-                                                buttonId,
-                                                "Delete"))
+                                .addActionRow(Button.danger(buttonId, "Delete"))
                                 .setEmbeds(toMessageEmbed(list, jda));
                 messages.add(messageCreateBuilder);
             }
-        } 
+        }
         return messages;
     }
 
@@ -148,11 +133,14 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                         .setImage(listing.getImages().get(0));
         ListingFields fields = listing.getFields();
         embedBuilder
-            .addField("Condition:", fields.getCondition(), true)
-            .addField("Description:", fields.getDescription(), false)
-            .addField("Posted By:", Objects.requireNonNull(jda.getUserById(listing.getDiscordUserId())).getName(), true)
-            .addField("Date Posted:", fields.getDatePosted(), false);
-
+                .addField("Condition:", fields.getCondition(), true)
+                .addField("Description:", fields.getDescription(), false)
+                .addField(
+                        "Posted By:",
+                        Objects.requireNonNull(jda.getUserById(listing.getDiscordUserId()))
+                                .getName(),
+                        true)
+                .addField("Date Posted:", fields.getDatePosted(), false);
 
         MessageEmbed messageEmbed = embedBuilder.build();
         listingsMessage.add(messageEmbed);

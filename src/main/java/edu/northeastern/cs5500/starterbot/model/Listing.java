@@ -1,7 +1,6 @@
 package edu.northeastern.cs5500.starterbot.model;
 
 import java.util.List;
-
 import javax.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Data;
@@ -13,13 +12,13 @@ import org.bson.types.ObjectId;
 @Data
 @Builder
 public class Listing implements Model {
-    
+
     // MongoDB id
     ObjectId id;
 
     // MessageEmbed id
     final long messageId;
- 
+
     // the userid of the account who created the listing
     @Nonnull final String discordUserId;
 
