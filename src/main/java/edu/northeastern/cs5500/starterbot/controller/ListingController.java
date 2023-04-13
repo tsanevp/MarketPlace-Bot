@@ -1,17 +1,20 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
-import com.mongodb.client.FindIterable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import edu.northeastern.cs5500.starterbot.model.Listing.ListingBuilder;
+import edu.northeastern.cs5500.starterbot.model.ListingFields;
+import edu.northeastern.cs5500.starterbot.model.ListingFields.ListingFieldsBuilder;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageEmbed.Field;
-import org.bson.Document;
+import javax.inject.Singleton;
 import org.bson.types.ObjectId;
 
+@Singleton
 public class ListingController {
 
     GenericRepository<Listing> listingRepository;
@@ -21,40 +24,72 @@ public class ListingController {
         this.listingRepository = listingRepository;
     }
 
-    public void setListing(
-            List<MessageEmbed> currentListings, Long messageId, String discordUserId) {
-        Listing listing = new Listing();
-        MessageEmbed currentListingAsBuilder = currentListings.get(0);
-
-        ArrayList<String> images = new ArrayList<>();
-        for (MessageEmbed messageEmbed : currentListings) {
-            images.add(messageEmbed.getImage().getUrl());
-        }
-        listing.setImages(images);
-        listing.setMessageId(messageId);
-        listing.setTitle(currentListingAsBuilder.getTitle());
-        listing.setUrl(currentListingAsBuilder.getUrl());
-        listing.setColor(currentListingAsBuilder.getColorRaw());
-        listing.setDiscordUserId(discordUserId);
-        listing.setDescription(currentListingAsBuilder.getDescription());
-        Document fieldsDocument = new Document();
-        for (Field field : currentListingAsBuilder.getFields()) {
-            fieldsDocument.append(field.getName(), field.getValue());
-        }
-        listing.setFields(fieldsDocument);
-        this.listingRepository.add(listing);
+    public void addListing(Listing listing) {
+        listingRepository.add(Objects.requireNonNull(listing));
     }
 
-    // Deletes the listing of a specific user in the collection.
+    public Listing createListing(
+            @Nonnull List<String> imagesUrl,
+            long messageId,
+            @Nonnull String title,
+            @Nonnull String url,
+            @Nonnull String discordUserId,
+            ListingFields fields) {
+
+        ListingBuilder listingBuilder = Listing.builder();
+        listingBuilder
+                .images(imagesUrl)
+                .messageId(messageId)
+                .title(title)
+                .url(url)
+                .discordUserId(discordUserId)
+                .fields(fields);
+
+        return listingBuilder.build();
+    }
+
+    public ListingFields createListingFields(
+            @Nonnegative int cost,
+            boolean shippingIncluded,
+            @Nonnull String condition,
+            @Nonnull String description) {
+        ListingFieldsBuilder listingFieldsBuilder = ListingFields.builder();
+        listingFieldsBuilder
+                .cost(cost)
+                .description(description)
+                .shippingIncluded(shippingIncluded)
+                .condition(condition);
+
+        return listingFieldsBuilder.build();
+    }
+
     public void deleteListingsForUser(String discordMemberId) {
-        FindIterable<Listing> listingsToDelete = filterListingsByMembersId(discordMemberId);
-        for (Listing l : listingsToDelete) {
-            this.listingRepository.delete(l.getId());
+        for (Listing listing : getListingsByMemberId(discordMemberId)) {
+            listingRepository.delete(Objects.requireNonNull(listing.getId()));
         }
     }
 
-    // Deletes a specific listing in the collection.
-    public void deleteListingById(@Nonnull ObjectId ObjectId) {
-        this.listingRepository.delete(ObjectId);
+    public void deleteListingById(@Nonnull ObjectId objectId) {
+        listingRepository.delete(objectId);
+    }
+
+    public int countListingsByMemberId(String discordUserId) {
+        return getListingsByMemberId(discordUserId).size();
+    }
+
+    public Collection<Listing> getListingsWithKeyword(String keyword) {
+        return getAllListings().stream()
+                .filter(listing -> listing.getTitle().contains(keyword))
+                .toList();
+    }
+
+    public Collection<Listing> getAllListings() {
+        return listingRepository.getAll();
+    }
+
+    public Collection<Listing> getListingsByMemberId(String discordMemberId) {
+        return getAllListings().stream()
+                .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
+                .toList();
     }
 }

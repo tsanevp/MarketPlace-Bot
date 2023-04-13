@@ -1,27 +1,39 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import lombok.Builder;
 import lombok.Data;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
+/*
+ * Represents the model of the listing that is stored in MongoDB
+ */
 @Data
+@Builder
 public class Listing implements Model {
+
+    // MongoDB id
     ObjectId id;
 
-    Long messageId;
+    // MessageEmbed id
+    final long messageId;
 
-    String discordUserId;
+    // the userid of the account who created the listing
+    @Nonnull final String discordUserId;
 
-    String title;
+    // title of the listing
+    @Nonnull String title;
 
-    String url;
+    // url of the listing
+    @Nonnull String url;
 
-    String description;
+    // description of item listed
+    @Nonnull String description;
 
-    ArrayList<String> images;
+    // list of images url
+    @Nonnull List<String> images;
 
-    Integer color;
-
-    Document fields;
+    // additional fields of message
+    ListingFields fields;
 }
