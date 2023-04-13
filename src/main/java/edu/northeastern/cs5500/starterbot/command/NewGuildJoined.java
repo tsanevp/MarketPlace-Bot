@@ -26,15 +26,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
     private static final String DEFAULT_TRADING_CHANNEL_NAME = "trading-channel";
-    private static final String BOT_INTRODUCTION_MESSAGE_TO_GUILD_OWNER =
-            "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.";
     private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
             "Please call the /createtradingchannel bot command to create a new text channel with a name you specify. Without doing this, the bot cannot function.";
     private static final String CREATE_NEW_CHANNEL_BUTTON_LABEL = "Bot Can Create The Channel";
-    private static final String TRADING_CHANNEL_NAME_ALREADY_EXISTS_MESSAGE =
-            String.format(
-                    "A text channel named %s already exists on your server. %s",
-                    DEFAULT_TRADING_CHANNEL_NAME, CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
 
     @Inject Location location;
     @Inject UserController userController;
@@ -60,7 +54,8 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
         // Embed builder with intro message later sent to guild owner
         var introMessageEmbed =
                 new EmbedBuilder()
-                        .setDescription(BOT_INTRODUCTION_MESSAGE_TO_GUILD_OWNER)
+                        .setDescription(
+                                "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.")
                         .setColor(EMBED_COLOR)
                         .build();
 
@@ -112,7 +107,11 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
                 if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
                     sendPrivateMessage(
                             owner,
-                            Objects.requireNonNull(TRADING_CHANNEL_NAME_ALREADY_EXISTS_MESSAGE));
+                            Objects.requireNonNull(
+                                    String.format(
+                                            "A text channel named %s already exists on your server. %s",
+                                            DEFAULT_TRADING_CHANNEL_NAME,
+                                            CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION)));
                     return;
                 }
             }
