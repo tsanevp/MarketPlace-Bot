@@ -17,17 +17,17 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu.Builder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
 @Slf4j
-public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, StringSelectHandler {
+public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
-    private static final String TRADING_CHANNEL_ID = "trading-channel";
+    private static final String DEFAULT_TRADING_CHANNEL_NAME = "trading-channel";
+    private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
+            "Please call the /createtradingchannel bot command to create a new text channel with a name you specify. Without doing this, the bot cannot function.";
 
     @Inject Location location;
     @Inject UserController userController;
@@ -47,37 +47,43 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
 
-        // Ask the guild owner if they want to create a new trading-channel or use existing channel
-        User owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
-        EmbedBuilder embedBuilder =
+        // Get Guild Owner as a User
+        var owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
+
+        // Embed builder with intro message later sent to guild owner
+        var introMessageEmbed =
                 new EmbedBuilder()
-                        .setTitle(
-                                "Thank you for adding our MarketPlace Bot! To function as intended, a text channel to POST new listings needs to be assigned. Would you like to create a new channel or use an existing channel in your server?")
-                        .setColor(EMBED_COLOR);
-        MessageCreateBuilder messageCreateBuilder =
+                        .setDescription(
+                                "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.")
+                        .setColor(EMBED_COLOR)
+                        .build();
+
+        // Message builder with buttons and the embed message. Is later sent to guild owner
+        var ownerIntroMessage =
                 new MessageCreateBuilder()
                         .addActionRow(
                                 Button.success(
-                                        this.getName() + ":createnewchannel", "Create New Channel"),
-                                Button.primary(
-                                        this.getName() + ":useexistingchannel",
-                                        "Use Existing Channel"))
-                        .setEmbeds(embedBuilder.build());
+                                        getName() + ":createnewchannel","Bot Can Create The Channel"),
+                                Button.primary(getName() + ":no", "I'll Create The Channel"))
+                        .setEmbeds(introMessageEmbed)
+                        .build();
 
-        // Send the message to the owner
-        owner.openPrivateChannel().complete().sendMessage(messageCreateBuilder.build()).queue();
+        // Sends intro message to Guild owner as a DM
+        sendPrivateMessage(owner, ownerIntroMessage);
 
-        // For each member, set the GuildId, ask their location, add them to collection
-        MessageCreateBuilder stateSelections = location.createStatesMessageBuilder();
-        for (Member member : event.getGuild().getMembers()) {
-            userController.setGuildIdForUser(member.getId(), event.getGuild().getId());
-            // Makes sure member is not the bot itself
-            if (!member.getId().equals(event.getJDA().getSelfUser().getId())) {
-                member.getUser()
-                        .openPrivateChannel()
-                        .complete()
-                        .sendMessage(stateSelections.build())
-                        .queue();
+        var stateSelections = location.createStatesMessageBuilder().build();
+        var membersInGuild = event.getGuild().getMembers();
+        var guildId = event.getGuild().getId();
+        var botId = event.getJDA().getSelfUser().getId();
+
+        // Add each member to collection, set the GuildId, ask their location
+        for (Member member : membersInGuild) {
+            var user = member.getUser();
+            var userId = user.getId();
+            userController.setGuildIdForUser(userId, guildId);
+            // If current member is not the bot, send them DM w/ state selection
+            if (!userId.equals(botId)) {
+                sendPrivateMessage(user, stateSelections);
             }
         }
     }
@@ -85,105 +91,91 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler, Str
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         // Define the Guild owner and request the GuildId from the user collection
-        User user = event.getUser();
-        Guild guild =
-                event.getJDA()
-                        .getGuildById(
-                                Objects.requireNonNull(
-                                        userController.getGuildIdForUser(user.getId())));
-        Objects.requireNonNull(guild);
+        var owner = event.getUser(); // Only the owner can toggle this event, no need to verify
+        var ownerGuildId = Objects.requireNonNull(userController.getGuildIdForUser(owner.getId()));
+        var guild = Objects.requireNonNull(event.getJDA().getGuildById(ownerGuildId));
 
         // Delete buttons so no longer clickable
         event.deferEdit().setComponents().queue();
 
-        // Checks to see if creation of a new trading-channel is selected
-        if ("Create New Channel".equals(event.getButton().getLabel())) {
-            // Checks if a channel named trading-channel already exists on the server
-            for (GuildChannel guildChannel : guild.getTextChannels()) {
-                if (TRADING_CHANNEL_ID.equals(guildChannel.getName())) {
-                    user.openPrivateChannel()
-                            .complete()
-                            .sendMessage("\"trading-channel\" already exists on your server.")
-                            .queue();
-                    return;
-                }
-            }
-            // Create the new "trading-channel". Move it under Text Channels
-            this.createNewTradingChannel(user, guild);
-        } else {
-            // Owner selects an existing channel to make trading channel
-            user.openPrivateChannel()
-                    .complete()
-                    .sendMessage(selectFromChannelsMenu(user, guild).build())
-                    .queue();
+        // Send instruction on how Guild Owner should create new trading channel
+        if ("I'll Create The Channel".equals(event.getButton().getLabel())) {
+            sendPrivateMessage(owner, CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
+            return;
         }
-    }
 
-    @Override
-    public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        final String response = event.getInteraction().getValues().get(0);
-        Objects.requireNonNull(response);
-        event.deferEdit()
-                .setActionRow(
-                        StringSelectMenu.create(getName())
-                                .setPlaceholder(response)
-                                .addOption(response, response)
-                                .build()
-                                .withDisabled(true))
-                .queue();
-        event.getUser()
-                .openPrivateChannel()
-                .complete()
-                .sendMessage(
+        // Checks if a channel named trading-channel already exists on the server
+        for (GuildChannel guildChannel : guild.getTextChannels()) {
+            if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
+                sendPrivateMessage(
+                        owner,
                         Objects.requireNonNull(
                                 String.format(
-                                        "%s has been set as the main trading channel!", response)))
-                .queue();
-        userController.setTradingChannel(event.getUser().getId(), response);
-    }
-
-    // Build the string select menu of existing channels to choose from
-    private MessageCreateBuilder selectFromChannelsMenu(User user, Guild guild) {
-        Builder menu =
-                StringSelectMenu.create("newguildjoined")
-                        .setPlaceholder("Select Existing Channel To Assign For Trading");
-        for (GuildChannel guildChannel : guild.getTextChannels()) {
-            menu.addOption(guildChannel.getName(), guildChannel.getName());
+                                        "A text channel named %s already exists on your server. %s",
+                                        DEFAULT_TRADING_CHANNEL_NAME,
+                                        CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION)));
+                return;
+            }
         }
-        // Send an embed message with the channel dropdown
-        EmbedBuilder embedBuilder =
-                new EmbedBuilder()
-                        .setDescription(
-                                "Select which text channel you wish to assign as your trading channel.")
-                        .setColor(EMBED_COLOR);
-        return new MessageCreateBuilder()
-                .mention(user)
-                .addActionRow(menu.build())
-                .addEmbeds(embedBuilder.build());
+
+        // Create the new "trading-channel". Move it under Text Channels
+        createNewTradingChannel(owner, guild, DEFAULT_TRADING_CHANNEL_NAME);
     }
 
-    // Create the "trading-channel" channel and add it to "Text Channels" grouping
-    private void createNewTradingChannel(User user, Guild guild) {
+    /**
+     * Opens a private channel with the user provided and send the given message.
+     *
+     * @param user - The user to send the private message to.
+     * @param messageToSend - The message to send the user. String Type.
+     */
+    private void sendPrivateMessage(User user, @Nonnull String messageToSend) {
+        user.openPrivateChannel().complete().sendMessage(messageToSend).queue();
+    }
+
+    /**
+     * Opens a private channel with the user provided and send the given message.
+     *
+     * @param user - The user to send the private message to.
+     * @param messageToSend - The message to send the user. MessageCreateData Type.
+     */
+    private void sendPrivateMessage(User user, @Nonnull MessageCreateData messageToSend) {
+        user.openPrivateChannel().complete().sendMessage(messageToSend).queue();
+    }
+
+    /**
+     * Creates a trading channel with specific permissions and adds it to "Text Channels" grouping.
+     *
+     * @param owner - The owner of the Discord Guild.
+     * @param guild - The guild to add the text channel to.
+     * @param channelName - The name to give the channel.
+     */
+    private void createNewTradingChannel(User owner, Guild guild, @Nonnull String channelName) {
         Category category = guild.getCategoriesByName("text channels", true).get(0);
+
+        // Permissions that should be applied to the channel
         EnumSet<Permission> deny =
                 EnumSet.of(
                         Permission.MESSAGE_SEND,
                         Permission.CREATE_PRIVATE_THREADS,
                         Permission.MESSAGE_MANAGE,
                         Permission.MANAGE_THREADS);
+
+        // Creation of the new channel
         TextChannel textChannel =
-                category.createTextChannel(TRADING_CHANNEL_ID)
+                category.createTextChannel(channelName)
                         .addPermissionOverride(guild.getPublicRole(), null, deny)
                         .complete();
         textChannel.getManager().setParent(category);
-        user.openPrivateChannel()
-                .complete()
-                .sendMessage(
-                        Objects.requireNonNull(
-                                String.format(
-                                        "A new channel named \"trading-channel\" has been created in your server %s.",
-                                        guild.getName())))
-                .queue();
-        userController.setTradingChannel(guild.getOwnerId(), TRADING_CHANNEL_ID);
+
+        // Send success message that the channel was created
+        var successMessage =
+                Objects.requireNonNull(
+                        String.format(
+                                "A new channel named %s has been created in your server %s.",
+                                channelName, guild.getName()));
+        sendPrivateMessage(owner, successMessage);
+
+        // Set this channel as the trading channel for the Discord server
+        userController.setTradingChannel(guild.getOwnerId(), textChannel.getId());
     }
 }

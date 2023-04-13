@@ -20,13 +20,6 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public StringSelectHandler provideNewGuildJoinedHandler(
-            NewGuildJoined stringSelectGuildJoined) {
-        return stringSelectGuildJoined;
-    }
-
-    @Provides
-    @IntoSet
     public ButtonHandler provideButtonNewGuildJoinedHandler(NewGuildJoined buttonCommand) {
         return buttonCommand;
     }
@@ -45,6 +38,13 @@ public class CommandModule {
 
     @Provides
     @IntoSet
+    public ButtonHandler provideButtonCreateListingClickHandler(
+            CreateListingCommand buttonCommand) {
+        return buttonCommand;
+    }
+
+    @Provides
+    @IntoSet
     public SlashCommandHandler provideViewMyListingCommand(
             ViewMyListingCommand viewMyListingCommand) {
         return viewMyListingCommand;
@@ -55,13 +55,6 @@ public class CommandModule {
     public ButtonHandler provideViewMyListingCommandButton(
             ViewMyListingCommand viewMyListingCommand) {
         return viewMyListingCommand;
-    }
-
-    @Provides
-    @IntoSet
-    public ButtonHandler provideButtonCreateListingClickHandler(
-            CreateListingCommand buttonCommand) {
-        return buttonCommand;
     }
 
     @Provides
