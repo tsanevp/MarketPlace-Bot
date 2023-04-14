@@ -21,4 +21,7 @@ public class User implements Model {
 
     // The city the user lives in
     String cityOfResidence;
+
+    // A listing the user is currently working on
+    Listing currentListing;
 }

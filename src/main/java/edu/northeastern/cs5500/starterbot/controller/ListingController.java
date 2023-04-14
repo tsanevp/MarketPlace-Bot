@@ -1,9 +1,7 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
 import edu.northeastern.cs5500.starterbot.model.Listing;
-import edu.northeastern.cs5500.starterbot.model.Listing.ListingBuilder;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
-import edu.northeastern.cs5500.starterbot.model.ListingFields.ListingFieldsBuilder;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.List;
@@ -33,20 +31,16 @@ public class ListingController {
             @Nonnull String title,
             @Nonnull String url,
             @Nonnull List<String> imagesUrl,
-            ListingFields fields,
-            boolean posted) {
+            ListingFields fields) {
 
-        ListingBuilder listingBuilder = Listing.builder();
-        listingBuilder
+        return Listing.builder()
                 .messageId(messageId)
                 .discordUserId(discordUserId)
                 .title(title)
                 .url(url)
                 .images(imagesUrl)
                 .fields(fields)
-                .posted(posted);
-
-        return listingBuilder.build();
+                .build();
     }
 
     public ListingFields createListingFields(
@@ -55,15 +49,14 @@ public class ListingController {
             @Nonnull String condition,
             @Nonnull String description,
             @Nonnull String datePosted) {
-        ListingFieldsBuilder listingFieldsBuilder = ListingFields.builder();
-        listingFieldsBuilder
+
+        return ListingFields.builder()
                 .cost(cost)
                 .description(description)
                 .shippingIncluded(shippingIncluded)
                 .condition(condition)
-                .datePosted(datePosted);
-
-        return listingFieldsBuilder.build();
+                .datePosted(datePosted)
+                .build();
     }
 
     public void deleteListingsForUser(String discordMemberId) {
@@ -93,13 +86,6 @@ public class ListingController {
     public Collection<Listing> getListingsByMemberId(String discordMemberId) {
         return getAllListings().stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
-                .toList();
-    }
-
-    public Collection<Listing> getTempListingByMemberId(String discordMemberId) {
-        return getAllListings().stream()
-                .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
-                // .filter(listing -> listing.getPosted().equals(discordMemberId))
                 .toList();
     }
 }

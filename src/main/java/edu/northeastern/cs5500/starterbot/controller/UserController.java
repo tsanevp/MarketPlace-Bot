@@ -1,6 +1,7 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
 import com.mongodb.lang.Nullable;
+import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.User;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
@@ -30,6 +31,17 @@ public class UserController {
     }
 
     /**
+     * Get the GuildId for the guild the user is in.
+     *
+     * @param discordMemberId - The discord user to get the guild Id for.
+     * @return the guild Id as a string.
+     */
+    @Nonnull
+    public String getGuildIdForUser(String discordMemberId) {
+        return Objects.requireNonNull(getUserForMemberId(discordMemberId).getGuildId());
+    }
+
+    /**
      * Retrieves the Trading Channel Id for the given user.
      *
      * @param discordMemberId - The user to get the trading channel Id for.
@@ -51,17 +63,6 @@ public class UserController {
 
         user.setTradingChannelId(tradingChannelId);
         userRepository.update(user);
-    }
-
-    /**
-     * Get the GuildId for the guild the user is in.
-     *
-     * @param discordMemberId - The discord user to get the guild Id for.
-     * @return the guild Id as a string.
-     */
-    @Nonnull
-    public String getGuildIdForUser(String discordMemberId) {
-        return Objects.requireNonNull(getUserForMemberId(discordMemberId).getGuildId());
     }
 
     /**
@@ -110,6 +111,32 @@ public class UserController {
     @Nonnull
     public String getCityOfResidence(String discordMemberId) {
         return Objects.requireNonNull(getUserForMemberId(discordMemberId).getCityOfResidence());
+    }
+
+    /**
+     * Set the current listing the user is working on.
+     *
+     * @param discordMemberId - The discord user to set the current listing for.
+     */
+    public void setCurrentListing(String discordMemberId, Listing currentListing) {
+        User user = getUserForMemberId(discordMemberId);
+        user.setCurrentListing(null);
+        if (currentListing != null) {
+            user.setCurrentListing(currentListing);
+        }
+        userRepository.update(user);
+    }
+
+    /**
+     * Gets the current listing the user is working on. There will only ever be one current listing,
+     * if it is not null.
+     *
+     * @param discordMemberId - The discord user to get the current listing for.
+     * @return the current listing object.
+     */
+    @Nullable
+    public Listing getCurrentListing(String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getCurrentListing();
     }
 
     /**

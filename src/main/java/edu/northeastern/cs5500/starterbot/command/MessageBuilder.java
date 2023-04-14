@@ -21,6 +21,13 @@ public class MessageBuilder {
         // Defined public and empty for Dagger injection
     }
 
+    /**
+     * Recreates the Listing Object as a message embed.
+     *
+     * @param listing - The listing to create a message embed from.
+     * @param discordDisplayName - The display name of the user who posted the listing.
+     * @return a List of message embeds that make up the listing.
+     */
     @Nonnull
     public List<MessageEmbed> toMessageEmbed(Listing listing, @Nonnull String discordDisplayName) {
         List<MessageEmbed> listingsMessage = new ArrayList<>();

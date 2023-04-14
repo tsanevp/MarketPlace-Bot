@@ -2,8 +2,10 @@ package edu.northeastern.cs5500.starterbot.model;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
 /*
@@ -11,16 +13,18 @@ import org.bson.types.ObjectId;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Listing implements Model {
 
     // MongoDB id
     ObjectId id;
 
     // MessageEmbed id
-    final long messageId;
+    long messageId;
 
     // the userid of the account who created the listing
-    @Nonnull final String discordUserId;
+    @Nonnull String discordUserId;
 
     // title of the listing
     @Nonnull String title;
@@ -33,7 +37,4 @@ public class Listing implements Model {
 
     // additional fields of message
     ListingFields fields;
-
-    // Boolean indicating if listing has been posted
-    Boolean posted;
 }
