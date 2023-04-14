@@ -8,7 +8,6 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,36 +28,40 @@ public class ListingController {
     }
 
     public Listing createListing(
-            @Nonnull List<String> imagesUrl,
             long messageId,
+            @Nonnull String discordUserId,
             @Nonnull String title,
             @Nonnull String url,
-            @Nonnull String discordUserId,
-            ListingFields fields) {
+            @Nonnull List<String> imagesUrl,
+            ListingFields fields,
+            boolean posted) {
 
         ListingBuilder listingBuilder = Listing.builder();
         listingBuilder
-                .images(imagesUrl)
                 .messageId(messageId)
+                .discordUserId(discordUserId)
                 .title(title)
                 .url(url)
-                .discordUserId(discordUserId)
-                .fields(fields);
+                .images(imagesUrl)
+                .fields(fields)
+                .posted(posted);
 
         return listingBuilder.build();
     }
 
     public ListingFields createListingFields(
-            @Nonnegative int cost,
+            @Nonnull List<String> cost,
             boolean shippingIncluded,
             @Nonnull String condition,
-            @Nonnull String description) {
+            @Nonnull String description,
+            @Nonnull String datePosted) {
         ListingFieldsBuilder listingFieldsBuilder = ListingFields.builder();
         listingFieldsBuilder
                 .cost(cost)
                 .description(description)
                 .shippingIncluded(shippingIncluded)
-                .condition(condition);
+                .condition(condition)
+                .datePosted(datePosted);
 
         return listingFieldsBuilder.build();
     }
@@ -90,6 +93,13 @@ public class ListingController {
     public Collection<Listing> getListingsByMemberId(String discordMemberId) {
         return getAllListings().stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
+                .toList();
+    }
+
+    public Collection<Listing> getTempListingByMemberId(String discordMemberId) {
+        return getAllListings().stream()
+                .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
+                // .filter(listing -> listing.getPosted().equals(discordMemberId))
                 .toList();
     }
 }

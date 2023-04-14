@@ -1,6 +1,6 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import javax.annotation.Nonnegative;
+import java.util.List;
 import javax.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Data;
@@ -8,13 +8,12 @@ import lombok.Data;
 /*
  * Represents the additional fields of the listing message
  */
-
 @Data
 @Builder
 public class ListingFields {
 
     // Cost of item
-    @Nonnegative int cost;
+    @Nonnull List<String> cost;
 
     // Whether shipping is included in the cost of item
     boolean shippingIncluded;

@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
 @Slf4j
@@ -41,19 +40,21 @@ public class UpdateLocationCommand implements SlashCommandHandler {
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         log.info("event: updatelocation");
 
-        EmbedBuilder embedBuilder =
+        // Embed with instructions on how to update your location
+        var updateLocationInstructions =
                 new EmbedBuilder()
                         .setDescription(
                                 "To update your State and City, plese select the correct values from the drop-down menus below.")
-                        .setColor(EMBED_COLOR);
+                        .setColor(EMBED_COLOR)
+                        .build();
 
-        // Create the new user Message to send. Includes the built State location selection menus
-        MessageCreateBuilder newMemberIntroMsg =
+        // Message that includes update instructions and location selection menus
+        var updateLocationMessage =
                 location.createStatesMessageBuilder()
                         .mention(event.getUser())
-                        .addEmbeds(embedBuilder.build());
+                        .addEmbeds(updateLocationInstructions)
+                        .build();
 
-        // Send the message to the user
-        event.reply(newMemberIntroMsg.build()).setEphemeral(true).queue();
+        event.reply(updateLocationMessage).setEphemeral(true).queue();
     }
 }

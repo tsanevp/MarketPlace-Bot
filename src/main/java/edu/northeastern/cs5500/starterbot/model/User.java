@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import com.mongodb.DBObject;
 import lombok.Data;
 import org.bson.types.ObjectId;
 
@@ -22,10 +21,4 @@ public class User implements Model {
 
     // The city the user lives in
     String cityOfResidence;
-
-    // This is the current listing in string format
-    String currentListingAsString;
-
-    // This is the current listing in JSON string format
-    DBObject currentListing;
 }

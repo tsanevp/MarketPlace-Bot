@@ -28,12 +28,12 @@ public class Listing implements Model {
     // url of the listing
     @Nonnull String url;
 
-    // description of item listed
-    @Nonnull String description;
-
     // list of images url
     @Nonnull List<String> images;
 
     // additional fields of message
     ListingFields fields;
+
+    // Boolean indicating if listing has been posted
+    Boolean posted;
 }
