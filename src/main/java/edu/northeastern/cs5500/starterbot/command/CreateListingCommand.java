@@ -2,6 +2,7 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,10 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -23,18 +20,17 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
 @Slf4j
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
-    private static final int MAX_NUM_IMAGES = 6;
     private static final String CURRENCY_USED = "USD ";
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject UserController userController;
     @Inject ListingController listingController;
+    @Inject MessageBuilder messageBuilder;
 
     @Inject
     public CreateListingCommand() {
@@ -65,13 +61,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         true)
                 .addOption(
                         OptionType.BOOLEAN,
-                        "shipping_cost_included",
+                        "shipping_included",
                         "Is the price of shipping included in your cost?",
-                        true)
-                .addOption(
-                        OptionType.BOOLEAN,
-                        "will_ship_internationally",
-                        "Are you willing to ship your item internationally?",
                         true)
                 .addOption(
                         OptionType.STRING,
@@ -117,186 +108,153 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        // need to delete after testing
-        userController.setTradingChannel(
-                Objects.requireNonNull(event.getGuild()).getOwnerId(), "trading-channel");
-
         log.info("event: /createlisting");
-        var title = Objects.requireNonNull(event.getOption("title"));
-        var cost = Objects.requireNonNull(event.getOption("item_cost"));
-        var shippingCost = Objects.requireNonNull(event.getOption("shipping_cost_included"));
-        var shipping = Objects.requireNonNull(event.getOption("will_ship_internationally"));
-        var condition = Objects.requireNonNull(event.getOption("condition"));
-        var description = Objects.requireNonNull(event.getOption("description"));
 
-        // Stores the user input as a string to the user object, which is saved in the DB
-        userController.setCurrentListingAsString(event.getUser().getId(), event.getCommandString());
+        var title = Objects.requireNonNull(event.getOption("title")).getAsString();
+        var cost = Objects.requireNonNull(event.getOption("item_cost")).getAsInt();
+        var shippingIncluded =
+                Objects.requireNonNull(event.getOption("shipping_included")).getAsBoolean();
+        var condition = Objects.requireNonNull(event.getOption("condition")).getAsString();
+        var description = Objects.requireNonNull(event.getOption("description")).getAsString();
+        var userId = event.getUser().getId();
+        var discordDisplayName = event.getUser().getName();
 
-        // Build the embed that represents the user's listing
-        List<MessageEmbed> embedBuilderlist =
-                buildListingEmbed(
-                        event, title, cost, shippingCost, shipping, condition, description);
+        // For all images associated with event, store their urls in a list
+        List<String> imageURLs = new ArrayList<>();
+        for (OptionMapping image : event.getOptionsByType(OptionType.ATTACHMENT)) {
+            imageURLs.add(image.getAsAttachment().getUrl());
+        }
 
-        // Temp save embed to mongoDB
-        userController.setCurrentListing(event.getUser().getId(), embedBuilderlist);
+        var datePosted = getDatePosted();
+        var titleReformatted = reformatListingTitle(userId, title);
+        var costValue = reformatCostValue(cost);
+        var url = Objects.requireNonNull(imageURLs.get(0));
 
-        // Create a message builder to add embeds and action buttons user must interact with
-        MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-        messageCreateBuilder =
-                messageCreateBuilder
+        // Create ListingFields Object
+        var listingFields =
+                listingController.createListingFields(
+                        costValue, shippingIncluded, condition, description, datePosted);
+
+        // Create Listing Object
+        var listing =
+                listingController.createListing(
+                        0, userId, titleReformatted, url, imageURLs, listingFields);
+
+        // Temporarily add listing to MongoDB
+        userController.setCurrentListing(userId, listing);
+
+        // Create a confirmation message. User reviews the listing and decides whether to post it
+        var listingConfirmation =
+                new MessageCreateBuilder()
                         .addActionRow(
                                 Button.success(this.getName() + ":ok", "Post"),
                                 Button.primary(this.getName() + ":edit", "Edit"),
                                 Button.danger(this.getName() + ":cancel", "Cancel"))
-                        .setEmbeds(embedBuilderlist);
+                        .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
+                        .build();
 
-        // Responds with Ephemeral message (message visible only to user who called /createlisting)
-        event.reply(messageCreateBuilder.build()).setEphemeral(true).queue();
+        // Send listing confirmation to the user
+        event.reply(listingConfirmation).setEphemeral(true).queue();
     }
 
-    // Method to build the listing embed
+    /**
+     * Method to reformat the Listing title to include the city and state the user is located in.
+     *
+     * @param userId - The userId of the member who posted the listing.
+     * @param title - The original title of the listing.
+     * @return the title of the listing with the city and state added to it.
+     */
     @Nonnull
-    private List<MessageEmbed> buildListingEmbed(
-            SlashCommandInteractionEvent event,
-            @Nonnull OptionMapping title,
-            @Nonnull OptionMapping cost,
-            @Nonnull OptionMapping shippingCost,
-            @Nonnull OptionMapping shipping,
-            @Nonnull OptionMapping condition,
-            @Nonnull OptionMapping description) {
-
-        // Stores the Guild ID to user object, which is saved in the DB - remove soon
-        if (userController.getGuildIdForUser(event.getUser().getId()) == null) {
-            userController.setGuildIdForUser(
-                    event.getUser().getId(), Objects.requireNonNull(event.getGuild()).getId());
-        }
-
-        // Create a List of the image variables
-        ArrayList<OptionMapping> images = new ArrayList<>();
-        for (int i = 1; i < MAX_NUM_IMAGES + 1; i++) {
-            if (event.getOption(Objects.requireNonNull(String.format("image%s", i))) != null) {
-                images.add(event.getOption(Objects.requireNonNull(String.format("image%s", i))));
-            }
-        }
-
-        // Reformat the date & time of when the listing was posted
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
-        LocalDateTime currentdateTime = LocalDateTime.now();
-
-        // Reformat the title to include the location of the user
-        StringBuilder titleReformatted = new StringBuilder(title.getAsString());
-        titleReformatted.insert(
-                0,
+    private String reformatListingTitle(String userId, String title) {
+        return Objects.requireNonNull(
                 String.format(
-                        "[%s, %s]",
-                        userController.getCityOfResidence(event.getUser().getId()),
-                        userController.getStateOfResidence(event.getUser().getId())));
+                        "[%s, %s]%s",
+                        userController.getCityOfResidence(userId),
+                        userController.getStateOfResidence(userId),
+                        title));
+    }
 
-        // Reformat the cost title to include + Shipping if shipping is included in the cost
-        StringBuilder costTitleReformatted = new StringBuilder("Cost:");
-        if ("true".equals(shippingCost.getAsString())) {
-            costTitleReformatted.insert(4, " + Shipping");
-        }
+    /**
+     * Method to get the date and time the listing was posted.
+     *
+     * @return the date and time the listing was posted.
+     */
+    @Nonnull
+    private String getDatePosted() {
+        var dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+        var currentdateTime = LocalDateTime.now();
+        return Objects.requireNonNull(dateTimeFormatter.format(currentdateTime));
+    }
 
+    /**
+     * Method to reformat the cost value to include the currency being used.
+     *
+     * @param cost - The monetary cost of the item being sold.
+     * @param shippingIncluded - A boolean indicating whether shipping costs are included in the
+     *     item's price.
+     * @return a list where the first index is the Cost field name reformatted, and the second is
+     *     the price reformatted.
+     */
+    @Nonnull
+    private String reformatCostValue(int cost) {
         // Reformat the price to include the currency being used
-        StringBuilder costReformatted = new StringBuilder(CURRENCY_USED);
-        costReformatted.append(cost.getAsString());
-
-        // Replace true/false with yes/no when it comes to shipping internationally
-        StringBuilder shipsInternationally = new StringBuilder();
-        if ("true".equals(shipping.getAsString())) {
-            shipsInternationally.append("Yes");
-        } else {
-            shipsInternationally.append("No");
-        }
-
-        // Create the list of MessageEmbeds that gets merged & displayed as one MessageEmbed
-        List<MessageEmbed> embedBuilderlist = new ArrayList<>();
-        for (int i = 0; i < images.size(); i++) {
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            if (i == 0) {
-                embedBuilder
-                        .setColor(EMBED_COLOR)
-                        .addField(
-                                Objects.requireNonNull(costTitleReformatted.toString()),
-                                Objects.requireNonNull(costReformatted.toString()),
-                                true)
-                        .addField(
-                                "Ships International:",
-                                Objects.requireNonNull(shipsInternationally.toString()),
-                                true)
-                        .addField("Condition:", condition.getAsString(), true)
-                        .addField("Description:", description.getAsString(), false)
-                        .addField("Posted By:", event.getUser().getName(), true)
-                        .addField(
-                                "Date Posted:",
-                                Objects.requireNonNull(dateTimeFormatter.format(currentdateTime)),
-                                true);
-            }
-            embedBuilder
-                    .setTitle(titleReformatted.toString(), images.get(0).getAsAttachment().getUrl())
-                    .setImage(images.get(i).getAsAttachment().getUrl());
-            embedBuilderlist.add(embedBuilder.build());
-        }
-        return embedBuilderlist;
+        return Objects.requireNonNull(String.format("%s %s", CURRENCY_USED, cost));
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        User user = event.getUser();
-        Guild guild = Objects.requireNonNull(event.getGuild());
-        TextChannel textChannel =
-                guild.getTextChannelsByName(
-                                Objects.requireNonNull(
-                                        userController.getTradingChannelId(guild.getOwnerId())),
-                                true)
-                        .get(0);
+        var user = event.getUser();
+        var userId = user.getId();
 
         // Remove the buttons so they are no longer clickable
-        MessageEditCallbackAction buttonEvent = event.deferEdit().setComponents();
+        var buttonEvent = event.deferEdit().setComponents();
+        var currentListing = userController.getCurrentListing(userId);
 
         if ("Post".equals(event.getButton().getLabel())) {
-            MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
-
-            // Pulls the listing information from MongoDB and then builds/sets the embed
-            List<MessageEmbed> embedToPost =
-                    Objects.requireNonNull(userController.getCurrentListing(user.getId()));
-            messageCreateBuilder.setEmbeds(embedToPost);
+            var guild = Objects.requireNonNull(event.getGuild());
+            var textChannelId =
+                    Objects.requireNonNull(userController.getTradingChannelId(guild.getOwnerId()));
+            var textChannel = Objects.requireNonNull(guild.getTextChannelById(textChannelId));
+            var embedToPost = messageBuilder.toMessageEmbed(currentListing, user.getName());
+            var embedAsmesMessageCreateData =
+                    new MessageCreateBuilder().setEmbeds(embedToPost).build();
 
             // Send the listing to the "trading-channel"
             textChannel
-                    .sendMessage(messageCreateBuilder.build())
+                    .sendMessage(embedAsmesMessageCreateData)
                     .queue(
-                            (message) -> {
-                                // Store the listing and messageId in the ListingControllerDB
-                                listingController.setListing(
-                                        embedToPost, message.getIdLong(), user.getId());
+                            message -> {
+                                // Set the message id and store the listing in the collection
+                                currentListing.setMessageId(message.getIdLong());
+                                listingController.addListing(currentListing);
                             });
 
-            // Replace the temp embed with a success message
+            // Replace the listing message embed with a success message
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()
                                     .setDescription(
-                                            "Your listing has been posted to the trading-channel!")
+                                            Objects.requireNonNull(
+                                                    String.format(
+                                                            "Your listing has been posted to the following text channel: %s!",
+                                                            textChannel.getName())))
                                     .setColor(EMBED_COLOR)
                                     .build())
                     .queue();
         } else if ("Edit".equals(event.getButton().getLabel())) {
-            // Replace temp embed with instructions on how to edit the listing, must resubmit one
+            // Replace listing embed with instructions on how to create a new one
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()
                                     .setDescription(
                                             String.format(
                                                     "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. %n%n%s",
-                                                    userController.getCurrentListingAsString(
-                                                            user.getId())))
+                                                    createListingCommandAsString(currentListing)))
                                     .setColor(EMBED_COLOR)
                                     .build())
                     .queue();
         } else {
-            // Cancels the /createListing event
+            // Replace listing message embed with cancellation message, delete buttons
             buttonEvent
                     .setEmbeds(
                             new EmbedBuilder()
@@ -306,8 +264,26 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                                     .build())
                     .queue();
         }
-        // Set all the temp embed variables back to null
-        userController.setCurrentListing(user.getId(), null);
-        userController.setCurrentListingAsString(user.getId(), null);
+
+        // Set all the temporary listing back to null. User can only have one at a time
+        userController.setCurrentListing(userId, null);
+    }
+
+    /**
+     * Method to build the /command input the user gave when calling /createlisting.
+     *
+     * @param currentListing - The current listing the user is working on.
+     * @return the command input the user entered as a string.
+     */
+    private String createListingCommandAsString(Listing currentListing) {
+        var fields = currentListing.getFields();
+        var cost = fields.getCost().replace(CURRENCY_USED, "");
+        return String.format(
+                "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
+                currentListing.getTitle(),
+                cost,
+                fields.getShippingIncluded(),
+                fields.getDescription(),
+                fields.getCondition());
     }
 }

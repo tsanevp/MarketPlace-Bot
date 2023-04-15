@@ -1,14 +1,11 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
 import edu.northeastern.cs5500.starterbot.model.Listing;
-import edu.northeastern.cs5500.starterbot.model.Listing.ListingBuilder;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
-import edu.northeastern.cs5500.starterbot.model.ListingFields.ListingFieldsBuilder;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,38 +26,37 @@ public class ListingController {
     }
 
     public Listing createListing(
-            @Nonnull List<String> imagesUrl,
             long messageId,
+            @Nonnull String discordUserId,
             @Nonnull String title,
             @Nonnull String url,
-            @Nonnull String discordUserId,
+            @Nonnull List<String> imagesUrl,
             ListingFields fields) {
 
-        ListingBuilder listingBuilder = Listing.builder();
-        listingBuilder
-                .images(imagesUrl)
+        return Listing.builder()
                 .messageId(messageId)
+                .discordUserId(discordUserId)
                 .title(title)
                 .url(url)
-                .discordUserId(discordUserId)
-                .fields(fields);
-
-        return listingBuilder.build();
+                .images(imagesUrl)
+                .fields(fields)
+                .build();
     }
 
     public ListingFields createListingFields(
-            @Nonnegative int cost,
+            @Nonnull String cost,
             boolean shippingIncluded,
             @Nonnull String condition,
-            @Nonnull String description) {
-        ListingFieldsBuilder listingFieldsBuilder = ListingFields.builder();
-        listingFieldsBuilder
+            @Nonnull String description,
+            @Nonnull String datePosted) {
+
+        return ListingFields.builder()
                 .cost(cost)
                 .description(description)
                 .shippingIncluded(shippingIncluded)
-                .condition(condition);
-
-        return listingFieldsBuilder.build();
+                .condition(condition)
+                .datePosted(datePosted)
+                .build();
     }
 
     public void deleteListingsForUser(String discordMemberId) {
