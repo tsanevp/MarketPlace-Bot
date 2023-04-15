@@ -3,7 +3,6 @@ package edu.northeastern.cs5500.starterbot.command;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,8 +39,10 @@ public class MessageBuilder {
                         .setTitle(listing.getTitle(), listing.getUrl())
                         .setImage(listing.getImages().get(0))
                         .addField(
-                                Objects.requireNonNull(fields.getCost().get(0)),
-                                Objects.requireNonNull(fields.getCost().get(1)),
+                                Boolean.TRUE.equals(fields.getShippingIncluded())
+                                        ? "Cost + Shipping:"
+                                        : "Cost:",
+                                fields.getCost(),
                                 true)
                         .addField("Condition:", fields.getCondition(), true)
                         .addField("Description:", fields.getDescription(), false)

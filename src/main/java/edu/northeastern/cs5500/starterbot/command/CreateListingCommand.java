@@ -6,7 +6,6 @@ import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -128,13 +127,13 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         var datePosted = getDatePosted();
         var titleReformatted = reformatListingTitle(userId, title);
-        var costTitleAndPrice = getCostTitleAndPrice(cost, shippingIncluded);
+        var costValue = reformatCostValue(cost);
         var url = Objects.requireNonNull(imageURLs.get(0));
 
         // Create ListingFields Object
         var listingFields =
                 listingController.createListingFields(
-                        costTitleAndPrice, shippingIncluded, condition, description, datePosted);
+                        costValue, shippingIncluded, condition, description, datePosted);
 
         // Create Listing Object
         var listing =
@@ -188,8 +187,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     }
 
     /**
-     * Method to add whether shipping is included in the price and to add the currency being used
-     * for this listing. Both values are added to a list and the list is returned.
+     * Method to reformat the cost value to include the currency being used.
      *
      * @param cost - The monetary cost of the item being sold.
      * @param shippingIncluded - A boolean indicating whether shipping costs are included in the
@@ -198,18 +196,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *     the price reformatted.
      */
     @Nonnull
-    private List<String> getCostTitleAndPrice(int cost, boolean shippingIncluded) {
-        // Reformat the cost title to include + Shipping if shipping is included in the cost
-        var costTitleReformatted = new StringBuilder("Cost:");
-        if (Boolean.TRUE.equals(shippingIncluded)) {
-            costTitleReformatted.insert(4, " + Shipping");
-        }
-
+    private String reformatCostValue(int cost) {
         // Reformat the price to include the currency being used
-        var costReformatted = Objects.requireNonNull(String.format("%s %s", CURRENCY_USED, cost));
-
-        return Objects.requireNonNull(
-                Arrays.asList(costTitleReformatted.toString(), costReformatted));
+        return Objects.requireNonNull(String.format("%s %s", CURRENCY_USED, cost));
     }
 
     @Override
@@ -288,7 +277,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     private String createListingCommandAsString(Listing currentListing) {
         var fields = currentListing.getFields();
-        var cost = fields.getCost().get(1).replace(CURRENCY_USED, "");
+        var cost = fields.getCost().replace(CURRENCY_USED, "");
         return String.format(
                 "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
                 currentListing.getTitle(),

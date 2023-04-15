@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class UserController {
     GenericRepository<User> userRepository;
 

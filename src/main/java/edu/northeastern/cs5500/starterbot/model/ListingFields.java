@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import java.util.List;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ListingFields {
 
     // Cost of item
-    @Nonnull List<String> cost;
+    @Nonnull String cost;
 
     // Whether shipping is included in the cost of item
     Boolean shippingIncluded;

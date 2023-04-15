@@ -44,7 +44,7 @@ public class ListingController {
     }
 
     public ListingFields createListingFields(
-            @Nonnull List<String> cost,
+            @Nonnull String cost,
             boolean shippingIncluded,
             @Nonnull String condition,
             @Nonnull String description,
