@@ -73,6 +73,8 @@ application {
 
 // Enable jacoco coverage
 apply plugin: 'jacoco'
+// apply plugin: 'org.sonarqube' version '3.3'
+
 
 test {
     // Use junit platform for unit tests
@@ -88,14 +90,27 @@ jacocoTestReport {
     reports {
         xml.enabled true
         // Change html.enabled to true if you want html reports
-        html.enabled false
+        html.enabled true
         csv.enabled false
         xml.destination file("${buildDir}/reports/jacoco.xml")
+        html.destination file("${buildDir}/reports/jacoco.html")
+
     }
 }
 
 // Check coverage after each test run
 check.dependsOn jacocoTestCoverageVerification
+
+// Add coverage rules
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.30
+            }
+        }
+    }
+}
 
 // Target Java 17 - make sure system.properties matches this as well
 sourceCompatibility = 1.17
