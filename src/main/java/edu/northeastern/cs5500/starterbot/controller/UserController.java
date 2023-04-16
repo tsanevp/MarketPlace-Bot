@@ -162,4 +162,15 @@ public class UserController {
         userRepository.add(user);
         return user;
     }
+
+    @Nonnull
+    public void removeUserByMemberAndGuildId(String discordMemberId, String guildId) {
+        Collection<User> users = userRepository.getAll();
+        for (User currentUser : users) {
+            if (currentUser.getDiscordUserId().equals(discordMemberId)
+                    && currentUser.getGuildId().equals(guildId)) {
+                userRepository.delete(currentUser.getId());
+            }
+        }
+    }
 }
