@@ -170,6 +170,7 @@ public class UserController {
             if (currentUser.getDiscordUserId().equals(discordMemberId)
                     && currentUser.getGuildId().equals(guildId)) {
                 userRepository.delete(currentUser.getId());
+                break;
             }
         }
     }
