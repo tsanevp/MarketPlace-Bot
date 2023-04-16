@@ -4,8 +4,6 @@ import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.States;
-import lombok.var;
-
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -13,7 +11,6 @@ import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu.Builder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 public class Location implements StringSelectHandler {
