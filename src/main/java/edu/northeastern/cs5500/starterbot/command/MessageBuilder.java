@@ -1,6 +1,8 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import lombok.var;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -53,7 +55,7 @@ public class MessageBuilder {
         listingsMessage.add(parentEmbed);
 
         // Create child embeds that "append" additional images to parent embed
-        boolean isFirstImage = true;
+        var isFirstImage = true;
         for (String imageUrl : listing.getImages()) {
             if (isFirstImage) {
                 isFirstImage = false;

@@ -149,9 +149,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var listingConfirmation =
                 new MessageCreateBuilder()
                         .addActionRow(
-                                Button.success(this.getName() + ":ok", "Post"),
-                                Button.primary(this.getName() + ":edit", "Edit"),
-                                Button.danger(this.getName() + ":cancel", "Cancel"))
+                                Button.success(getName() + ":ok", "Post"),
+                                Button.primary(getName() + ":edit", "Edit"),
+                                Button.danger(getName() + ":cancel", "Cancel"))
                         .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
                         .build();
 

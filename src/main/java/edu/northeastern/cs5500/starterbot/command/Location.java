@@ -4,6 +4,8 @@ import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.States;
+import lombok.var;
+
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -67,7 +69,7 @@ public class Location implements StringSelectHandler {
             var stateAbbreviation = States.valueOfName(selectedCityOrState).getAbbreviation();
 
             userController.setStateOfResidence(userId, stateAbbreviation);
-            MessageCreateBuilder messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
+            var messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
             event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
         }
     }
@@ -79,16 +81,16 @@ public class Location implements StringSelectHandler {
      * @return MessageCreateBuilder that has each StringSelectMenu as an action row
      */
     public MessageCreateBuilder createStatesMessageBuilder() {
-        Builder statesFirstHalf =
-                StringSelectMenu.create(this.getName() + ":stateselect1")
+        var statesFirstHalf =
+                StringSelectMenu.create(getName() + ":stateselect1")
                         .setPlaceholder("Select what State you live in (1-25):");
-        Builder statesSecondHalf =
-                StringSelectMenu.create(this.getName() + ":stateselect2")
+        var statesSecondHalf =
+                StringSelectMenu.create(getName() + ":stateselect2")
                         .setPlaceholder("Select what State you live in (26-50):");
-        int count = 1;
+        var count = 1;
         for (States state : States.values()) {
             if (!state.equals(States.UNKNOWN)) {
-                String stateName = Objects.requireNonNull(state.name());
+                var stateName = Objects.requireNonNull(state.name());
                 if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);
                 } else {
@@ -112,8 +114,8 @@ public class Location implements StringSelectHandler {
     private MessageCreateBuilder createCityMessageBuilder(String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
-        Builder menu =
-                StringSelectMenu.create(this.getName() + ":cities")
+        var menu =
+                StringSelectMenu.create(getName() + ":cities")
                         .setPlaceholder("Select The City You Live In");
         for (String city : cities) {
             Objects.requireNonNull(city);
