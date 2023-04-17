@@ -70,4 +70,9 @@ public class CommandModule {
             UpdateLocationCommand updateLocationCommand) {
         return updateLocationCommand;
     }
+
+    @Provides
+    public RemoveMemberHandler provideRemoveMember(RemoveMember removeMember) {
+        return removeMember;
+    }
 }
