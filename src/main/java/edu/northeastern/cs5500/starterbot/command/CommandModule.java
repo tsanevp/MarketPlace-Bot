@@ -45,6 +45,13 @@ public class CommandModule {
 
     @Provides
     @IntoSet
+    public SlashCommandHandler provideCreateTradingChannelCommand(
+            CreateTradingChannelCommand createTradingChannelCommand) {
+        return createTradingChannelCommand;
+    }
+
+    @Provides
+    @IntoSet
     public SlashCommandHandler provideViewMyListingCommand(
             ViewMyListingCommand viewMyListingCommand) {
         return viewMyListingCommand;
