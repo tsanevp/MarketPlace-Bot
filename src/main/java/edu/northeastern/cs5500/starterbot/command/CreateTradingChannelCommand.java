@@ -59,8 +59,6 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
 
         // Verify that the given name for the new trading channel does not already exist
         for (GuildChannel guildChannel : guild.getTextChannels()) {
-            log.info(guildChannel.getName());
-
             if (title.equals(guildChannel.getName())) {
                 event.reply(
                                 Objects.requireNonNull(
