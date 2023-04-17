@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 public class CreateTradingChannelCommand implements SlashCommandHandler {
 
     @Inject CreateTradingChannel createTradingChannel;
-    @Inject MessageBuilder messageBuilder;
 
     @Inject
     public CreateTradingChannelCommand() {
