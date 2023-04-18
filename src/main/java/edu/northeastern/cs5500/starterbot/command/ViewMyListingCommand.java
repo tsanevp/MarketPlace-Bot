@@ -91,18 +91,38 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                 .queue();
     }
 
+    /**
+     * Deletes listing in discord and in MongodDB
+     *
+     * @param channel - The channel where the message is stored.
+     * @param objectid - The objectid of the listing in the database.
+     * @param messageId - The messageId of the listing in the channel.
+     */
     private void deleteListingMessages(
-            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String buttonIds) {
+            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId) {
         listingController.deleteListingById(objectid);
-        channel.deleteMessageById(buttonIds).queue();
+        channel.deleteMessageById(messageId).queue();
     }
 
+    /**
+     * Sends the listing messages to user's DM
+     *
+     * @param user - The user who intiated the command.
+     * @param listingsMessages - The user's listings in message format.
+     */
     private void sendListingsMessageToUser(User user, List<MessageCreateBuilder> listingsMessages) {
         for (MessageCreateBuilder message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message.build());
         }
     }
 
+    /**
+     * Retrieves all listings in message format from the user.
+     *
+     * @param discordUserId - The user's id in discord.
+     * @param discordDisplayName - The user's display name in discord.
+     * @return List<MessageCreateBuilder>
+     */
     private List<MessageCreateBuilder> getListingsMessages(
             String discordUserId, @Nonnull String discordDisplayName) {
         var listing = listingController.getListingsByMemberId(discordUserId);
@@ -111,14 +131,14 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
             return messages;
         }
         for (Listing list : listing) {
-            var buttonId =
-                    Objects.requireNonNull(
-                            String.format(
-                                    "%s:%s:%X:delete",
-                                    getName(), list.getMessageId(), list.getId()));
             var messageCreateBuilder =
                     new MessageCreateBuilder()
-                            .addActionRow(Button.danger(buttonId, "Delete"))
+                            .addActionRow(
+                                    Button.danger(
+                                            String.format(
+                                                    "%s:%s:%s:delete",
+                                                    getName(), list.getMessageId(), list.getId()),
+                                            "Delete"))
                             .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
             messages.add(messageCreateBuilder);
         }
