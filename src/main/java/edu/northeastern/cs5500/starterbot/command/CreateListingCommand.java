@@ -1,5 +1,7 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
@@ -147,9 +149,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var listingConfirmation =
                 new MessageCreateBuilder()
                         .addActionRow(
-                                Button.success(this.getName() + ":ok", "Post"),
-                                Button.primary(this.getName() + ":edit", "Edit"),
-                                Button.danger(this.getName() + ":cancel", "Cancel"))
+                                Button.success(getName() + ":ok", "Post"),
+                                Button.primary(getName() + ":edit", "Edit"),
+                                Button.danger(getName() + ":cancel", "Cancel"))
                         .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
                         .build();
 
@@ -278,9 +280,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     private String createListingCommandAsString(Listing currentListing) {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
+        var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
         return String.format(
                 "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
-                currentListing.getTitle(),
+                titleStateCityRemoved,
                 cost,
                 fields.getShippingIncluded(),
                 fields.getDescription(),

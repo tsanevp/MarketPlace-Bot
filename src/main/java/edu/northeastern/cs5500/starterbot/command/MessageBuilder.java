@@ -53,7 +53,7 @@ public class MessageBuilder {
         listingsMessage.add(parentEmbed);
 
         // Create child embeds that "append" additional images to parent embed
-        boolean isFirstImage = true;
+        var isFirstImage = true;
         for (String imageUrl : listing.getImages()) {
             if (isFirstImage) {
                 isFirstImage = false;

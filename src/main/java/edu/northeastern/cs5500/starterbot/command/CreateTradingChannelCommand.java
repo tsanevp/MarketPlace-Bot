@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
