@@ -19,6 +19,8 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import okhttp3.internal.ws.RealWebSocket.Message;
+
 import org.bson.types.ObjectId;
 
 @Singleton
@@ -109,14 +111,11 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
             return messages;
         }
         for (Listing list : listing) {
-            var buttonId =
-                    Objects.requireNonNull(
-                            String.format(
-                                    "%s:%s:%X:delete",
-                                    getName(), list.getMessageId(), list.getId()));
-            var messageCreateBuilder =
+                var messageCreateBuilder =
                     new MessageCreateBuilder()
-                            .addActionRow(Button.danger(buttonId, "Delete"))
+                            .addActionRow(Button.danger(String.format(
+                                    "%s:%s:%s:delete",
+                                    getName(), list.getMessageId(), list.getId()), "Delete"))
                             .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
             messages.add(messageCreateBuilder);
         }
