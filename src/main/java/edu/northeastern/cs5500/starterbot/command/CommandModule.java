@@ -6,6 +6,7 @@ import dagger.multibindings.IntoSet;
 import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.NewMemberHandler;
+import edu.northeastern.cs5500.starterbot.command.handlers.RemoveMemberHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
 

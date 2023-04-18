@@ -163,15 +163,30 @@ public class UserController {
         return user;
     }
 
-    @Nonnull
+    /**
+     * Removes the user associated with the discordMemberId and guildId passed from the user
+     * collection.
+     *
+     * @param discordMemberId - The discord user to remove from the collection.
+     * @param guildId - The guild id of guiid the user was removed or left from.
+     */
     public void removeUserByMemberAndGuildId(String discordMemberId, String guildId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
             if (currentUser.getDiscordUserId().equals(discordMemberId)
                     && currentUser.getGuildId().equals(guildId)) {
-                userRepository.delete(currentUser.getId());
-                break;
+                userRepository.delete(Objects.requireNonNull(currentUser.getId()));
+                return;
             }
         }
+    }
+
+    /**
+     * Method to get the size of the user collection. Used mainly for test purposes.
+     *
+     * @return the size of the user collection.
+     */
+    public long getSizeUserCollection() {
+        return userRepository.count();
     }
 }

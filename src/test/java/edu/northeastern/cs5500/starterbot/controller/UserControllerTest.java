@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 public class UserControllerTest {
 
     static final String DISCORD_ID_1 = "testUser1";
+    static final String DISCORD_ID_2 = "testUser2";
     static final String GUILD_ID_1 = "987654321";
+    static final String GUILD_ID_2 = "123456789";
     static final String TRADING_CHANNEL_ID_1 = "trading-channel";
     static final String STATE_OF_RESIDENCE_1 = "WA";
     static final String CITY_OF_RESIDENCE_1 = "Seattle";
@@ -113,5 +115,59 @@ public class UserControllerTest {
         // Check we can set the listing back to null
         userController.setCurrentListing(DISCORD_ID_1, null);
         assertThat(userController.getCurrentListing(DISCORD_ID_1)).isNull();
+    }
+
+    @Test
+    void testGetUserForMemberIdCreatesAndReturnsANewUserCorrectly() {
+        // First check user collection is empty to start
+        assertThat(userController.getSizeUserCollection()).isEqualTo(0);
+
+        // Create and add a new user to the collection
+        var testUser1 = userController.getUserForMemberId(DISCORD_ID_1);
+
+        // Check that passing the same discord id returns the same user
+        var userIdTestUser1 = testUser1.getDiscordUserId();
+        assertThat(userController.getUserForMemberId(userIdTestUser1)).isEqualTo(testUser1);
+
+        // Makes sure that when a different id is passed a different user is returned
+        assertThat(userController.getUserForMemberId(GUILD_ID_2)).isNotEqualTo(testUser1);
+    }
+
+    @Test
+    void testRemoveUserByMemberAndGuildIdRemovesUserCorrectly() {
+        // First check user collection is empty to start
+        assertThat(userController.getSizeUserCollection()).isEqualTo(0);
+
+        // Create and add a new user to the collection
+        var testUser1 = userController.getUserForMemberId(DISCORD_ID_1);
+        userController.setGuildIdForUser(testUser1.getDiscordUserId(), GUILD_ID_1);
+
+        // Check that size of collection increased to 1
+        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
+
+        // Remove the user and check if collection reduced size back to 0
+        userController.removeUserByMemberAndGuildId(DISCORD_ID_1, GUILD_ID_1);
+        assertThat(userController.getSizeUserCollection()).isEqualTo(0);
+    }
+
+    @Test
+    void testRemoveUserByMemberAndGuildIdDoesNotRemoveIfPassedBadValues() {
+        // First check user collection is empty to start
+        assertThat(userController.getSizeUserCollection()).isEqualTo(0);
+
+        // Create and add a new user to the collection
+        var testUser1 = userController.getUserForMemberId(DISCORD_ID_1);
+        userController.setGuildIdForUser(testUser1.getDiscordUserId(), GUILD_ID_1);
+
+        // Check that size of collection increased to 1
+        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
+
+        // Passed different guild id than the one used to create the user
+        userController.removeUserByMemberAndGuildId(DISCORD_ID_1, GUILD_ID_2);
+        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
+
+        // Passed different user id than one used to create the user
+        userController.removeUserByMemberAndGuildId(DISCORD_ID_2, GUILD_ID_1);
+        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
     }
 }
