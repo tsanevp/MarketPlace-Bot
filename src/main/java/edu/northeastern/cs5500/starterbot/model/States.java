@@ -96,7 +96,7 @@ public enum States {
      * @return the state's abbreviation.
      */
     public String getAbbreviation() {
-        return this.abbreviation;
+        return abbreviation;
     }
 
     /**
@@ -105,7 +105,7 @@ public enum States {
      * @return the state's state code.
      */
     public String getStateCode() {
-        return this.stateCode;
+        return stateCode;
     }
 
     /**
@@ -145,6 +145,6 @@ public enum States {
      */
     @Override
     public String toString() {
-        return this.name;
+        return name;
     }
 }
