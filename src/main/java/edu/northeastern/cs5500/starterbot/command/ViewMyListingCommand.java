@@ -19,8 +19,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import okhttp3.internal.ws.RealWebSocket.Message;
-
 import org.bson.types.ObjectId;
 
 @Singleton
@@ -91,18 +89,38 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                 .queue();
     }
 
+    /**
+     * Deletes listing in discord and in MongodDB
+     *
+     * @param channel - The channel where the message is stored.
+     * @param objectid - The objectid of the listing in the database.
+     * @param messageId - The messageId of the listing in the channel.
+     */
     private void deleteListingMessages(
-            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String buttonIds) {
+            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId) {
         listingController.deleteListingById(objectid);
-        channel.deleteMessageById(buttonIds).queue();
+        channel.deleteMessageById(messageId).queue();
     }
 
+    /**
+     * Sends the listing messages to user's DM
+     *
+     * @param user - The user who intiated the command.
+     * @param listingsMessages - The user's listings in message format.
+     */
     private void sendListingsMessageToUser(User user, List<MessageCreateBuilder> listingsMessages) {
         for (MessageCreateBuilder message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message.build());
         }
     }
 
+    /**
+     * Retrieves all listings in message format from the user.
+     *
+     * @param discordUserId - The user's id in discord.
+     * @param discordDisplayName - The user's display name in discord.
+     * @return List<MessageCreateBuilder>
+     */
     private List<MessageCreateBuilder> getListingsMessages(
             String discordUserId, @Nonnull String discordDisplayName) {
         var listing = listingController.getListingsByMemberId(discordUserId);
@@ -111,11 +129,14 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
             return messages;
         }
         for (Listing list : listing) {
-                var messageCreateBuilder =
+            var messageCreateBuilder =
                     new MessageCreateBuilder()
-                            .addActionRow(Button.danger(String.format(
-                                    "%s:%s:%s:delete",
-                                    getName(), list.getMessageId(), list.getId()), "Delete"))
+                            .addActionRow(
+                                    Button.danger(
+                                            String.format(
+                                                    "%s:%s:%s:delete",
+                                                    getName(), list.getMessageId(), list.getId()),
+                                            "Delete"))
                             .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
             messages.add(messageCreateBuilder);
         }

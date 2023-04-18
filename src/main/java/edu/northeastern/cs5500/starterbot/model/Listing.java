@@ -23,18 +23,18 @@ public class Listing implements Model {
     // MessageEmbed id
     long messageId;
 
-    // the userid of the account who created the listing
+    // The userid of the account who created the listing
     @Nonnull String discordUserId;
 
-    // title of the listing
+    // Title of the listing
     @Nonnull String title;
 
-    // url of the listing
+    // Url of the listing
     @Nonnull String url;
 
-    // list of images url
+    // List of images url
     @Nonnull List<String> images;
 
-    // additional fields of message
+    // Additional fields of message
     ListingFields fields;
 }
