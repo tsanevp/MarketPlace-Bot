@@ -280,9 +280,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     private String createListingCommandAsString(Listing currentListing) {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
+        var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
         return String.format(
                 "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
-                currentListing.getTitle(),
+                titleStateCityRemoved,
                 cost,
                 fields.getShippingIncluded(),
                 fields.getDescription(),
