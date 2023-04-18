@@ -50,6 +50,13 @@ public class CommandModule {
 
     @Provides
     @IntoSet
+    public SlashCommandHandler provideCreateTradingChannelCommand(
+            CreateTradingChannelCommand createTradingChannelCommand) {
+        return createTradingChannelCommand;
+    }
+
+    @Provides
+    @IntoSet
     public SlashCommandHandler provideViewMyListingCommand(
             ViewMyListingCommand viewMyListingCommand) {
         return viewMyListingCommand;
@@ -67,5 +74,10 @@ public class CommandModule {
     public SlashCommandHandler provideUpdateLocationCommand(
             UpdateLocationCommand updateLocationCommand) {
         return updateLocationCommand;
+    }
+
+    @Provides
+    public RemoveMemberHandler provideRemoveMember(RemoveMember removeMember) {
+        return removeMember;
     }
 }

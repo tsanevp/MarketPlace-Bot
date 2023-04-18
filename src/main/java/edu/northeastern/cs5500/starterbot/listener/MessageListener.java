@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -29,6 +30,7 @@ public class MessageListener extends ListenerAdapter {
     @Inject Set<StringSelectHandler> stringSelects;
     @Inject NewMemberHandler newMemberEvent;
     @Inject NewGuildJoinedHandler newGuildJoined;
+    @Inject RemoveMemberHandler removeMember;
 
     @Inject
     public MessageListener() {
@@ -98,5 +100,10 @@ public class MessageListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         newGuildJoined.onGuildJoin(event);
+    }
+
+    @Override
+    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        removeMember.onGuildMemberRemove(event);
     }
 }
