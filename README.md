@@ -1,12 +1,12 @@
 ## Discord MarketPlace Bot
 ### Backgound & Purpose
-In Foundations of Software Engineering, we were assigned the project of creating a Discord Chat Bot that serves some purpose. After conducting research and discussion, we identified a need for a bot to facilitate items' trading, buying, and selling. Our bot will specifically target keyboard trading servers, computer part trading servers, and tech device trading servers. As a result, we have decided to create a Marketplace Discord Bot that can be deployed to any of these targeted groups, allowing users to come together and conduct business safely and conveniently within their respective communities. 
+In Foundations of Software Engineering, we were assigned the project of creating a Discord Chat Bot that serves some purpose. After conducting research and discussion, we identified a need for a bot to facilitate items' trading, buying, and selling. Our bot will specifically target keyboard trading servers, computer part trading servers, and tech device trading servers. As a result, we have decided to create a Marketplace Discord Bot that can be deployed to any of these targeted groups, allowing users to come together and conduct business safely and conveniently within their respective communities.
 
 ### The Issue
 // need to talk about the current issue and how since our bot does not yet exist in servers, users post thread/like listings that are all in different formats, hard to read, may exclude important info, might include too much info, etc
 
 ### Our Bot
-As mentioned in the previous section, our MarketPlace Bot targets servers where users wish to buy & sell keyboard and computer parts. What makes our bot unique and special is that it is one of the few bots like it. That being said, our group did not have examples to based our work on, and it is completely our own envisionment of what a Discord trading bot should and should not entail. 
+As mentioned in the previous section, our MarketPlace Bot targets servers where users wish to buy & sell keyboard and computer parts. What makes our bot unique and special is that it is one of the few bots like it. That being said, our group did not have examples to based our work on, and it is completely our own envisionment of what a Discord trading bot should and should not entail.
 
 Our bot allows users to create listings of the items they wish to sell. Specifically, the bot formats the information the user provides the same for each post they make. This so reviewing what's being sold is now
 
@@ -28,7 +28,7 @@ Use the following invite link to join our Production Discord server: [Invite Lin
 #### Adding The Bot To A Server
 Use the following invite link to add the bot to a server: [Bot Invite Link](https://discord.com/api/oauth2/authorize?client_id=1093746738361270373&permissions=8&scope=bot)
 
-Upon adding the bot to a server, two things immdediately occur. First, the server owner will receive the following DM from the bot: 
+Upon adding the bot to a server, two things immdediately occur. First, the server owner will receive the following DM from the bot:
 
 ![Screenshot (50)](https://user-images.githubusercontent.com/78775944/232926423-d039fda7-286d-4cd2-b9b9-d978e2218a4b.png)
 
