@@ -6,7 +6,6 @@ import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -135,16 +134,18 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var url = Objects.requireNonNull(imageURLs.get(0));
 
         // Create ListingFields Object
-        var listingFields = ListingFields.builder()
-                                .cost(costValue)
-                                .shippingIncluded(shippingIncluded)
-                                .condition(condition)
-                                .description(description)
-                                .datePosted(datePosted)
-                                .build();
+        var listingFields =
+                ListingFields.builder()
+                        .cost(costValue)
+                        .shippingIncluded(shippingIncluded)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
 
         // Create Listing Object
-        var listing = Listing.builder()
+        var listing =
+                Listing.builder()
                         .messageId(0)
                         .discordUserId(userId)
                         .title(titleReformatted)

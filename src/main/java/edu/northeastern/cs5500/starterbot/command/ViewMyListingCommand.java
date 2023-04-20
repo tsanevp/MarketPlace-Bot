@@ -61,7 +61,6 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
         var guildId = event.getGuild().getId();
-        var guild = guildController.getGuildByGuildId(guildId);
         var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guildId);
 
         if (listingsMessages.isEmpty()) {
@@ -95,8 +94,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                 .queue();
     }
 
-
-
+    // TODO: Refactor the delete listings to Alex's suggestions.
     /**
      * Deletes listing in discord and in MongodDB
      *
@@ -105,7 +103,12 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param messageId - The messageId of the listing in the channel.
      */
     private void deleteListingMessages(
-            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId, String guildId, @Nonnull String discordMemberId) {
+            MessageChannel channel,
+            @Nonnull ObjectId objectid,
+            @Nonnull String messageId,
+            String guildId,
+            @Nonnull String discordMemberId) {
+        // TODO: check if user is in guild, and add an error if not
         listingController.deleteListingById(objectid, discordMemberId, guildId);
         channel.deleteMessageById(messageId).queue();
     }
@@ -137,11 +140,15 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
             return messages;
         }
         for (Listing list : listing) {
-            var button = Button.danger(
-                String.format(
-                        "%s:%s:%s:%s:delete",
-                        getName(), list.getId(), list.getMessageId(), list.getGuildId()),
-                "Delete");
+            var button =
+                    Button.danger(
+                            String.format(
+                                    "%s:%s:%s:%s:delete",
+                                    getName(),
+                                    list.getId(),
+                                    list.getMessageId(),
+                                    list.getGuildId()),
+                            "Delete");
             var messageCreateBuilder =
                     new MessageCreateBuilder()
                             .addActionRow(button)
