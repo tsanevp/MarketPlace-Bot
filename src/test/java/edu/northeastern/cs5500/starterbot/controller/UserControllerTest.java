@@ -2,6 +2,8 @@ package edu.northeastern.cs5500.starterbot.controller;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import edu.northeastern.cs5500.starterbot.model.Listing;
+import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,8 +90,13 @@ public class UserControllerTest {
 
         // Create ListingFields object
         var listingFields =
-                listingController.createListingFields(
-                        cost, shippingIncluded, condition, description, datePosted);
+                ListingFields.builder()
+                        .cost(cost)
+                        .shippingIncluded(shippingIncluded)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
 
         // Define Listing parameters
         var title = "test title";
@@ -99,8 +106,14 @@ public class UserControllerTest {
 
         // Create Listing object
         var listing =
-                listingController.createListing(
-                        0, DISCORD_ID_1, title, url, imageUrl, listingFields);
+                Listing.builder()
+                        .messageId(0)
+                        .discordUserId(DISCORD_ID_1)
+                        .title(title)
+                        .url(url)
+                        .images(imageUrl)
+                        .fields(listingFields)
+                        .build();
 
         // Check to see if listing is initially null
         assertThat(userController.getCurrentListing(DISCORD_ID_1)).isNull();

@@ -26,15 +26,15 @@ public class GuildControllerTest {
 
         // Define guild id and create new guild object
         var guildId1 = "12345";
-        var guild1 = guildController.getGuildForId(guildId1);
+        var guild1 = guildController.getGuildByGuildId(guildId1);
 
         // Check guild collection size is now 1 and get for guild by id works
         assertThat(guildController.getSizeGuildCollection()).isEqualTo(1);
-        assertThat(guild1).isEqualTo(guildController.getGuildForId(guildId1));
+        assertThat(guild1).isEqualTo(guildController.getGuildByGuildId(guildId1));
 
         // Make sure passing different guildId does not return what we expect
         var guildId2 = "54321";
-        assertThat(guildController.getGuildForId(guildId2)).isNotEqualTo(guild1);
+        assertThat(guildController.getGuildByGuildId(guildId2)).isNotEqualTo(guild1);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class GuildControllerTest {
         guildController.setTradingChannelId(guildId, tradingChannelId);
 
         // Get guild
-        var guild = guildController.getGuildForId(guildId);
+        var guild = guildController.getGuildByGuildId(guildId);
 
         // Check to see if size increased to 1
         assertThat(guild.getTradingChannelId()).isNotNull();
@@ -67,7 +67,7 @@ public class GuildControllerTest {
         var userToAdd = "testUser1";
 
         // Create a new guild object
-        var guild = guildController.getGuildForId(guildId);
+        var guild = guildController.getGuildByGuildId(guildId);
 
         // Check that List of users is empty when the guild is first created
         assertThat(guild.getUsersOnServer()).isNotNull();
