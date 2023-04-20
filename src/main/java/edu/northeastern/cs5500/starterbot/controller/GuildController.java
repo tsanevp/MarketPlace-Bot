@@ -57,7 +57,7 @@ public class GuildController {
      * @param guildId - The id of the guild that the user is in.
      * @returns Whether the user was successfully removed from the guild.
      */
-    public boolean removeUserToServer(@NonNull String discordMemberId, @NonNull String guildId) {
+    public boolean removeUserInServer(@NonNull String discordMemberId, @NonNull String guildId) {
         List<String> guildUsers = getGuildByGuildId(guildId).getUsersOnServer();
         return guildUsers.remove(discordMemberId);
     }
