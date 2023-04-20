@@ -186,7 +186,7 @@ public class UserController {
      *
      * @return the size of the user collection.
      */
-    public long getSizeUserCollection() {
+    long getSizeUserCollection() {
         return userRepository.count();
     }
 }
