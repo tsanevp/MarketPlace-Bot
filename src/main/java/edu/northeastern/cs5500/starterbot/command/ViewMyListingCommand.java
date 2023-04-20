@@ -5,11 +5,9 @@ import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
-import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,8 +61,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
         var guildId = event.getGuild().getId();
-        var guild = guildController.getGuildForId(guildId);
-        var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guild);
+        var guild = guildController.getGuildByGuildId(guildId);
+        var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guildId);
 
         if (listingsMessages.isEmpty()) {
             event.reply("No postings available").setEphemeral(true).complete();
@@ -83,10 +81,10 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var objectId = new ObjectId(buttonIds[1]);
         var messageId = buttonIds[2];
         var guildId = buttonIds[3];
-        var guild = guildController.getGuildForId(guildId);
+        var guild = guildController.getGuildByGuildId(guildId);
 
-        MessageChannel channel = jda.getGuildById(guildId).getTextChannelById(guild.getTradingChannelId());
-        deleteListingMessages(channel, objectId, messageId, guild, userId);
+        var channel = jda.getGuildById(guildId).getTextChannelById(guild.getTradingChannelId());
+        deleteListingMessages(channel, objectId, messageId, guildId, userId);
 
         buttonEvent
                 .setEmbeds(
@@ -107,8 +105,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param messageId - The messageId of the listing in the channel.
      */
     private void deleteListingMessages(
-            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId, Guild guild, String discordMemberId) {
-        listingController.deleteListingById(objectid, discordMemberId, guild);
+            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId, String guildId, @Nonnull String discordMemberId) {
+        listingController.deleteListingById(objectid, discordMemberId, guildId);
         channel.deleteMessageById(messageId).queue();
     }
 
@@ -132,8 +130,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return List<MessageCreateBuilder>
      */
     private List<MessageCreateBuilder> getListingsMessages(
-            String discordUserId, @Nonnull String discordDisplayName, Guild guild) {
-        var listing = listingController.getListingsByMemberId(discordUserId, guild);
+            String discordUserId, @Nonnull String discordDisplayName, String guildId) {
+        var listing = listingController.getListingsByMemberId(discordUserId, guildId);
         List<MessageCreateBuilder> messages = new ArrayList<>();
         if (listing.isEmpty()) {
             return messages;
@@ -142,7 +140,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
             var button = Button.danger(
                 String.format(
                         "%s:%s:%s:%s:delete",
-                        getName(), list.getId(), list.getMessageId(), list.getGuild()),
+                        getName(), list.getId(), list.getMessageId(), list.getGuildId()),
                 "Delete");
             var messageCreateBuilder =
                     new MessageCreateBuilder()

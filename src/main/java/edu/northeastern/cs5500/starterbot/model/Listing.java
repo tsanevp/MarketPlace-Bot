@@ -36,7 +36,7 @@ public class Listing implements Model {
     @Nonnull List<String> images;
 
     // The guild that the listing is contained in
-    Guild guild;
+    @Nonnull String guildId;
 
     // Additional fields of message
     ListingFields fields;
