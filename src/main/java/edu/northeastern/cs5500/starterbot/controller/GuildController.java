@@ -3,8 +3,8 @@ package edu.northeastern.cs5500.starterbot.controller;
 import com.mongodb.lang.NonNull;
 import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -17,17 +17,24 @@ public class GuildController {
         this.guildRepository = guildRepository;
     }
 
+    /**
+     * Sets the trading channel id for the current guild.
+     *
+     * @param guildId - The id of the guild to set the trading channel id for.
+     * @param tradingChannelId - The trading channel id to set for the guild.
+     */
     public void setTradingChannelId(@NonNull String guildId, @NonNull String tradingChannelId) {
         Guild guild = getGuildForId(guildId);
         guild.setTradingChannelId(tradingChannelId);
         guildRepository.update(guild);
     }
 
-    @NonNull
-    public String getTradingChannelId(@NonNull String guildId) {
-        return getGuildForId(guildId).getTradingChannelId();
-    }
-
+    /**
+     * Adds the user to the list of user that are in the guild.
+     *
+     * @param guildId - The id of the guild to add the user to.
+     * @param discordMemberId - The id of the user that should be added to the guild.
+     */
     public void addUserToServer(@NonNull String guildId, @NonNull String discordMemberId) {
         Guild guild = getGuildForId(guildId);
         var usersOnServer = guild.getUsersOnServer();
@@ -37,13 +44,14 @@ public class GuildController {
         guildRepository.update(guild);
     }
 
+    /**
+     * Gets the guild object for the guild id passed.
+     *
+     * @param guildId - The id of the guild object to return.
+     * @return the guild object with the given guild id.
+     */
     @NonNull
-    public List<String> getUsersOnServer(@NonNull String guildId) {
-        return getGuildForId(guildId).getUsersOnServer();
-    }
-
-    @NonNull
-    private Guild getGuildForId(@NonNull String guildId) {
+    public Guild getGuildForId(@NonNull String guildId) {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild currentGuild : guilds) {
             if (currentGuild.getGuildId().equals(guildId)) {
@@ -53,6 +61,7 @@ public class GuildController {
 
         Guild guild = new Guild();
         guild.setGuildId(guildId);
+        guild.setUsersOnServer(new ArrayList<>());
         guildRepository.add(guild);
         return guild;
     }
