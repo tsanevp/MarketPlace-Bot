@@ -1,6 +1,7 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.RemoveMemberHandler;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import javax.annotation.Nonnull;
@@ -15,6 +16,7 @@ public class RemoveMember implements RemoveMemberHandler {
 
     @Inject UserController userController;
     @Inject ListingController listingController;
+    @Inject GuildController guildController;
 
     @Inject
     public RemoveMember() {
@@ -33,7 +35,9 @@ public class RemoveMember implements RemoveMemberHandler {
         var userId = event.getUser().getId();
         var guildId = event.getGuild().getId();
 
+        var guild = guildController.getGuildForId(guildId);
+
         userController.removeUserByMemberAndGuildId(userId, guildId);
-        listingController.deleteListingsForUser(userId);
+        listingController.deleteListingsForUser(userId, guild);
     }
 }

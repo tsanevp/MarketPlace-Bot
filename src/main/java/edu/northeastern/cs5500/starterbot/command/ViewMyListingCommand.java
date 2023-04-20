@@ -2,8 +2,10 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -32,6 +35,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
     @Inject ListingController listingController;
     @Inject UserController userController;
     @Inject MessageBuilder messageBuilder;
+    @Inject GuildController guildController;
+    @Inject JDA jda;
 
     @Inject
     public ViewMyListingCommand() {
@@ -57,7 +62,9 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var user = event.getUser();
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
-        var listingsMessages = getListingsMessages(discordUserId, discordDisplayName);
+        var guildId = event.getGuild().getId();
+        var guild = guildController.getGuildForId(guildId);
+        var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guild);
 
         if (listingsMessages.isEmpty()) {
             event.reply("No postings available").setEphemeral(true).complete();
@@ -70,17 +77,16 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        var user = event.getUser();
-        var userId = user.getId();
-        var guildId = Objects.requireNonNull(userController.getGuildIdForUser(userId));
-        var guild = Objects.requireNonNull(event.getJDA().getGuildById(guildId));
-        var channel =
-                guild.getTextChannelById(
-                        Objects.requireNonNull(userController.getTradingChannelId(userId)));
+        var userId = event.getUser().getId();
         var buttonEvent = event.deferEdit().setComponents();
-        var buttonIds = Objects.requireNonNull(event.getButton().getId()).split(":");
-        deleteListingMessages(
-                channel, new ObjectId(buttonIds[2]), Objects.requireNonNull(buttonIds[1]));
+        var buttonIds = event.getButton().getId().split(":");
+        var objectId = new ObjectId(buttonIds[1]);
+        var messageId = buttonIds[2];
+        var guildId = buttonIds[3];
+        var guild = guildController.getGuildForId(guildId);
+
+        MessageChannel channel = jda.getGuildById(guildId).getTextChannelById(guild.getTradingChannelId());
+        deleteListingMessages(channel, objectId, messageId, guild, userId);
 
         buttonEvent
                 .setEmbeds(
@@ -91,6 +97,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
                 .queue();
     }
 
+
+
     /**
      * Deletes listing in discord and in MongodDB
      *
@@ -99,8 +107,8 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param messageId - The messageId of the listing in the channel.
      */
     private void deleteListingMessages(
-            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId) {
-        listingController.deleteListingById(objectid);
+            MessageChannel channel, @Nonnull ObjectId objectid, @Nonnull String messageId, Guild guild, String discordMemberId) {
+        listingController.deleteListingById(objectid, discordMemberId, guild);
         channel.deleteMessageById(messageId).queue();
     }
 
@@ -124,21 +132,21 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return List<MessageCreateBuilder>
      */
     private List<MessageCreateBuilder> getListingsMessages(
-            String discordUserId, @Nonnull String discordDisplayName) {
-        var listing = listingController.getListingsByMemberId(discordUserId);
+            String discordUserId, @Nonnull String discordDisplayName, Guild guild) {
+        var listing = listingController.getListingsByMemberId(discordUserId, guild);
         List<MessageCreateBuilder> messages = new ArrayList<>();
         if (listing.isEmpty()) {
             return messages;
         }
         for (Listing list : listing) {
+            var button = Button.danger(
+                String.format(
+                        "%s:%s:%s:%s:delete",
+                        getName(), list.getId(), list.getMessageId(), list.getGuild()),
+                "Delete");
             var messageCreateBuilder =
                     new MessageCreateBuilder()
-                            .addActionRow(
-                                    Button.danger(
-                                            String.format(
-                                                    "%s:%s:%s:delete",
-                                                    getName(), list.getMessageId(), list.getId()),
-                                            "Delete"))
+                            .addActionRow(button)
                             .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
             messages.add(messageCreateBuilder);
         }

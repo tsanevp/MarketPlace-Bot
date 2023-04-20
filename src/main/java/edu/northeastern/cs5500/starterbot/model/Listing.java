@@ -18,7 +18,7 @@ import org.bson.types.ObjectId;
 public class Listing implements Model {
 
     // MongoDB id
-    ObjectId id;
+    @Nonnull ObjectId id;
 
     // MessageEmbed id
     long messageId;
@@ -34,6 +34,9 @@ public class Listing implements Model {
 
     // List of images url
     @Nonnull List<String> images;
+
+    // The guild that the listing is contained in
+    Guild guild;
 
     // Additional fields of message
     ListingFields fields;

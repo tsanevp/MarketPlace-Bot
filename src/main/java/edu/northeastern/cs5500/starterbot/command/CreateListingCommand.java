@@ -5,6 +5,8 @@ import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import edu.northeastern.cs5500.starterbot.model.ListingFields;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -133,14 +135,22 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var url = Objects.requireNonNull(imageURLs.get(0));
 
         // Create ListingFields Object
-        var listingFields =
-                listingController.createListingFields(
-                        costValue, shippingIncluded, condition, description, datePosted);
+        var listingFields = ListingFields.builder()
+                                .cost(costValue)
+                                .shippingIncluded(shippingIncluded)
+                                .condition(condition)
+                                .description(description)
+                                .datePosted(datePosted)
+                                .build();
 
         // Create Listing Object
-        var listing =
-                listingController.createListing(
-                        0, userId, titleReformatted, url, imageURLs, listingFields);
+        var listing = Listing.builder()
+                        .messageId(0)
+                        .discordUserId(userId)
+                        .title(titleReformatted)
+                        .url(url)
+                        .fields(listingFields)
+                        .build();
 
         // Temporarily add listing to MongoDB
         userController.setCurrentListing(userId, listing);
