@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.model;
 
+import com.mongodb.lang.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,6 +96,7 @@ public enum States {
      *
      * @return the state's abbreviation.
      */
+    @NonNull
     public String getAbbreviation() {
         return abbreviation;
     }
@@ -104,6 +106,7 @@ public enum States {
      *
      * @return the state's state code.
      */
+    @NonNull
     public String getStateCode() {
         return stateCode;
     }
@@ -129,7 +132,7 @@ public enum States {
      * @param name the state's name.
      * @return the enum constant's values (name, abrv, state code).
      */
-    public static States valueOfName(final String name) {
+    public static States valueOfName(final @NonNull String name) {
         final String enumName = name.toUpperCase().replace(" ", "_");
         try {
             return valueOf(enumName);

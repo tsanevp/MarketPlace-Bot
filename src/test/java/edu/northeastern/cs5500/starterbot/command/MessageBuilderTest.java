@@ -2,8 +2,8 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import edu.northeastern.cs5500.starterbot.controller.ListingController;
-import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
+import edu.northeastern.cs5500.starterbot.model.Listing;
+import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,7 @@ public class MessageBuilderTest {
     void testMessageBuilderToMessageEmbedReturnListIsOfCorrectSize() {
         // If the method returns a list of size 1 or greater, we expect that the method works as
         // intended
-        
-        ListingController listingController = new ListingController(new InMemoryRepository<>());
+
         messageBuilder = new MessageBuilder();
 
         // Define ListingFields parameters
@@ -37,11 +36,22 @@ public class MessageBuilderTest {
 
         // Create ListingFields & Listing objects
         var listingFields1 =
-                listingController.createListingFields(
-                        cost, shippingIncludedFalse, condition, description, datePosted);
+                ListingFields.builder()
+                        .cost(cost)
+                        .shippingIncluded(shippingIncludedFalse)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
         var listing1 =
-                listingController.createListing(
-                        0, discordUserId, title, url, imageUrl, listingFields1);
+                Listing.builder()
+                        .messageId(0)
+                        .discordUserId(discordUserId)
+                        .title(title)
+                        .url(url)
+                        .images(imageUrl)
+                        .fields(listingFields1)
+                        .build();
 
         // Call toMessageEmbed on listing object
         var listMessageEmbeds1 = messageBuilder.toMessageEmbed(listing1, discordUserId);
@@ -57,11 +67,23 @@ public class MessageBuilderTest {
 
         // Create new ListingFields & Listing objects
         var listingFields2 =
-                listingController.createListingFields(
-                        cost, shippingIncludedTrue, condition, description, datePosted);
+                ListingFields.builder()
+                        .cost(cost)
+                        .shippingIncluded(shippingIncludedTrue)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
+
         var listing2 =
-                listingController.createListing(
-                        0, discordUserId, title, url, imageUrl, listingFields2);
+                Listing.builder()
+                        .messageId(0)
+                        .discordUserId(discordUserId)
+                        .title(title)
+                        .url(url)
+                        .images(imageUrl)
+                        .fields(listingFields2)
+                        .build();
 
         // Call toMessageEmbed on new listing objects
         var listMessageEmbeds2 = messageBuilder.toMessageEmbed(listing2, discordUserId);
