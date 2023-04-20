@@ -149,7 +149,7 @@ public class UserController {
      * @return the user obtained from the repository OR the user just created.
      */
     @Nonnull
-    public User getUserForMemberId(String discordMemberId) {
+    User getUserForMemberId(String discordMemberId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
             if (currentUser.getDiscordUserId().equals(discordMemberId)) {

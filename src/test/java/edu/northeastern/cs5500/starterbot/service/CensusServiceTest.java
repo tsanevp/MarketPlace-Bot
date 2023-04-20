@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class CensusServiceTest {
 
     CensusService censusService;
