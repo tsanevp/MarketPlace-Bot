@@ -5,6 +5,7 @@ import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -131,16 +132,28 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var titleReformatted = reformatListingTitle(userId, title);
         var costValue = reformatCostValue(cost);
         var url = Objects.requireNonNull(imageURLs.get(0));
+        var guildId = event.getGuild().getId();
 
         // Create ListingFields Object
         var listingFields =
-                listingController.createListingFields(
-                        costValue, shippingIncluded, condition, description, datePosted);
+                ListingFields.builder()
+                        .cost(costValue)
+                        .shippingIncluded(shippingIncluded)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
 
         // Create Listing Object
         var listing =
-                listingController.createListing(
-                        0, userId, titleReformatted, url, imageURLs, listingFields);
+                Listing.builder()
+                        .messageId(0)
+                        .discordUserId(userId)
+                        .guildId(guildId)
+                        .title(titleReformatted)
+                        .url(url)
+                        .fields(listingFields)
+                        .build();
 
         // Temporarily add listing to MongoDB
         userController.setCurrentListing(userId, listing);

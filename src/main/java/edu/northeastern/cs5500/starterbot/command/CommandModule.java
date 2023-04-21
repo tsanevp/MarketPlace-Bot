@@ -58,16 +58,14 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public SlashCommandHandler provideViewMyListingCommand(
-            ViewMyListingCommand viewMyListingCommand) {
-        return viewMyListingCommand;
+    public SlashCommandHandler provideMyListingCommand(MyListingsCommand myListingCommand) {
+        return myListingCommand;
     }
 
     @Provides
     @IntoSet
-    public ButtonHandler provideViewMyListingCommandButton(
-            ViewMyListingCommand viewMyListingCommand) {
-        return viewMyListingCommand;
+    public ButtonHandler provideMyListingCommandButton(MyListingsCommand myListingCommand) {
+        return myListingCommand;
     }
 
     @Provides

@@ -33,6 +33,7 @@ public class MessageBuilderTest {
         var url =
                 "https://cdn.discordapp.com/ephemeral-attachments/1077737981869297745/1096913399180435537/Screenshot_2023-04-07_at_12.31.41_PM.png";
         imageUrl.add(url);
+        var guildId = "234257657568";
 
         // Create ListingFields & Listing objects
         var listingFieldsWithoutShipping =
@@ -47,6 +48,7 @@ public class MessageBuilderTest {
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(discordUserId)
+                        .guildId(guildId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)
@@ -80,6 +82,7 @@ public class MessageBuilderTest {
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(discordUserId)
+                        .guildId(guildId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)

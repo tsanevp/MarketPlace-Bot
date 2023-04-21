@@ -26,6 +26,9 @@ public class Listing implements Model {
     // The userid of the account who created the listing
     @Nonnull String discordUserId;
 
+    // The guild that the listing is contained in
+    @Nonnull String guildId;
+
     // Title of the listing
     @Nonnull String title;
 
