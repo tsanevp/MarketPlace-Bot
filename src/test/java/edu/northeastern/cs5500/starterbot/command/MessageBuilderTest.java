@@ -21,7 +21,7 @@ public class MessageBuilderTest {
 
         // Define ListingFields parameters
         var cost = "50";
-        var shippingIncludedFalse = false;
+        var shippingIncluded = false;
         var condition = "very good";
         var description = "test description";
         var datePosted = "4/15/23";
@@ -35,64 +35,64 @@ public class MessageBuilderTest {
         imageUrl.add(url);
 
         // Create ListingFields & Listing objects
-        var listingFields1 =
+        var listingFieldsWithoutShipping =
                 ListingFields.builder()
                         .cost(cost)
-                        .shippingIncluded(shippingIncludedFalse)
+                        .shippingIncluded(shippingIncluded)
                         .condition(condition)
                         .description(description)
                         .datePosted(datePosted)
                         .build();
-        var listing1 =
+        var listingWithoutShipping =
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(discordUserId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)
-                        .fields(listingFields1)
+                        .fields(listingFieldsWithoutShipping)
                         .build();
 
         // Call toMessageEmbed on listing object
-        var listMessageEmbeds1 = messageBuilder.toMessageEmbed(listing1, discordUserId);
+        var listMessageEmbedWithoutShipping = messageBuilder.toMessageEmbed(listingWithoutShipping, discordUserId);
 
         // Since only one url was added, we expect the List<MessageEmbed> to be size 1
-        assertThat(listMessageEmbeds1.size()).isEqualTo(1);
+        assertThat(listMessageEmbedWithoutShipping.size()).isEqualTo(1);
 
         // Add another url link to the list of urls. This should make size List<MessageEmbed> 2
         imageUrl.add(url);
 
         // Change shipping included to true
-        var shippingIncludedTrue = true;
+        shippingIncluded = true;
 
         // Create new ListingFields & Listing objects
-        var listingFields2 =
+        var listingFieldsWithShipping =
                 ListingFields.builder()
                         .cost(cost)
-                        .shippingIncluded(shippingIncludedTrue)
+                        .shippingIncluded(shippingIncluded)
                         .condition(condition)
                         .description(description)
                         .datePosted(datePosted)
                         .build();
 
-        var listing2 =
+        var listingWithShipping =
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(discordUserId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)
-                        .fields(listingFields2)
+                        .fields(listingFieldsWithShipping)
                         .build();
 
         // Call toMessageEmbed on new listing objects
-        var listMessageEmbeds2 = messageBuilder.toMessageEmbed(listing2, discordUserId);
+        var listMessageEmbedWithShipping = messageBuilder.toMessageEmbed(listingWithShipping, discordUserId);
 
         // Check that the size of the list returned is 2
-        assertThat(listMessageEmbeds2.size()).isEqualTo(2);
+        assertThat(listMessageEmbedWithShipping.size()).isEqualTo(2);
 
         // Check that the two listMessageEmbeds are different
-        assertThat(listMessageEmbeds1).isEqualTo(listMessageEmbeds1);
-        assertThat(listMessageEmbeds1).isNotEqualTo(listMessageEmbeds2);
+        assertThat(listMessageEmbedWithoutShipping).isEqualTo(listMessageEmbedWithoutShipping);
+        assertThat(listMessageEmbedWithoutShipping).isNotEqualTo(listMessageEmbedWithShipping);
     }
 }
