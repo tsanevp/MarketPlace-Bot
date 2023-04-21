@@ -17,6 +17,7 @@ public class GuildController {
     GuildController(GenericRepository<Guild> guildRepository) {
         this.guildRepository = guildRepository;
     }
+    
 
     /**
      * Sets the trading channel id for the current guild.
@@ -24,7 +25,7 @@ public class GuildController {
      * @param guildId - The id of the guild to set the trading channel id for.
      * @param tradingChannelId - The trading channel id to set for the guild.
      */
-    public void setTradingChannelId(@NonNull String guildId, @NonNull String tradingChannelId) {
+    public void setTradingChannelId(@NonNull String guildId, String tradingChannelId) {
         Guild guild = getGuildByGuildId(guildId);
         guild.setTradingChannelId(tradingChannelId);
         guildRepository.update(guild);
@@ -93,6 +94,23 @@ public class GuildController {
         guild.setUsersOnServer(new ArrayList<>());
         guildRepository.add(guild);
         return guild;
+    }
+
+    /**
+     * Removes guild from database.
+     * 
+     * @param guildId - The id of the guild that needs to be removed.
+     * @return Whether the guild has been successfully deleted.
+     */
+    public boolean removeGuildByGuildId(@NonNull String guildId) {
+        Collection<Guild> guilds = guildRepository.getAll();
+        for (Guild guild : guilds) {
+            if (guild.getGuildId().equals(guildId)) {
+                guildRepository.delete(guild.getId());
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -17,7 +17,7 @@ public class Guild implements Model {
     @NonNull String guildId;
 
     // The id of the trading channel in the Guild
-    @NonNull String tradingChannelId;
+    String tradingChannelId;
 
     // A list of users ids in the Guild
     @NonNull List<String> usersOnServer;

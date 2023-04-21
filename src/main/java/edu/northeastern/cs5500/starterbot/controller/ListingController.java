@@ -51,13 +51,10 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(
-            @Nonnull ObjectId objectId, @Nonnull String discordMemberId, String guildId) {
-        for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
-            if (listing.getId() == objectId) {
-                listingRepository.delete(objectId);
-                return true;
-            }
+    public boolean deleteListingById(@Nonnull ObjectId objectId, @Nonnull String discordMemberId) {
+        if (listingRepository.get(objectId).getDiscordUserId().equals(discordMemberId)) {
+            listingRepository.delete(objectId);
+            return true;
         }
         return false;
     }
