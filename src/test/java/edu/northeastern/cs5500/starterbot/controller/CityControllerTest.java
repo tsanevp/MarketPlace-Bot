@@ -11,7 +11,7 @@ class CityControllerTest {
     CityController cityController;
 
     public CityControllerTest() {
-        this.cityController = new CityController(new CensusService());
+        cityController = new CityController(new CensusService());
     }
 
     @Test

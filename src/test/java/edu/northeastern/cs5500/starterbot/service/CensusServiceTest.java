@@ -13,7 +13,7 @@ class CensusServiceTest {
     CensusService censusService;
 
     public CensusServiceTest() {
-        this.censusService = new CensusService();
+        censusService = new CensusService();
     }
 
     @Test
