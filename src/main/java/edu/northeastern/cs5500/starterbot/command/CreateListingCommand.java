@@ -149,9 +149,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(userId)
+                        .guildId(guildId)
                         .title(titleReformatted)
                         .url(url)
-                        .guildId(guildId)
                         .fields(listingFields)
                         .build();
 

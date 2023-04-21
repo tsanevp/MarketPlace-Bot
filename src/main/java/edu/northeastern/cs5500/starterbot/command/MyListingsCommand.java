@@ -76,6 +76,39 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     }
 
     /**
+     * Retrieves all listings in message format from the user.
+     *
+     * @param discordUserId - The user's id in discord.
+     * @param discordDisplayName - The user's display name in discord.
+     * @return List<MessageCreateBuilder>
+     */
+    @Nonnull
+    private List<MessageCreateData> getListingsMessages(
+            @Nonnull String discordUserId,
+            @Nonnull String discordDisplayName,
+            @Nonnull String guildId) {
+        var listing = listingController.getListingsByMemberId(discordUserId, guildId);
+        List<MessageCreateData> messages = new ArrayList<>();
+
+        if (listing.isEmpty()) {
+            return messages;
+        }
+
+        for (Listing list : listing) {
+            var buttonId = String.format("%s:%s:delete", getName(), list.getId());
+            var button = Button.danger(buttonId, "Delete");
+
+            var messageCreateData =
+                    new MessageCreateBuilder()
+                            .addActionRow(button)
+                            .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName))
+                            .build();
+            messages.add(messageCreateData);
+        }
+        return messages;
+    }
+
+    /**
      * Sends the listing messages to user's DM.
      *
      * @param user - The user who intiated the command.
@@ -85,36 +118,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         for (MessageCreateData message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message);
         }
-    }
-
-    /**
-     * Retrieves all listings in message format from the user.
-     *
-     * @param discordUserId - The user's id in discord.
-     * @param discordDisplayName - The user's display name in discord.
-     * @return List<MessageCreateBuilder>
-     */
-    private List<MessageCreateData> getListingsMessages(
-            String discordUserId, @Nonnull String discordDisplayName, String guildId) {
-        var listing = listingController.getListingsByMemberId(discordUserId, guildId);
-        List<MessageCreateData> messages = new ArrayList<>();
-
-        if (listing.isEmpty()) {
-            return messages;
-        }
-
-        for (Listing list : listing) {
-
-            var buttonId = String.format("%s:%s:delete", getName(), list.getId());
-            var button = Button.danger(buttonId, "Delete");
-
-            var messageCreateBuilder =
-                    new MessageCreateBuilder()
-                            .addActionRow(button)
-                            .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
-            messages.add(messageCreateBuilder.build());
-        }
-        return messages;
     }
 
     @Override
@@ -130,16 +133,15 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      *
      * @param event - the event of a button interaction
      * @param listing - the listing to be deleted.
-     * @throws GuildNotFoundException - guild was not found in JDA.
-     * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    void onDeleteListingButtonClick(@Nonnull ButtonInteractionEvent event, Listing listing) {
-        var userId = event.getUser().getId();
-
+    void onDeleteListingButtonClick(
+            @Nonnull ButtonInteractionEvent event, @Nonnull Listing listing) {
         MessageChannel channel;
         try {
             channel = getTradingChannel(listing.getGuildId());
             var buttonEvent = event.deferEdit().setComponents();
+
+            var userId = event.getUser().getId();
 
             listingController.deleteListingById(listing.getId(), userId);
             channel.deleteMessageById(listing.getMessageId()).queue();
