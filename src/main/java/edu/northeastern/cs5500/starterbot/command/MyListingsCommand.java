@@ -62,7 +62,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var user = event.getUser();
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
-        var guildId = event.getGuild().getId();
+        var guildOwner = event.getGuild().getOwner();
+        var guildId = guildOwner.getGuild().getId();
         var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guildId);
 
         if (listingsMessages.isEmpty()) {
@@ -78,15 +79,40 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         var buttonIds = event.getButton().getId().split(":");
         var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
-        var guildId = listing.getGuildId();
         
         try {
             onDeleteListingButtonClick(event, listing);
         } catch (GuildNotFoundException | ChannelNotFoundException e) {
-            guildController.removeGuildByGuildId(guildId);
             log.error("myListing Command encountered an exception when attempting to delete listing", e);
             event.reply("Unable to remove listing because the server or channel no longer exists.").complete();
         }
+    }
+
+    /**
+     * Deletes listing in the trading channel and database when the "delete" button is clicked.
+     * 
+     * @param event - the event of a button interaction
+     * @param listing - the listing to be deleted.
+     * @throws GuildNotFoundException - guild was not found in JDA.
+     * @throws ChannelNotFoundException - text channel was not found in JDA.
+     */
+
+     void onDeleteListingButtonClick(@Nonnull ButtonInteractionEvent event, Listing listing) throws GuildNotFoundException, ChannelNotFoundException {
+        var userId = event.getUser().getId();
+        var channel = getTradingChannel(listing.getGuildId());
+
+        var buttonEvent = event.deferEdit().setComponents();
+
+        listingController.deleteListingById(listing.getId(), userId);
+        channel.deleteMessageById(listing.getMessageId()).queue();
+
+        buttonEvent
+        .setEmbeds(
+                new EmbedBuilder()
+                        .setDescription("Your post has been successfully deleted")
+                        .setColor(EMBED_COLOR)
+                        .build())
+        .queue();
     }
 
     /**
@@ -114,33 +140,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throw new ChannelNotFoundException("Trading channel ID no longer exists in the specified guild in JDA.");
         }
         return channel;
-    }
-
-    /**
-     * Deletes listing in the trading channel and database when the "delete" button is clicked.
-     * 
-     * @param event - the event of a button interaction
-     * @param listing - the listing to be deleted.
-     * @throws GuildNotFoundException - guild was not found in JDA.
-     * @throws ChannelNotFoundException - text channel was not found in JDA.
-     */
-
-    void onDeleteListingButtonClick(@Nonnull ButtonInteractionEvent event, Listing listing) throws GuildNotFoundException, ChannelNotFoundException {
-        var userId = event.getUser().getId();
-        var channel = getTradingChannel(listing.getGuildId());
-
-        var buttonEvent = event.deferEdit().setComponents();
-
-        listingController.deleteListingById(listing.getId(), userId);
-        channel.deleteMessageById(listing.getMessageId()).queue();
-
-        buttonEvent
-        .setEmbeds(
-                new EmbedBuilder()
-                        .setDescription("Your post has been successfully deleted")
-                        .setColor(EMBED_COLOR)
-                        .build())
-        .queue();
     }
 
     /**
