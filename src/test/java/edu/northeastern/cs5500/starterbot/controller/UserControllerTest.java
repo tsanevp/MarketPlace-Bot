@@ -22,14 +22,9 @@ public class UserControllerTest {
 
     UserController userController;
 
-    private UserController getUserController() {
-        UserController userController = new UserController(new InMemoryRepository<>());
-        return userController;
-    }
-
     @BeforeEach
     void initializeUserController() {
-        userController = getUserController();
+        userController = new UserController(new InMemoryRepository<>());
     }
 
     @Test
