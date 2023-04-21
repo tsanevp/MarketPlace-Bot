@@ -152,13 +152,13 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
                                     .build())
                     .queue();
         } catch (GuildNotFoundException e) {
-            log.error(
-                    "myListing Command encountered an exception when attempting to delete listing",
-                    e);
-            event.reply("Unable to remove listing because the server or channel no longer exists.")
-                    .complete();
+            log.error("myListing encountered an error when retrieving server.", e);
+            event.reply("Unable to remove listing because the server no longer exists.").complete();
         } catch (ChannelNotFoundException e) {
-
+            log.error("myListing encountered an error when retrieving channel.", e);
+            event.reply(
+                            "Unable to remove listing because the channel no longer exists. Please use /createtradingchannel in the server.")
+                    .complete();
         }
     }
 
