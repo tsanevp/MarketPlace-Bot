@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.bson.types.ObjectId;
 
 @Singleton
@@ -62,8 +63,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var user = event.getUser();
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
-        var guildOwner = event.getGuild().getOwner();
-        var guildId = guildOwner.getGuild().getId();
+        var guildId = event.getGuild().getId();
         var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guildId);
 
         if (listingsMessages.isEmpty()) {
@@ -75,55 +75,103 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         event.reply("Your listings has been sent to your DM").setEphemeral(true).complete();
     }
 
-    @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        var buttonIds = event.getButton().getId().split(":");
-        var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
-        
-        try {
-            onDeleteListingButtonClick(event, listing);
-        } catch (GuildNotFoundException | ChannelNotFoundException e) {
-            log.error("myListing Command encountered an exception when attempting to delete listing", e);
-            event.reply("Unable to remove listing because the server or channel no longer exists.").complete();
+    /**
+     * Sends the listing messages to user's DM.
+     *
+     * @param user - The user who intiated the command.
+     * @param listingsMessages - The user's listings in message format.
+     */
+    private void sendListingsMessageToUser(User user, List<MessageCreateData> listingsMessages) {
+        for (MessageCreateData message : listingsMessages) {
+            messageBuilder.sendPrivateMessage(user, message);
         }
     }
 
     /**
+     * Retrieves all listings in message format from the user.
+     *
+     * @param discordUserId - The user's id in discord.
+     * @param discordDisplayName - The user's display name in discord.
+     * @return List<MessageCreateBuilder>
+     */
+    private List<MessageCreateData> getListingsMessages(
+            String discordUserId, @Nonnull String discordDisplayName, String guildId) {
+        var listing = listingController.getListingsByMemberId(discordUserId, guildId);
+        List<MessageCreateData> messages = new ArrayList<>();
+
+        if (listing.isEmpty()) {
+            return messages;
+        }
+
+        for (Listing list : listing) {
+
+            var buttonId = String.format("%s:%s:delete", getName(), list.getId());
+            var button = Button.danger(buttonId, "Delete");
+
+            var messageCreateBuilder =
+                    new MessageCreateBuilder()
+                            .addActionRow(button)
+                            .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
+            messages.add(messageCreateBuilder.build());
+        }
+        return messages;
+    }
+
+    @Override
+    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        var buttonIds = event.getButton().getId().split(":");
+        var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
+
+        onDeleteListingButtonClick(event, listing);
+    }
+
+    /**
      * Deletes listing in the trading channel and database when the "delete" button is clicked.
-     * 
+     *
      * @param event - the event of a button interaction
      * @param listing - the listing to be deleted.
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-
-     void onDeleteListingButtonClick(@Nonnull ButtonInteractionEvent event, Listing listing) throws GuildNotFoundException, ChannelNotFoundException {
+    void onDeleteListingButtonClick(@Nonnull ButtonInteractionEvent event, Listing listing) {
         var userId = event.getUser().getId();
-        var channel = getTradingChannel(listing.getGuildId());
 
-        var buttonEvent = event.deferEdit().setComponents();
+        MessageChannel channel;
+        try {
+            channel = getTradingChannel(listing.getGuildId());
+            var buttonEvent = event.deferEdit().setComponents();
 
-        listingController.deleteListingById(listing.getId(), userId);
-        channel.deleteMessageById(listing.getMessageId()).queue();
+            listingController.deleteListingById(listing.getId(), userId);
+            channel.deleteMessageById(listing.getMessageId()).queue();
 
-        buttonEvent
-        .setEmbeds(
-                new EmbedBuilder()
-                        .setDescription("Your post has been successfully deleted")
-                        .setColor(EMBED_COLOR)
-                        .build())
-        .queue();
+            buttonEvent
+                    .setEmbeds(
+                            new EmbedBuilder()
+                                    .setDescription("Your post has been successfully deleted")
+                                    .setColor(EMBED_COLOR)
+                                    .build())
+                    .queue();
+        } catch (GuildNotFoundException e) {
+            log.error(
+                    "myListing Command encountered an exception when attempting to delete listing",
+                    e);
+            event.reply("Unable to remove listing because the server or channel no longer exists.")
+                    .complete();
+        } catch (ChannelNotFoundException e) {
+
+        }
     }
 
     /**
      * Retrieves the trading channel where the listing is located.
-     * 
+     *
      * @param guildId - the id of the guild where the listing is located.
      * @return - The trading channel
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    MessageChannel getTradingChannel(@Nonnull String guildId) throws GuildNotFoundException, ChannelNotFoundException {
+    MessageChannel getTradingChannel(@Nonnull String guildId)
+            throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
 
         if (guild == null) {
@@ -135,54 +183,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var channel = guild.getTextChannelById(tradingChannelId);
 
         if (channel == null) {
-            // TODO: Should there be more to do?
             guildController.setTradingChannelId(guildId, null);
-            throw new ChannelNotFoundException("Trading channel ID no longer exists in the specified guild in JDA.");
+            throw new ChannelNotFoundException(
+                    "Trading channel ID no longer exists in the specified guild in JDA.");
         }
         return channel;
-    }
-
-    /**
-     * Sends the listing messages to user's DM.
-     *
-     * @param user - The user who intiated the command.
-     * @param listingsMessages - The user's listings in message format.
-     */
-    private void sendListingsMessageToUser(User user, List<MessageCreateBuilder> listingsMessages) {
-        for (MessageCreateBuilder message : listingsMessages) {
-            messageBuilder.sendPrivateMessage(user, message.build());
-        }
-    }
-
-    /**
-     * Retrieves all listings in message format from the user.
-     *
-     * @param discordUserId - The user's id in discord.
-     * @param discordDisplayName - The user's display name in discord.
-     * @return List<MessageCreateBuilder>
-     */
-    private List<MessageCreateBuilder> getListingsMessages(
-            String discordUserId, @Nonnull String discordDisplayName, String guildId) {
-        var listing = listingController.getListingsByMemberId(discordUserId, guildId);
-        //TODO: MessageCreate vs MessageCreateBuilder?
-        List<MessageCreateBuilder> messages = new ArrayList<>();
-        if (listing.isEmpty()) {
-            return messages;
-        }
-        for (Listing list : listing) {
-            var button =
-                    Button.danger(
-                            String.format(
-                                    "%s:%s:delete",
-                                    getName(),
-                                    list.getId()),
-                            "Delete");
-            var messageCreateBuilder =
-                    new MessageCreateBuilder()
-                            .addActionRow(button)
-                            .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName));
-            messages.add(messageCreateBuilder);
-        }
-        return messages;
     }
 }

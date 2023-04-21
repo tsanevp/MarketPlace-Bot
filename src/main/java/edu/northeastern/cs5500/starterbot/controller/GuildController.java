@@ -17,7 +17,6 @@ public class GuildController {
     GuildController(GenericRepository<Guild> guildRepository) {
         this.guildRepository = guildRepository;
     }
-    
 
     /**
      * Sets the trading channel id for the current guild.
@@ -98,7 +97,7 @@ public class GuildController {
 
     /**
      * Removes guild from database.
-     * 
+     *
      * @param guildId - The id of the guild that needs to be removed.
      * @return Whether the guild has been successfully deleted.
      */
