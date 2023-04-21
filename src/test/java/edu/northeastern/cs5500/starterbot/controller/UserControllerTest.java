@@ -82,7 +82,6 @@ public class UserControllerTest {
         var condition = "very good";
         var description = "test description";
         var datePosted = "4/15/23";
-
         // Create ListingFields object
         var listingFields =
                 ListingFields.builder()
@@ -98,12 +97,14 @@ public class UserControllerTest {
         var url = "test url";
         List<String> imageUrl = new ArrayList<>();
         imageUrl.add(url);
+        var guildId = "234257657568";
 
         // Create Listing object
         var listing =
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(DISCORD_ID_1)
+                        .guildId(guildId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)

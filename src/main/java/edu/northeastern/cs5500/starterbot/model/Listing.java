@@ -18,13 +18,16 @@ import org.bson.types.ObjectId;
 public class Listing implements Model {
 
     // MongoDB id
-    @Nonnull ObjectId id;
+    ObjectId id;
 
     // MessageEmbed id
     long messageId;
 
     // The userid of the account who created the listing
     @Nonnull String discordUserId;
+
+    // The guild that the listing is contained in
+    @Nonnull String guildId;
 
     // Title of the listing
     @Nonnull String title;
@@ -34,9 +37,6 @@ public class Listing implements Model {
 
     // List of images url
     @Nonnull List<String> images;
-
-    // The guild that the listing is contained in
-    @Nonnull String guildId;
 
     // Additional fields of message
     ListingFields fields;
