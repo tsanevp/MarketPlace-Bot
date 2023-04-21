@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -33,6 +34,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
     @Inject UserController userController;
     @Inject MessageBuilder messageBuilder;
     @Inject GuildController guildController;
+    @Inject JDA jda;
 
     @Inject
     public ViewMyListingCommand() {
@@ -80,10 +82,7 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
         var guildId = buttonIds[3];
         var guild = guildController.getGuildByGuildId(guildId);
 
-        var channel =
-                event.getJDA()
-                        .getGuildById(guildId)
-                        .getTextChannelById(guild.getTradingChannelId());
+        var channel = jda.getGuildById(guildId).getTextChannelById(guild.getTradingChannelId());
         deleteListingMessages(channel, objectId, messageId, guildId, userId);
 
         buttonEvent
@@ -104,10 +103,10 @@ public class ViewMyListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param messageId - The messageId of the listing in the channel.
      */
     private void deleteListingMessages(
-            MessageChannel channel,
+            @Nonnull MessageChannel channel,
             @Nonnull ObjectId objectid,
             @Nonnull String messageId,
-            String guildId,
+            @Nonnull String guildId,
             @Nonnull String discordMemberId) {
         // TODO: check if user is in guild, and add an error if not
         listingController.deleteListingById(objectid, discordMemberId, guildId);

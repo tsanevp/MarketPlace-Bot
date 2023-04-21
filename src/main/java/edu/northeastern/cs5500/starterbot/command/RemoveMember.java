@@ -36,6 +36,7 @@ public class RemoveMember implements RemoveMemberHandler {
         var guildId = event.getGuild().getId();
 
         userController.removeUserByMemberAndGuildId(userId, guildId);
+        guildController.removeUserInServer(userId, guildId);
         listingController.deleteListingsForUser(userId, guildId);
     }
 }

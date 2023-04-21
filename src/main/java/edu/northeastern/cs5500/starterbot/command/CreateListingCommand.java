@@ -14,6 +14,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -132,6 +133,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var titleReformatted = reformatListingTitle(userId, title);
         var costValue = reformatCostValue(cost);
         var url = Objects.requireNonNull(imageURLs.get(0));
+        var guildId = event.getGuild().getId();
 
         // Create ListingFields Object
         var listingFields =
@@ -150,6 +152,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .discordUserId(userId)
                         .title(titleReformatted)
                         .url(url)
+                        .guildId(guildId)
                         .fields(listingFields)
                         .build();
 
