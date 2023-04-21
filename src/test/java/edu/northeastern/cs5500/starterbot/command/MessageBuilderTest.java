@@ -54,7 +54,8 @@ public class MessageBuilderTest {
                         .build();
 
         // Call toMessageEmbed on listing object
-        var listMessageEmbedWithoutShipping = messageBuilder.toMessageEmbed(listingWithoutShipping, discordUserId);
+        var listMessageEmbedWithoutShipping =
+                messageBuilder.toMessageEmbed(listingWithoutShipping, discordUserId);
 
         // Since only one url was added, we expect the List<MessageEmbed> to be size 1
         assertThat(listMessageEmbedWithoutShipping.size()).isEqualTo(1);
@@ -86,7 +87,8 @@ public class MessageBuilderTest {
                         .build();
 
         // Call toMessageEmbed on new listing objects
-        var listMessageEmbedWithShipping = messageBuilder.toMessageEmbed(listingWithShipping, discordUserId);
+        var listMessageEmbedWithShipping =
+                messageBuilder.toMessageEmbed(listingWithShipping, discordUserId);
 
         // Check that the size of the list returned is 2
         assertThat(listMessageEmbedWithShipping.size()).isEqualTo(2);
