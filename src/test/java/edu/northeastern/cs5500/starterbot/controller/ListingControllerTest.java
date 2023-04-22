@@ -9,7 +9,6 @@ import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -18,32 +17,24 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 class ListingControllerTest {
     static final String USER_ID = "631666734125987209";
     static final String GUILD_ID = "294764645159495548";
-    static final List<String> IMAGES_URL = new ArrayList<>(Arrays.asList("Test url", "test"));
-    static final long MESSAGEID = 123455677;
-    static final String COST = "123";
     static final String TITLE = "test";
-    static final String URL = "test url";
-    static final String DESCRIPTION = "test description";
-    static final String DATE = "test date";
-    static final String CONDITION = "Good";
-    static final boolean SHIPPINGINCLUDED = false;
     static final ListingFields listingFields =
             ListingFields.builder()
-                    .cost(COST)
-                    .description(DESCRIPTION)
-                    .shippingIncluded(SHIPPINGINCLUDED)
-                    .condition(CONDITION)
-                    .datePosted(DATE)
+                    .cost("123")
+                    .description("test description")
+                    .shippingIncluded(false)
+                    .condition("Good")
+                    .datePosted("test date")
                     .build();
     static final Listing testListing =
             Listing.builder()
                     .id(new ObjectId())
-                    .messageId(MESSAGEID)
+                    .messageId(123455677)
                     .discordUserId(USER_ID)
                     .guildId(GUILD_ID)
                     .title(TITLE)
-                    .url(URL)
-                    .images(IMAGES_URL)
+                    .url("test url")
+                    .images(new ArrayList<>(Arrays.asList("Test url", "test")))
                     .fields(listingFields)
                     .build();
 
@@ -134,14 +125,14 @@ class ListingControllerTest {
         ListingController listingController = getListingController();
 
         // precondition
-        assertThat(listingController.getListingsWithKeyword("test", GUILD_ID)).isNotNull();
+        assertThat(listingController.getListingsWithKeyword(TITLE, GUILD_ID)).isNotNull();
 
         // mutation
         listingController.addListing(testListing);
         Collection<Listing> testCollection = Arrays.asList(testListing);
 
         // post
-        assertThat(listingController.getListingsWithKeyword("test", GUILD_ID))
+        assertThat(listingController.getListingsWithKeyword(TITLE, GUILD_ID))
                 .isEqualTo(testCollection);
 
         // clean
