@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.command;
 
+import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
@@ -114,7 +115,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param user - The user who intiated the command.
      * @param listingsMessages - The user's listings in message format.
      */
-    private void sendListingsMessageToUser(User user, List<MessageCreateData> listingsMessages) {
+    private void sendListingsMessageToUser(
+            @Nonnull User user, @Nonnull List<MessageCreateData> listingsMessages) {
         for (MessageCreateData message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message);
         }
@@ -125,7 +127,13 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var buttonIds = event.getButton().getId().split(":");
         var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
 
-        onDeleteListingButtonClick(event, listing);
+        if (listing == null) {
+            log.error("Listing is no longer in database");
+            event.reply(
+                    "Listings are not updated. Please use /mylistings to recieve an updated list.");
+        } else {
+            onDeleteListingButtonClick(event, listing);
+        }
     }
 
     /**
@@ -172,6 +180,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
+    @Nullable
     MessageChannel getTradingChannel(@Nonnull String guildId)
             throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
