@@ -59,9 +59,6 @@ class ListingControllerTest {
         // postcondition
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID))
                 .isEqualTo(testCollection);
-
-        // cleans database
-        listingController.deleteListingById(testListing.getId(), USER_ID);
     }
 
     @Test
@@ -114,9 +111,6 @@ class ListingControllerTest {
 
         // post
         assertThat(listingController.countListingsByMemberId(USER_ID, GUILD_ID)).isEqualTo(1);
-
-        // clean
-        listingController.deleteListingsForUser(USER_ID, GUILD_ID);
     }
 
     @Test
@@ -134,9 +128,6 @@ class ListingControllerTest {
         // post
         assertThat(listingController.getListingsWithKeyword(TITLE, GUILD_ID))
                 .isEqualTo(testCollection);
-
-        // clean
-        listingController.deleteListingsForUser(USER_ID, GUILD_ID);
     }
 
     @Test
@@ -157,9 +148,6 @@ class ListingControllerTest {
                 .isEqualTo(testCollection);
         ;
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
-
-        // clean
-        listingController.deleteListingsForUser(USER_ID, GUILD_ID);
     }
 
     @Test
@@ -177,9 +165,6 @@ class ListingControllerTest {
         assertThat(listingController.getListingById(testListing.getId())).isEqualTo(testListing);
         ;
         assertThat(listingController.getListingById(testListing.getId())).isNotNull();
-
-        // clean
-        listingController.deleteListingsForUser(USER_ID, GUILD_ID);
     }
 
     @Test
@@ -200,8 +185,5 @@ class ListingControllerTest {
                 .isEqualTo(testCollection);
         ;
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
-
-        // clean
-        listingController.deleteListingsForUser(USER_ID, GUILD_ID);
     }
 }
