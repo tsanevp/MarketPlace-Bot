@@ -1,5 +1,7 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
+import com.mongodb.lang.NonNull;
+import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
@@ -51,12 +53,12 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(@Nonnull ObjectId objectId, @Nonnull String discordMemberId) {
-        if (listingRepository.get(objectId).getDiscordUserId().equals(discordMemberId)) {
-            listingRepository.delete(objectId);
-            return true;
+    public boolean deleteListingById(@Nonnull ObjectId objectId, String discordMemberId) {
+        if (getListingById(objectId) == null) {
+            return false;
         }
-        return false;
+        listingRepository.delete(objectId);
+        return true;
     }
 
     /**
@@ -77,6 +79,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
+    @NonNull
     public Collection<Listing> getListingsWithKeyword(String keyword, String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
@@ -90,6 +93,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
+    @NonNull
     public Collection<Listing> getListingsByMemberId(String discordMemberId, String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
@@ -102,6 +106,7 @@ public class ListingController {
      * @param objectId - The object id of the listing.
      * @return A listing
      */
+    @Nullable
     public Listing getListingById(@Nonnull ObjectId objectId) {
         return listingRepository.get(objectId);
     }
@@ -112,6 +117,7 @@ public class ListingController {
      * @param guild - The guild that the listings contain in.
      * @return A collection of listings.
      */
+    @NonNull
     public Collection<Listing> getAllListingsInGuild(String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
