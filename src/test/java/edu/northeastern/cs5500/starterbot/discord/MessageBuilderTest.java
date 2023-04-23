@@ -1,8 +1,7 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import java.util.ArrayList;

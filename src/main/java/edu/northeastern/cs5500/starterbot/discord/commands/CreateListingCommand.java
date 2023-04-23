@@ -151,29 +151,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     }
 
     /**
-     * Create and return the confirmation message to send the user asking if the user wants to post,
-     * edit, or delete the listing.
-     *
-     * @param discordDisplayName - The display name of the user who created the listing.
-     * @param listing - The listing object that was created from the user input.
-     * @return the confirmation message to send the user asking if the user wants to post, edit, or
-     *     delete the listing.
-     */
-    @Nonnull
-    private MessageCreateData createListingConfirmationMessage(
-            @Nonnull String discordDisplayName, @Nonnull Listing listing) {
-
-        var postButton = Button.success(getName() + ":ok", "Post");
-        var editButton = Button.primary(getName() + ":edit", "Edit");
-        var cancelButton = Button.danger(getName() + ":cancel", "Cancel");
-
-        return new MessageCreateBuilder()
-                .addActionRow(postButton, editButton, cancelButton)
-                .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
-                .build();
-    }
-
-    /**
      * Build and returns a ListingFields object given its variables.
      *
      * @param cost - The cost of the item being sold.
@@ -241,6 +218,29 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         userController.setCurrentListing(userId, listing);
 
         return listing;
+    }
+
+    /**
+     * Create and return the confirmation message to send the user asking if the user wants to post,
+     * edit, or delete the listing.
+     *
+     * @param discordDisplayName - The display name of the user who created the listing.
+     * @param listing - The listing object that was created from the user input.
+     * @return the confirmation message to send the user asking if the user wants to post, edit, or
+     *     delete the listing.
+     */
+    @Nonnull
+    private MessageCreateData createListingConfirmationMessage(
+            @Nonnull String discordDisplayName, @Nonnull Listing listing) {
+
+        var postButton = Button.success(getName() + ":ok", "Post");
+        var editButton = Button.primary(getName() + ":edit", "Edit");
+        var cancelButton = Button.danger(getName() + ":cancel", "Cancel");
+
+        return new MessageCreateBuilder()
+                .addActionRow(postButton, editButton, cancelButton)
+                .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
+                .build();
     }
 
     /**
@@ -327,7 +327,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *
      * @param buttonEvent - The button event.
      */
-    private void listingNotFoundOrIsNull(MessageEditCallbackAction buttonEvent) {
+    private void listingNotFoundOrIsNull(@Nonnull MessageEditCallbackAction buttonEvent) {
         var listingNotFound =
                 "Sorry, there was an error finding your listing. Please resubmit the listing!";
         var listingNotFoundEmbed =
@@ -420,6 +420,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
         var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
+
         return Objects.requireNonNull(
                 String.format(
                         "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",

@@ -1,7 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
-import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import java.util.EnumSet;
@@ -23,7 +22,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 @Slf4j
 public class CreateTradingChannelCommand implements SlashCommandHandler {
 
-    @Inject UserController userController;
     @Inject MessageBuilder messageBuilder;
     @Inject GuildController guildController;
 
