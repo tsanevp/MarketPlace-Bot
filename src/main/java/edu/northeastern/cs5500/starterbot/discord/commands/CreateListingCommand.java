@@ -1,10 +1,11 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord.commands;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
+import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import java.time.LocalDateTime;
@@ -252,15 +253,14 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Nonnull
     private String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
         try {
-                return Objects.requireNonNull(
-                        String.format(
-                                "[%s, %s]%s",
-                                userController.getCityOfResidence(userId),
-                                userController.getStateOfResidence(userId),
-                                title));
+            return Objects.requireNonNull(
+                    String.format(
+                            "[%s, %s]%s",
+                            userController.getCityOfResidence(userId),
+                            userController.getStateOfResidence(userId),
+                            title));
         } catch (Exception e) {
-                log.info("event: /createlisting");
-
+            log.info("event: /createlisting");
         }
         return title;
     }

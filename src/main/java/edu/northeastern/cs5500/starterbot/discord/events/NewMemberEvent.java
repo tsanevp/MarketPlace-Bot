@@ -1,7 +1,9 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord.events;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
+import edu.northeastern.cs5500.starterbot.discord.Location;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,7 +13,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 
 @Singleton
 @Slf4j
-public class NewMember implements NewMemberHandler {
+public class NewMemberEvent implements NewMemberHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject Location location;
@@ -19,7 +21,7 @@ public class NewMember implements NewMemberHandler {
     @Inject GuildController guildController;
 
     @Inject
-    public NewMember() {
+    public NewMemberEvent() {
         // Defined public and empty for Dagger injection
     }
 

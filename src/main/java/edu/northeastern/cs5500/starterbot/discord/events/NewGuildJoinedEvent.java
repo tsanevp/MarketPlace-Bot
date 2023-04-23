@@ -1,8 +1,11 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord.events;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
+import edu.northeastern.cs5500.starterbot.discord.Location;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
+import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
+import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -21,7 +24,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 @Singleton
 @Slf4j
-public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
+public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
     private static final String DEFAULT_TRADING_CHANNEL_NAME = "trading-channel";
     private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
@@ -43,7 +46,7 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     @Inject CreateTradingChannelCommand createTradingChannelCommand;
 
     @Inject
-    public NewGuildJoined() {
+    public NewGuildJoinedEvent() {
         // Defined public and empty for Dagger injection
     }
 

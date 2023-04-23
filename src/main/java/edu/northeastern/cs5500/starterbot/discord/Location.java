@@ -1,8 +1,8 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.model.States;
 import java.util.List;
 import java.util.Objects;

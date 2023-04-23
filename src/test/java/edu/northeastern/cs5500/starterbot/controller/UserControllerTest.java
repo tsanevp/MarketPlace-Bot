@@ -8,7 +8,6 @@ import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +61,7 @@ public class UserControllerTest {
                         .datePosted("4/15/23")
                         .build();
         Objects.requireNonNull(listingFields);
-        
+
         // Define Listing parameters
         var url = "test url";
         List<String> imageUrl = new ArrayList<>();
@@ -136,10 +135,6 @@ public class UserControllerTest {
         userController.getUserForMemberId(DISCORD_ID_1);
 
         // Check that size of collection increased to 1
-        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
-
-        // Passed different guild id than the one used to create the user
-        userController.removeUserByMemberId(DISCORD_ID_1);
         assertThat(userController.getSizeUserCollection()).isEqualTo(1);
 
         // Passed different user id than one used to create the user

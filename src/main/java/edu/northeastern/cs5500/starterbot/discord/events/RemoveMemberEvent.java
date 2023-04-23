@@ -1,9 +1,9 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord.events;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.RemoveMemberHandler;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,14 +12,14 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 
 @Singleton
 @Slf4j
-public class RemoveMember implements RemoveMemberHandler {
+public class RemoveMemberEvent implements RemoveMemberHandler {
 
     @Inject UserController userController;
     @Inject ListingController listingController;
     @Inject GuildController guildController;
 
     @Inject
-    public RemoveMember() {
+    public RemoveMemberEvent() {
         // Defined public and empty for Dagger injection
     }
 

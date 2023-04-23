@@ -1,4 +1,4 @@
-package edu.northeastern.cs5500.starterbot.command.handlers;
+package edu.northeastern.cs5500.starterbot.discord.handlers;
 
 import javax.annotation.Nonnull;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;

@@ -1,20 +1,27 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
-import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.NewGuildJoinedHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.NewMemberHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.RemoveMemberHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
+import edu.northeastern.cs5500.starterbot.discord.commands.CreateListingCommand;
+import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
+import edu.northeastern.cs5500.starterbot.discord.commands.MyListingsCommand;
+import edu.northeastern.cs5500.starterbot.discord.commands.UpdateLocationCommand;
+import edu.northeastern.cs5500.starterbot.discord.events.NewGuildJoinedEvent;
+import edu.northeastern.cs5500.starterbot.discord.events.NewMemberEvent;
+import edu.northeastern.cs5500.starterbot.discord.events.RemoveMemberEvent;
+import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 
 @Module
 public class CommandModule {
 
     @Provides
-    public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoined newGuildJoined) {
+    public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoinedEvent newGuildJoined) {
         return newGuildJoined;
     }
 
@@ -26,12 +33,12 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public ButtonHandler provideButtonNewGuildJoinedHandler(NewGuildJoined buttonCommand) {
+    public ButtonHandler provideButtonNewGuildJoinedHandler(NewGuildJoinedEvent buttonCommand) {
         return buttonCommand;
     }
 
     @Provides
-    public NewMemberHandler provideNewMember(NewMember newMember) {
+    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
         return newMember;
     }
 
@@ -76,7 +83,7 @@ public class CommandModule {
     }
 
     @Provides
-    public RemoveMemberHandler provideRemoveMember(RemoveMember removeMember) {
+    public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
         return removeMember;
     }
 }

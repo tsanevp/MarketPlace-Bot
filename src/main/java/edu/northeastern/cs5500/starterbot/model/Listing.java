@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.model;
 
+import com.mongodb.lang.Nullable;
 import java.util.List;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
@@ -7,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
-
-import com.mongodb.lang.Nullable;
 
 /*
  * Represents the model of the listing that is stored in MongoDB

@@ -1,4 +1,4 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class MessageBuilder {
         // Create child embeds that "append" additional images to parent embed
         var isFirstImage = true;
         for (String imageUrl : listing.getImages()) {
-            
+
             if (isFirstImage) {
                 isFirstImage = false;
                 continue;
@@ -70,7 +70,7 @@ public class MessageBuilder {
 
             listingsMessage.add(additionalImageEmbeds);
         }
-        
+
         return listingsMessage;
     }
 
