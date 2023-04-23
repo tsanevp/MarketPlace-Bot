@@ -69,26 +69,26 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
         // Verify that the given name for the new trading channel does not already exist
         for (GuildChannel guildChannel : guild.getTextChannels()) {
             if (title.equals(guildChannel.getName())) {
-                event.reply(
-                                Objects.requireNonNull(
-                                        String.format(
-                                                "A text channel named %s already exists on your server. Please call this command again and input a name not already in use. Thank you.",
-                                                title)))
-                        .setEphemeral(true)
-                        .queue();
+                var channelExistsMessage =
+                        String.format(
+                                "A text channel named %s already exists on your server. Please call this command again and input a name not already in use. Thank you.",
+                                title);
+                Objects.requireNonNull(channelExistsMessage);
+
+                event.reply(channelExistsMessage).setEphemeral(true).queue();
                 return;
             }
         }
 
         // A new text channel is created and set as the new trading channel for the server
         createNewTradingChannel(guildOwner, guild, Objects.requireNonNull(title));
-        event.reply(
-                        Objects.requireNonNull(
-                                String.format(
-                                        "The new text channel with the name %s has been set as the main trading channel. All new listings will be posted there!",
-                                        title)))
-                .setEphemeral(true)
-                .queue();
+        var channelCreatedMessage =
+                String.format(
+                        "The new text channel with the name %s has been set as the main trading channel. All new listings will be posted there!",
+                        title);
+        Objects.requireNonNull(channelCreatedMessage);
+
+        event.reply(channelCreatedMessage).setEphemeral(true).queue();
     }
 
     /**
@@ -98,7 +98,8 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
      * @param guild - The guild to add the text channel to.
      * @param channelName - The name to give the channel.
      */
-    public void createNewTradingChannel(User owner, Guild guild, @Nonnull String channelName) {
+    public void createNewTradingChannel(
+            @Nonnull User owner, @Nonnull Guild guild, @Nonnull String channelName) {
         var category = guild.getCategoriesByName("text channels", true).get(0);
 
         // Permissions that should be applied to the channel
@@ -116,12 +117,13 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
                         .complete();
         textChannel.getManager().setParent(category);
 
-        // Send success message that the channel was created
         var successMessage =
                 Objects.requireNonNull(
                         String.format(
                                 "A new channel named %s has been created in your server %s.",
                                 channelName, guild.getName()));
+
+        // Send success message that the channel was created
         messageBuilder.sendPrivateMessage(owner, successMessage);
 
         // Set this channel as the trading channel for the Discord server

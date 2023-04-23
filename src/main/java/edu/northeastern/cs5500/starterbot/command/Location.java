@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -43,32 +44,48 @@ public class Location implements StringSelectHandler {
      */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        var id = Objects.requireNonNull(event.getComponentId());
-        var handlerName = id.split(":", 2)[1];
+        var buttonId = Objects.requireNonNull(event.getComponentId());
+        var handlerName = buttonId.split(":", 2)[1];
         var userId = event.getUser().getId();
         var selectedCityOrState = event.getInteraction().getValues().get(0);
 
+        Objects.requireNonNull(selectedCityOrState);
+
         if ("cities".equals(handlerName)) {
-            userController.setCityOfResidence(userId, selectedCityOrState);
-            event.deferEdit()
-                    .setComponents()
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription(
-                                            String.format(
-                                                    "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
-                                                    userController.getCityOfResidence(userId),
-                                                    userController.getStateOfResidence(userId)))
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
+            var messageEmbed = cityAndStateSetEmbedMessage(userId, selectedCityOrState);
+            event.deferEdit().setComponents().setEmbeds(messageEmbed).queue();
+
         } else {
             var stateAbbreviation = States.valueOfName(selectedCityOrState).getAbbreviation();
+            var messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
 
             userController.setStateOfResidence(userId, stateAbbreviation);
-            var messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
             event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
         }
+    }
+
+    /**
+     * Creates an embed message to send to the user. Embed lets the user know that the city and
+     * state they selected have been properly set and saved.
+     *
+     * @param userId - The id of the user who the city and state were set for.
+     * @param selectedCityOrState - The city the user selected from the list of cities.
+     * @return MessageEmbed to send to the user informing them their city and state have been set.
+     */
+    @Nonnull
+    private MessageEmbed cityAndStateSetEmbedMessage(
+            @Nonnull String userId, @Nonnull String selectedCityOrState) {
+        var description =
+                String.format(
+                        "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
+                        userController.getCityOfResidence(userId),
+                        userController.getStateOfResidence(userId));
+
+        var messageEmbed =
+                new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
+
+        userController.setCityOfResidence(userId, selectedCityOrState);
+        return messageEmbed;
     }
 
     /**
@@ -81,13 +98,17 @@ public class Location implements StringSelectHandler {
         var statesFirstHalf =
                 StringSelectMenu.create(getName() + ":stateselect1")
                         .setPlaceholder("Select what State you live in (1-25):");
+
         var statesSecondHalf =
                 StringSelectMenu.create(getName() + ":stateselect2")
                         .setPlaceholder("Select what State you live in (26-50):");
+
         var count = 1;
         for (States state : States.values()) {
+
             if (!state.equals(States.UNKNOWN)) {
                 var stateName = Objects.requireNonNull(state.name());
+
                 if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);
                 } else {
@@ -96,6 +117,7 @@ public class Location implements StringSelectHandler {
             }
             count++;
         }
+
         return new MessageCreateBuilder()
                 .addActionRow(statesFirstHalf.build())
                 .addActionRow(statesSecondHalf.build());
@@ -111,13 +133,16 @@ public class Location implements StringSelectHandler {
     private MessageCreateBuilder createCityMessageBuilder(String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
+
         var menu =
                 StringSelectMenu.create(getName() + ":cities")
                         .setPlaceholder("Select The City You Live In");
+
         for (String city : cities) {
             Objects.requireNonNull(city);
             menu.addOption(city, city);
         }
+
         return new MessageCreateBuilder().addActionRow(menu.build());
     }
 }

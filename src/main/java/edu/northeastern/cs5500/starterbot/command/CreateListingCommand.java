@@ -191,13 +191,17 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var costValue = reformatCostValue(cost);
 
         // Create ListingFields Object
-        return ListingFields.builder()
-                .cost(costValue)
-                .shippingIncluded(shippingIncluded)
-                .condition(condition)
-                .description(description)
-                .datePosted(datePosted)
-                .build();
+        var listingFields =
+                ListingFields.builder()
+                        .cost(costValue)
+                        .shippingIncluded(shippingIncluded)
+                        .condition(condition)
+                        .description(description)
+                        .datePosted(datePosted)
+                        .build();
+
+        Objects.requireNonNull(listingFields);
+        return listingFields;
     }
 
     /**
@@ -230,8 +234,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .url(url)
                         .fields(listingFields)
                         .build();
+        Objects.requireNonNull(listing);
 
-        // Temporarily add listing to MongoDB
+        // Temporarily store the listing in MongoDB
         userController.setCurrentListing(userId, listing);
 
         return listing;
@@ -245,13 +250,19 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return the title of the listing with the city and state added to it.
      */
     @Nonnull
-    private String reformatListingTitle(String userId, String title) {
-        return Objects.requireNonNull(
-                String.format(
-                        "[%s, %s]%s",
-                        userController.getCityOfResidence(userId),
-                        userController.getStateOfResidence(userId),
-                        title));
+    private String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
+        try {
+                return Objects.requireNonNull(
+                        String.format(
+                                "[%s, %s]%s",
+                                userController.getCityOfResidence(userId),
+                                userController.getStateOfResidence(userId),
+                                title));
+        } catch (Exception e) {
+                log.info("event: /createlisting");
+
+        }
+        return title;
     }
 
     /**
@@ -291,6 +302,11 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var currentListing = userController.getCurrentListing(userId);
         var buttonLabel = event.getButton().getLabel();
 
+        if (currentListing == null) {
+            listingNotFoundOrIsNull(buttonEvent);
+            return;
+        }
+
         if ("Post".equals(buttonLabel)) {
             var guild = Objects.requireNonNull(event.getGuild());
 
@@ -303,6 +319,20 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         // Set all the temporary listing back to null. User can only have one at a time
         userController.setCurrentListing(userId, null);
+    }
+
+    /**
+     * Lets the user know that their listing could not be found. The user must resubmit their
+     * listing in this case.
+     *
+     * @param buttonEvent - The button event.
+     */
+    private void listingNotFoundOrIsNull(MessageEditCallbackAction buttonEvent) {
+        var listingNotFound =
+                "Sorry, there was an error finding your listing. Please resubmit the listing!";
+        var listingNotFoundEmbed =
+                new EmbedBuilder().setDescription(listingNotFound).setColor(EMBED_COLOR).build();
+        buttonEvent.setEmbeds(listingNotFoundEmbed).queue();
     }
 
     /**

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
+import com.mongodb.lang.Nullable;
+
 /*
  * Represents the model of the listing that is stored in MongoDB
  */
@@ -20,10 +22,10 @@ public class Listing implements Model {
     // MongoDB id
     ObjectId id;
 
-    // MessageEmbed id
-    long messageId;
+    // MessageEmbed id. This is null until a listing is posted
+    @Nullable long messageId;
 
-    // The userid of the account who created the listing
+    // The user id of the account who created the listing
     @Nonnull String discordUserId;
 
     // The guild that the listing is contained in
@@ -39,5 +41,5 @@ public class Listing implements Model {
     @Nonnull List<String> images;
 
     // Additional fields of message
-    ListingFields fields;
+    @Nonnull ListingFields fields;
 }
