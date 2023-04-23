@@ -2,6 +2,7 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.model.Listing;
@@ -16,6 +17,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -23,7 +26,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
 @Slf4j
@@ -34,6 +39,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Inject UserController userController;
     @Inject ListingController listingController;
     @Inject MessageBuilder messageBuilder;
+    @Inject GuildController guildController;
 
     @Inject
     public CreateListingCommand() {
@@ -113,36 +119,106 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         log.info("event: /createlisting");
 
+        // Retrieve user input
         var title = Objects.requireNonNull(event.getOption("title")).getAsString();
         var cost = Objects.requireNonNull(event.getOption("item_cost")).getAsInt();
         var shippingIncluded =
                 Objects.requireNonNull(event.getOption("shipping_included")).getAsBoolean();
         var condition = Objects.requireNonNull(event.getOption("condition")).getAsString();
         var description = Objects.requireNonNull(event.getOption("description")).getAsString();
+
+        // Get guild and user data
+        var guildId = Objects.requireNonNull(event.getGuild()).getId();
         var userId = event.getUser().getId();
         var discordDisplayName = event.getUser().getName();
 
-        // For all images associated with event, store their urls in a list
+        // For all images attached by the user, store their urls in a list
         List<String> imageURLs = new ArrayList<>();
         for (OptionMapping image : event.getOptionsByType(OptionType.ATTACHMENT)) {
             imageURLs.add(image.getAsAttachment().getUrl());
         }
 
+        // Create ListingFields and Listing objects
+        var listingFields = buildListingFields(cost, shippingIncluded, condition, description);
+        var listing = buildListing(title, guildId, userId, imageURLs, listingFields);
+
+        // Create listing confirmation message
+        var listingConfirmation = createListingConfirmationMessage(discordDisplayName, listing);
+
+        // Send listing confirmation to the user
+        event.reply(listingConfirmation).setEphemeral(true).queue();
+    }
+
+    /**
+     * Create and return the confirmation message to send the user asking if the user wants to post,
+     * edit, or delete the listing.
+     *
+     * @param discordDisplayName - The display name of the user who created the listing.
+     * @param listing - The listing object that was created from the user input.
+     * @return the confirmation message to send the user asking if the user wants to post, edit, or
+     *     delete the listing.
+     */
+    @Nonnull
+    private MessageCreateData createListingConfirmationMessage(
+            @Nonnull String discordDisplayName, @Nonnull Listing listing) {
+
+        var postButton = Button.success(getName() + ":ok", "Post");
+        var editButton = Button.primary(getName() + ":edit", "Edit");
+        var cancelButton = Button.danger(getName() + ":cancel", "Cancel");
+
+        return new MessageCreateBuilder()
+                .addActionRow(postButton, editButton, cancelButton)
+                .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
+                .build();
+    }
+
+    /**
+     * Build and returns a ListingFields object given its variables.
+     *
+     * @param cost - The cost of the item being sold.
+     * @param shippingIncluded - Whether shipping is included in the cost.
+     * @param condition - The condition of the item being sold.
+     * @param description - A description of the item being sold.
+     * @return a ListingFields object.
+     */
+    @Nonnull
+    private ListingFields buildListingFields(
+            int cost,
+            boolean shippingIncluded,
+            @Nonnull String condition,
+            @Nonnull String description) {
         var datePosted = getDatePosted();
-        var titleReformatted = reformatListingTitle(userId, title);
         var costValue = reformatCostValue(cost);
-        var url = Objects.requireNonNull(imageURLs.get(0));
-        var guildId = event.getGuild().getId();
 
         // Create ListingFields Object
-        var listingFields =
-                ListingFields.builder()
-                        .cost(costValue)
-                        .shippingIncluded(shippingIncluded)
-                        .condition(condition)
-                        .description(description)
-                        .datePosted(datePosted)
-                        .build();
+        return ListingFields.builder()
+                .cost(costValue)
+                .shippingIncluded(shippingIncluded)
+                .condition(condition)
+                .description(description)
+                .datePosted(datePosted)
+                .build();
+    }
+
+    /**
+     * Build and returns a Listing object given its variables.
+     *
+     * @param title - The title of the listing.
+     * @param guildId - The id of the guild the listing was created in.
+     * @param userId - The id of the user who created the listing.
+     * @param imageURLs - A list of image urls. These are the images of the item.
+     * @param listingFields - A ListingFields object that holds data of each listing field.
+     * @return a Listing object.
+     */
+    @Nonnull
+    private Listing buildListing(
+            @Nonnull String title,
+            @Nonnull String guildId,
+            @Nonnull String userId,
+            @Nonnull List<String> imageURLs,
+            @Nonnull ListingFields listingFields) {
+        var titleReformatted = reformatListingTitle(userId, title);
+        var url = Objects.requireNonNull(imageURLs.get(0));
 
         // Create Listing Object
         var listing =
@@ -158,18 +234,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         // Temporarily add listing to MongoDB
         userController.setCurrentListing(userId, listing);
 
-        // Create a confirmation message. User reviews the listing and decides whether to post it
-        var listingConfirmation =
-                new MessageCreateBuilder()
-                        .addActionRow(
-                                Button.success(getName() + ":ok", "Post"),
-                                Button.primary(getName() + ":edit", "Edit"),
-                                Button.danger(getName() + ":cancel", "Cancel"))
-                        .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
-                        .build();
-
-        // Send listing confirmation to the user
-        event.reply(listingConfirmation).setEphemeral(true).queue();
+        return listing;
     }
 
     /**
@@ -224,64 +289,94 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         // Remove the buttons so they are no longer clickable
         var buttonEvent = event.deferEdit().setComponents();
         var currentListing = userController.getCurrentListing(userId);
+        var buttonLabel = event.getButton().getLabel();
 
-        if ("Post".equals(event.getButton().getLabel())) {
+        if ("Post".equals(buttonLabel)) {
             var guild = Objects.requireNonNull(event.getGuild());
-            var textChannelId =
-                    Objects.requireNonNull(userController.getTradingChannelId(guild.getOwnerId()));
-            var textChannel = Objects.requireNonNull(guild.getTextChannelById(textChannelId));
-            var embedToPost = messageBuilder.toMessageEmbed(currentListing, user.getName());
-            var embedAsmesMessageCreateData =
-                    new MessageCreateBuilder().setEmbeds(embedToPost).build();
 
-            // Send the listing to the "trading-channel"
-            textChannel
-                    .sendMessage(embedAsmesMessageCreateData)
-                    .queue(
-                            message -> {
-                                // Set the message id and store the listing in the collection
-                                currentListing.setMessageId(message.getIdLong());
-                                listingController.addListing(currentListing);
-                            });
-
-            // Replace the listing message embed with a success message
-            buttonEvent
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription(
-                                            Objects.requireNonNull(
-                                                    String.format(
-                                                            "Your listing has been posted to the following text channel: %s!",
-                                                            textChannel.getName())))
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
-        } else if ("Edit".equals(event.getButton().getLabel())) {
-            // Replace listing embed with instructions on how to create a new one
-            buttonEvent
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription(
-                                            String.format(
-                                                    "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. %n%n%s",
-                                                    createListingCommandAsString(currentListing)))
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
+            postAndSaveListing(user, buttonEvent, currentListing, guild);
+        } else if ("Edit".equals(buttonLabel)) {
+            sendEditListingInstructions(buttonEvent, currentListing);
         } else {
-            // Replace listing message embed with cancellation message, delete buttons
-            buttonEvent
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription(
-                                            "The creation of you lisitng has been canceled.")
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
+            cancelListing(buttonEvent);
         }
 
         // Set all the temporary listing back to null. User can only have one at a time
         userController.setCurrentListing(userId, null);
+    }
+
+    /**
+     * Sends the listing to the trading channel and save it in the Listing collection.
+     *
+     * @param user - The user who is posting the listing.
+     * @param buttonEvent - The button event.
+     * @param currentListing - The listing the user is going to post.
+     * @param guild - The guild the user is going to post the listing in.
+     */
+    private void postAndSaveListing(
+            @Nonnull User user,
+            @Nonnull MessageEditCallbackAction buttonEvent,
+            @Nonnull Listing currentListing,
+            @Nonnull Guild guild) {
+        var guildObject = guildController.getGuildByGuildId(guild.getId());
+        var tradingChannelId = Objects.requireNonNull(guildObject.getTradingChannelId());
+        var textChannel = Objects.requireNonNull(guild.getTextChannelById(tradingChannelId));
+        var embedToPost = messageBuilder.toMessageEmbed(currentListing, user.getName());
+        var embedAsmesMessageCreateData = new MessageCreateBuilder().setEmbeds(embedToPost).build();
+
+        // Send the listing to the "trading-channel"
+        textChannel
+                .sendMessage(embedAsmesMessageCreateData)
+                .queue(
+                        message -> {
+                            // Set the message id and store the listing in the collection
+                            currentListing.setMessageId(message.getIdLong());
+                            listingController.addListing(currentListing);
+                        });
+
+        var successMessage =
+                String.format(
+                        "Your listing has been posted to the following text channel: %s!",
+                        textChannel.getName());
+
+        var successEmbed =
+                new EmbedBuilder().setDescription(successMessage).setColor(EMBED_COLOR).build();
+
+        // Replace the listing message embed with a success message embed
+        buttonEvent.setEmbeds(successEmbed).queue();
+    }
+
+    /**
+     * Sends the edit string back to the user with instructions on how to resubmit the listing.
+     *
+     * @param buttonEvent - The button event.
+     * @param currentListing - The listing the user is going to post.
+     */
+    private void sendEditListingInstructions(
+            @Nonnull MessageEditCallbackAction buttonEvent, @Nonnull Listing currentListing) {
+        // Replace listing embed with instructions on how to create a new one
+        var editMessage =
+                String.format(
+                        "To Edit your listing, COPY & PASTE the following to your message line. This will auto-fill each section BUT will not reattach your images. %n%n%s",
+                        createListingCommandAsString(currentListing));
+        var editEmbed =
+                new EmbedBuilder().setDescription(editMessage).setColor(EMBED_COLOR).build();
+        buttonEvent.setEmbeds(editEmbed).queue();
+    }
+
+    /**
+     * Sends a message to the user confirming the creation of the listing has been cancelled.
+     *
+     * @param buttonEvent - The button event.
+     */
+    private void cancelListing(@Nonnull MessageEditCallbackAction buttonEvent) {
+        // Replace listing message embed with cancellation message, delete buttons
+        var messageEmbed =
+                new EmbedBuilder()
+                        .setDescription("The creation of you lisitng has been canceled.")
+                        .setColor(EMBED_COLOR)
+                        .build();
+        buttonEvent.setEmbeds(messageEmbed).queue();
     }
 
     /**
@@ -290,16 +385,18 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param currentListing - The current listing the user is working on.
      * @return the command input the user entered as a string.
      */
-    private String createListingCommandAsString(Listing currentListing) {
+    @Nonnull
+    private String createListingCommandAsString(@Nonnull Listing currentListing) {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
         var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
-        return String.format(
-                "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
-                titleStateCityRemoved,
-                cost,
-                fields.getShippingIncluded(),
-                fields.getDescription(),
-                fields.getCondition());
+        return Objects.requireNonNull(
+                String.format(
+                        "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
+                        titleStateCityRemoved,
+                        cost,
+                        fields.getShippingIncluded(),
+                        fields.getDescription(),
+                        fields.getCondition()));
     }
 }

@@ -1,7 +1,7 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.NewMemberHandler;
-import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,8 +15,8 @@ public class NewMember implements NewMemberHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject Location location;
-    @Inject UserController userController;
     @Inject MessageBuilder messageBuilder;
+    @Inject GuildController guildController;
 
     @Inject
     public NewMember() {
@@ -36,26 +36,28 @@ public class NewMember implements NewMemberHandler {
         var user = event.getUser();
         var guild = event.getGuild();
 
-        // Assigns the Guild ID to the user object when a user first joins
-        userController.setGuildIdForUser(user.getId(), guild.getId());
+        // Add user to the List of guild members when they first join
+        guildController.addUserToServer(guild.getId(), user.getId());
 
-        var newUserWelcomeMessage =
+        var introMsg =
+                String.format(
+                        "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
+                        user.getName());
+
+        var newUserWelcomeEmbed =
                 new EmbedBuilder()
                         .setTitle(String.format("Welcome to %s!", guild.getName()))
-                        .setDescription(
-                                String.format(
-                                        "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
-                                        user.getName()))
+                        .setDescription(introMsg)
                         .setColor(EMBED_COLOR)
                         .build();
 
         // Create the message to send the new user. Includes state dropdown menus
-        var newMemberIntroMsg =
+        var newUserIntroMsg =
                 location.createStatesMessageBuilder()
                         .mention(user)
-                        .addEmbeds(newUserWelcomeMessage)
+                        .addEmbeds(newUserWelcomeEmbed)
                         .build();
 
-        messageBuilder.sendPrivateMessage(user, newMemberIntroMsg);
+        messageBuilder.sendPrivateMessage(user, newUserIntroMsg);
     }
 }

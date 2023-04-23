@@ -35,8 +35,13 @@ public class RemoveMember implements RemoveMemberHandler {
         var userId = event.getUser().getId();
         var guildId = event.getGuild().getId();
 
-        userController.removeUserByMemberAndGuildId(userId, guildId);
+        // Remove user from discord server and delete all their listings
         guildController.removeUserInServer(userId, guildId);
         listingController.deleteListingsForUser(userId, guildId);
+
+        // If user no longer exists in ANY guild, remove them from user collection
+        if (guildController.verifyUserNoLongerExistsInAnyGuild(userId)) {
+            userController.removeUserByMemberId(userId);
+        }
     }
 }

@@ -2,14 +2,17 @@ package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.command.handlers.NewGuildJoinedHandler;
-import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -23,11 +26,21 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     private static final String DEFAULT_TRADING_CHANNEL_NAME = "trading-channel";
     private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
             "Please call the /createtradingchannel bot command to create a new text channel with a name you specify. Without doing this, the bot cannot function.";
+    private static final String BOT_INTRO_MESSAGE_WHEN_FIRST_ADDED =
+            "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.";
+
+    @Nonnull
+    private static final String TRADING_CHANNEL_NAME_ALREADY_EXISTS =
+            Objects.requireNonNull(
+                    String.format(
+                            "A text channel named %s already exists on your server. %s",
+                            DEFAULT_TRADING_CHANNEL_NAME,
+                            CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION));
 
     @Inject Location location;
-    @Inject UserController userController;
     @Inject MessageBuilder messageBuilder;
-    @Inject CreateTradingChannel createTradingChannel;
+    @Inject GuildController guildController;
+    @Inject CreateTradingChannelCommand createTradingChannelCommand;
 
     @Inject
     public NewGuildJoined() {
@@ -46,40 +59,68 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
 
         // Get Guild Owner as a User
         var owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
+        var membersInGuild = event.getGuild().getMembers();
+        var guildId = event.getGuild().getId();
+        var botId = event.getJDA().getSelfUser().getId();
 
-        // Embed builder with intro message later sent to guild owner
+        askOwnerToCreateTradingChannel(owner, guildId);
+
+        addUsersToGuildAndAskLocation(membersInGuild, guildId, botId);
+    }
+
+    /**
+     * Send an intro message to the Guild owner and ask if a new trading channel can be created by
+     * the bot.
+     *
+     * @param owner - The guild owner.
+     * @param guildId - The id of the guild the bot was just added to.
+     */
+    private void askOwnerToCreateTradingChannel(@Nonnull User owner, @Nonnull String guildId) {
+        // Embed builder with intro message sent to guild owner
         var introMessageEmbed =
                 new EmbedBuilder()
-                        .setDescription(
-                                "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.")
+                        .setDescription(BOT_INTRO_MESSAGE_WHEN_FIRST_ADDED)
                         .setColor(EMBED_COLOR)
                         .build();
+
+        var buttonIdCreateChannel =
+                Objects.requireNonNull(String.format("%s:%s:createnewchannel", getName(), guildId));
+        var buttonIdDoNotCreateChannel =
+                Objects.requireNonNull(String.format("%s:%s:no", getName(), guildId));
+
+        var createChannelButton =
+                Button.success(buttonIdCreateChannel, "Bot Can Create The Channel");
+        var doNotCreateChannelButton =
+                Button.primary(buttonIdDoNotCreateChannel, "I'll Create The Channel");
 
         // Message builder with buttons and the embed message. Is later sent to guild owner
         var ownerIntroMessage =
                 new MessageCreateBuilder()
-                        .addActionRow(
-                                Button.success(
-                                        getName() + ":createnewchannel",
-                                        "Bot Can Create The Channel"),
-                                Button.primary(getName() + ":no", "I'll Create The Channel"))
+                        .addActionRow(createChannelButton, doNotCreateChannelButton)
                         .setEmbeds(introMessageEmbed)
                         .build();
 
         // Sends intro message to Guild owner as a DM
         messageBuilder.sendPrivateMessage(owner, ownerIntroMessage);
+    }
 
+    /**
+     * Add all users to the list of members stored by their Guild object.
+     *
+     * @param membersInGuild - A list of all the members in the guild as Member objects.
+     * @param guildId - The id of the guild the users are from.
+     * @param botId - The id of the bot.
+     */
+    private void addUsersToGuildAndAskLocation(
+            @Nonnull List<Member> membersInGuild, @Nonnull String guildId, @Nonnull String botId) {
         var stateSelections = location.createStatesMessageBuilder().build();
-        var membersInGuild = event.getGuild().getMembers();
-        var guildId = event.getGuild().getId();
-        var botId = event.getJDA().getSelfUser().getId();
 
-        // Add each member to collection, set the GuildId, ask their location
+        // Add each member to guild collection & ask their location
         for (Member member : membersInGuild) {
             var user = member.getUser();
             var userId = user.getId();
 
-            userController.setGuildIdForUser(userId, guildId);
+            guildController.addUserToServer(guildId, userId);
 
             if (userId.equals(botId)) {
                 continue;
@@ -93,15 +134,31 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         // Define the Guild owner and request the GuildId from the user collection
-        var owner = event.getUser(); // Only the owner can toggle this event, no need to verify
-        var ownerGuildId = Objects.requireNonNull(userController.getGuildIdForUser(owner.getId()));
-        var guild = Objects.requireNonNull(event.getJDA().getGuildById(ownerGuildId));
+        var owner = event.getUser(); // Only the owner can toggle this event, no need to
+        var buttonLabel = event.getButton().getLabel();
+        var buttonId = Objects.requireNonNull(event.getButton().getId());
+        var guildId = Objects.requireNonNull(buttonId.split(":")[1]);
+        var guild = Objects.requireNonNull(event.getJDA().getGuildById(guildId));
 
         // Delete buttons so no longer clickable
         event.deferEdit().setComponents().queue();
 
-        // Send instruction on how Guild Owner should create new trading channel
-        if ("I'll Create The Channel".equals(event.getButton().getLabel())) {
+        attemptToCreateTradingChannel(owner, buttonLabel, guild);
+    }
+
+    /**
+     * Checks to see which button guild owner selected. If "Bot Can Create The Channel" was
+     * selected, the creation of a channel named 'trading-channel' is attempted.
+     *
+     * @param owner - A guild owner.
+     * @param buttonLabel - The button label.
+     * @param guild - The guild JDA object.
+     */
+    private void attemptToCreateTradingChannel(
+            @Nonnull User owner, @Nonnull String buttonLabel, @Nonnull Guild guild) {
+
+        // Checks to see if owner selected that they'll create the channel
+        if ("I'll Create The Channel".equals(buttonLabel)) {
             messageBuilder.sendPrivateMessage(
                     owner, CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
             return;
@@ -110,18 +167,13 @@ public class NewGuildJoined implements NewGuildJoinedHandler, ButtonHandler {
         // Checks if a channel named trading-channel already exists on the server
         for (GuildChannel guildChannel : guild.getTextChannels()) {
             if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
-                messageBuilder.sendPrivateMessage(
-                        owner,
-                        Objects.requireNonNull(
-                                String.format(
-                                        "A text channel named %s already exists on your server. %s",
-                                        DEFAULT_TRADING_CHANNEL_NAME,
-                                        CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION)));
+                messageBuilder.sendPrivateMessage(owner, TRADING_CHANNEL_NAME_ALREADY_EXISTS);
                 return;
             }
         }
 
         // Create the new "trading-channel". Move it under Text Channels
-        createTradingChannel.createNewTradingChannel(owner, guild, DEFAULT_TRADING_CHANNEL_NAME);
+        createTradingChannelCommand.createNewTradingChannel(
+                owner, guild, DEFAULT_TRADING_CHANNEL_NAME);
     }
 }

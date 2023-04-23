@@ -20,54 +20,6 @@ public class UserController {
     }
 
     /**
-     * Sets the Guild Id for the given user.
-     *
-     * @param discordMemberId - The user to set the Guild Id for.
-     * @param guildId - The Guild Id to set for the user.
-     */
-    public void setGuildIdForUser(String discordMemberId, String guildId) {
-        User user = getUserForMemberId(discordMemberId);
-
-        user.setGuildId(guildId);
-        userRepository.update(user);
-    }
-
-    /**
-     * Get the GuildId for the guild the user is in.
-     *
-     * @param discordMemberId - The discord user to get the guild Id for.
-     * @return the guild Id as a string.
-     */
-    @Nonnull
-    public String getGuildIdForUser(String discordMemberId) {
-        return Objects.requireNonNull(getUserForMemberId(discordMemberId).getGuildId());
-    }
-
-    /**
-     * Retrieves the Trading Channel Id for the given user.
-     *
-     * @param discordMemberId - The user to get the trading channel Id for.
-     * @return the trading channel Id as a string.
-     */
-    @Nullable
-    public String getTradingChannelId(String discordMemberId) {
-        return getUserForMemberId(discordMemberId).getTradingChannelId();
-    }
-
-    /**
-     * Sets the Trading Channel Id for the given user.
-     *
-     * @param user - The user to set the trading channel Id for.
-     * @param tradingChannelId - The trading channel Id to set for the user.
-     */
-    public void setTradingChannelId(String discordMemberId, String tradingChannelId) {
-        User user = getUserForMemberId(discordMemberId);
-
-        user.setTradingChannelId(tradingChannelId);
-        userRepository.update(user);
-    }
-
-    /**
      * Set the state that the user lives in.
      *
      * @param discordMemberId - The discord user to set the state of residence for.
@@ -170,11 +122,10 @@ public class UserController {
      * @param discordMemberId - The discord user to remove from the collection.
      * @param guildId - The guild id of guiid the user was removed or left from.
      */
-    public void removeUserByMemberAndGuildId(String discordMemberId, String guildId) {
+    public void removeUserByMemberId(String discordMemberId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
-            if (currentUser.getDiscordUserId().equals(discordMemberId)
-                    && currentUser.getGuildId().equals(guildId)) {
+            if (currentUser.getDiscordUserId().equals(discordMemberId)) {
                 userRepository.delete(Objects.requireNonNull(currentUser.getId()));
                 return;
             }

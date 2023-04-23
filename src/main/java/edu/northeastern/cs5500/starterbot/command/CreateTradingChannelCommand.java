@@ -1,11 +1,17 @@
 package edu.northeastern.cs5500.starterbot.command;
 
 import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
+import edu.northeastern.cs5500.starterbot.controller.UserController;
+import java.util.EnumSet;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -16,7 +22,9 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 @Slf4j
 public class CreateTradingChannelCommand implements SlashCommandHandler {
 
-    @Inject CreateTradingChannel createTradingChannel;
+    @Inject UserController userController;
+    @Inject MessageBuilder messageBuilder;
+    @Inject GuildController guildController;
 
     @Inject
     public CreateTradingChannelCommand() {
@@ -73,8 +81,7 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
         }
 
         // A new text channel is created and set as the new trading channel for the server
-        createTradingChannel.createNewTradingChannel(
-                guildOwner, guild, Objects.requireNonNull(title));
+        createNewTradingChannel(guildOwner, guild, Objects.requireNonNull(title));
         event.reply(
                         Objects.requireNonNull(
                                 String.format(
@@ -82,5 +89,42 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
                                         title)))
                 .setEphemeral(true)
                 .queue();
+    }
+
+    /**
+     * Creates a trading channel with specific permissions and adds it to "Text Channels" grouping.
+     *
+     * @param owner - The owner of the Discord Guild.
+     * @param guild - The guild to add the text channel to.
+     * @param channelName - The name to give the channel.
+     */
+    public void createNewTradingChannel(User owner, Guild guild, @Nonnull String channelName) {
+        var category = guild.getCategoriesByName("text channels", true).get(0);
+
+        // Permissions that should be applied to the channel
+        EnumSet<Permission> deny =
+                EnumSet.of(
+                        Permission.MESSAGE_SEND,
+                        Permission.CREATE_PRIVATE_THREADS,
+                        Permission.MESSAGE_MANAGE,
+                        Permission.MANAGE_THREADS);
+
+        // Creation of the new channel
+        var textChannel =
+                category.createTextChannel(channelName)
+                        .addPermissionOverride(guild.getPublicRole(), null, deny)
+                        .complete();
+        textChannel.getManager().setParent(category);
+
+        // Send success message that the channel was created
+        var successMessage =
+                Objects.requireNonNull(
+                        String.format(
+                                "A new channel named %s has been created in your server %s.",
+                                channelName, guild.getName()));
+        messageBuilder.sendPrivateMessage(owner, successMessage);
+
+        // Set this channel as the trading channel for the Discord server
+        guildController.setTradingChannelId(guild.getId(), textChannel.getId());
     }
 }

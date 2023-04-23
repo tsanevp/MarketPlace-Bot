@@ -6,6 +6,7 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -74,6 +75,19 @@ public class GuildController {
     }
 
     /**
+     * Method to check if the user exists in ANY guild.
+     *
+     * @param discordMemberId - The discord user that may be contained in the guild.
+     * @return the true if the user is no longer exists in any guild, false if not.
+     */
+    public boolean verifyUserNoLongerExistsInAnyGuild(@NonNull String discordMemberId) {
+        return guildRepository.getAll().stream()
+                .filter(guild -> guild.getUsersOnServer().contains(discordMemberId))
+                .toList()
+                .isEmpty();
+    }
+
+    /**
      * Gets the guild object for the guild id passed.
      *
      * @param guildId - The id of the guild object to return.
@@ -105,7 +119,7 @@ public class GuildController {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild guild : guilds) {
             if (guild.getGuildId().equals(guildId)) {
-                guildRepository.delete(guild.getId());
+                guildRepository.delete(Objects.requireNonNull(guild.getId()));
                 return true;
             }
         }
