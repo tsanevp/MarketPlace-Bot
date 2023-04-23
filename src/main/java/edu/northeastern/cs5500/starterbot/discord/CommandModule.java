@@ -27,7 +27,7 @@ public class CommandModule {
 
     @Provides
     @IntoSet
-    public StringSelectHandler provideLocation(Location stringSelectLocation) {
+    public StringSelectHandler provideLocation(SettingLocationHelper stringSelectLocation) {
         return stringSelectLocation;
     }
 

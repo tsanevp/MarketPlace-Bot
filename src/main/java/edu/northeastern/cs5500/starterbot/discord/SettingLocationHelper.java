@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
-public class Location implements StringSelectHandler {
+public class SettingLocationHelper implements StringSelectHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
     private static final Integer MAX_MENU_SELECTIONS = 25;
 
@@ -22,7 +22,7 @@ public class Location implements StringSelectHandler {
     @Inject CityController cityController;
 
     @Inject
-    public Location() {
+    public SettingLocationHelper() {
         // Defined public and empty for Dagger injection
     }
 
@@ -52,6 +52,8 @@ public class Location implements StringSelectHandler {
         Objects.requireNonNull(selectedCityOrState);
 
         if ("cities".equals(handlerName)) {
+            userController.setCityOfResidence(userId, selectedCityOrState);
+
             var messageEmbed = cityAndStateSetEmbedMessage(userId, selectedCityOrState);
             event.deferEdit().setComponents().setEmbeds(messageEmbed).queue();
 
@@ -81,11 +83,7 @@ public class Location implements StringSelectHandler {
                         userController.getCityOfResidence(userId),
                         userController.getStateOfResidence(userId));
 
-        var messageEmbed =
-                new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
-
-        userController.setCityOfResidence(userId, selectedCityOrState);
-        return messageEmbed;
+        return new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
     }
 
     /**
@@ -94,6 +92,7 @@ public class Location implements StringSelectHandler {
      *
      * @return MessageCreateBuilder that has each StringSelectMenu as an action row
      */
+    @Nonnull
     public MessageCreateBuilder createStatesMessageBuilder() {
         var statesFirstHalf =
                 StringSelectMenu.create(getName() + ":stateselect1")
@@ -130,7 +129,8 @@ public class Location implements StringSelectHandler {
      * @param stateAbbreviation the abbreviation of the State that we need to pull city data on
      * @return A MessageCreateBuilder with the StringSelectMenu of cities for the given State
      */
-    private MessageCreateBuilder createCityMessageBuilder(String stateAbbreviation) {
+    @Nonnull
+    private MessageCreateBuilder createCityMessageBuilder(@Nonnull String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
 

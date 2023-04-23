@@ -1,13 +1,12 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
-import edu.northeastern.cs5500.starterbot.discord.Location;
+import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -18,7 +17,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 public class UpdateLocationCommand implements SlashCommandHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject Location location;
+    @Inject SettingLocationHelper location;
 
     @Inject
     public UpdateLocationCommand() {
@@ -67,8 +66,6 @@ public class UpdateLocationCommand implements SlashCommandHandler {
                         .build();
 
         // Message that includes update instructions and location selection menus
-        return location.createStatesMessageBuilder()
-                .addEmbeds(updateLocationInstructions)
-                .build();
+        return location.createStatesMessageBuilder().addEmbeds(updateLocationInstructions).build();
     }
 }

@@ -3,7 +3,7 @@ package edu.northeastern.cs5500.starterbot.discord.commands;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
-import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.exceptions.ChannelNotFoundException;
@@ -36,7 +36,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     @Inject ListingController listingController;
     @Inject UserController userController;
-    @Inject MessageBuilder messageBuilder;
+    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
     @Inject JDA jda;
 

@@ -8,16 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-public class MessageBuilderTest {
+public class MessageBuilderHelperTest {
 
-    MessageBuilder messageBuilder;
+    MessageBuilderHelper messageBuilder;
 
     @Test
     void testMessageBuilderToMessageEmbedReturnListIsOfCorrectSize() {
         // If the method returns a list of size 1 or greater, we expect that the method works as
         // intended
 
-        messageBuilder = new MessageBuilder();
+        messageBuilder = new MessageBuilderHelper();
 
         // Define ListingFields parameters
         var cost = "50";

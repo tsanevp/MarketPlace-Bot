@@ -12,11 +12,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
-public class MessageBuilder {
+public class MessageBuilderHelper {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject
-    public MessageBuilder() {
+    public MessageBuilderHelper() {
         // Defined public and empty for Dagger injection
     }
 

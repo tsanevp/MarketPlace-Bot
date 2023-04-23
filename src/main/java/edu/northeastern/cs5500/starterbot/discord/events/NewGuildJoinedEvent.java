@@ -1,8 +1,8 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
-import edu.northeastern.cs5500.starterbot.discord.Location;
-import edu.northeastern.cs5500.starterbot.discord.MessageBuilder;
+import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
@@ -40,8 +40,8 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
                             DEFAULT_TRADING_CHANNEL_NAME,
                             CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION));
 
-    @Inject Location location;
-    @Inject MessageBuilder messageBuilder;
+    @Inject SettingLocationHelper location;
+    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
     @Inject CreateTradingChannelCommand createTradingChannelCommand;
 
