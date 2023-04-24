@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
@@ -160,6 +161,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return a ListingFields object.
      */
     @Nonnull
+    @VisibleForTesting
     private ListingFields buildListingFields(
             int cost,
             boolean shippingIncluded,
@@ -193,6 +195,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return a Listing object.
      */
     @Nonnull
+    @VisibleForTesting
     private Listing buildListing(
             @Nonnull String title,
             @Nonnull String guildId,
@@ -230,6 +233,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *     delete the listing.
      */
     @Nonnull
+    @VisibleForTesting
     private MessageCreateData createListingConfirmationMessage(
             @Nonnull String discordDisplayName, @Nonnull Listing listing) {
 
@@ -251,6 +255,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return the title of the listing with the city and state added to it.
      */
     @Nonnull
+    @VisibleForTesting
     private String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
         try {
             return Objects.requireNonNull(
@@ -271,6 +276,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return the date and time the listing was posted.
      */
     @Nonnull
+    @VisibleForTesting
     private String getDatePosted() {
         var dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
         var currentdateTime = LocalDateTime.now();
@@ -287,6 +293,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *     the price reformatted.
      */
     @Nonnull
+    @VisibleForTesting
     private String reformatCostValue(int cost) {
         // Reformat the price to include the currency being used
         return Objects.requireNonNull(String.format("%s %s", CURRENCY_USED, cost));

@@ -25,7 +25,7 @@ public class GuildController {
      * @param guildId - The id of the guild to set the trading channel id for.
      * @param tradingChannelId - The trading channel id to set for the guild.
      */
-    public void setTradingChannelId(@NonNull String guildId, String tradingChannelId) {
+    public void setTradingChannelId(@NonNull String guildId, @NonNull String tradingChannelId) {
         Guild guild = getGuildByGuildId(guildId);
         guild.setTradingChannelId(tradingChannelId);
         guildRepository.update(guild);

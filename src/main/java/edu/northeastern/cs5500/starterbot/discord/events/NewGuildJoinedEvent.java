@@ -1,8 +1,8 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
-import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
+import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
