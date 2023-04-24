@@ -183,7 +183,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     private MessageChannel getTradingChannel(@Nonnull String guildId)
             throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
-        
+
         if (guild == null) {
             guildController.removeGuildByGuildId(guildId);
             throw new GuildNotFoundException("Guild ID no longer exists in JDA.");
