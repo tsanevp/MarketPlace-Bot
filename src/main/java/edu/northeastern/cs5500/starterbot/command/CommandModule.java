@@ -79,4 +79,11 @@ public class CommandModule {
     public RemoveMemberHandler provideRemoveMember(RemoveMember removeMember) {
         return removeMember;
     }
+
+    @Provides
+    @IntoSet
+    public SlashCommandHandler provideSearchListingsCommand(
+            SearchListingsCommand searchListingsCommand) {
+        return searchListingsCommand;
+    }
 }
