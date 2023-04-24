@@ -124,15 +124,31 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        var userId = event.getUser().getId();
         var buttonIds = event.getButton().getId().split(":");
+        var buttonEvent = event.deferEdit().setComponents();
         var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
 
         if (listing == null) {
             log.error("Listing is no longer in database");
             event.reply(
-                    "Listings are not updated. Please use /mylistings to recieve an updated list.");
+                            "Listings are not updated. Please use /mylistings to recieve an updated list.")
+                    .queue();
         } else {
-            onDeleteListingButtonClick(event, listing);
+            try {
+                onDeleteListingButtonClick(userId, listing);
+            } catch (GuildNotFoundException | ChannelNotFoundException e) {
+                log.error("myListing encountered an error when deleting listing", e);
+                event.reply("Unable to remove listing because the channel/server no longer exists.")
+                        .queue();
+            }
+            buttonEvent
+                    .setEmbeds(
+                            new EmbedBuilder()
+                                    .setDescription("Your post has been successfully deleted")
+                                    .setColor(EMBED_COLOR)
+                                    .build())
+                    .queue();
         }
     }
 
@@ -141,35 +157,16 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      *
      * @param event - the event of a button interaction
      * @param listing - the listing to be deleted.
+     * @throws GuildNotFoundException - guild was not found in JDA.
+     * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    void onDeleteListingButtonClick(
-            @Nonnull ButtonInteractionEvent event, @Nonnull Listing listing) {
+    void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
+            throws GuildNotFoundException, ChannelNotFoundException {
         MessageChannel channel;
-        try {
-            channel = getTradingChannel(listing.getGuildId());
-            var buttonEvent = event.deferEdit().setComponents();
+        channel = getTradingChannel(listing.getGuildId());
 
-            var userId = event.getUser().getId();
-
-            listingController.deleteListingById(listing.getId(), userId);
-            channel.deleteMessageById(listing.getMessageId()).queue();
-
-            buttonEvent
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription("Your post has been successfully deleted")
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
-        } catch (GuildNotFoundException e) {
-            log.error("myListing encountered an error when retrieving server.", e);
-            event.reply("Unable to remove listing because the server no longer exists.").complete();
-        } catch (ChannelNotFoundException e) {
-            log.error("myListing encountered an error when retrieving channel.", e);
-            event.reply(
-                            "Unable to remove listing because the channel no longer exists. Please use /createtradingchannel in the server.")
-                    .complete();
-        }
+        listingController.deleteListingById(listing.getId(), userId);
+        channel.deleteMessageById(listing.getMessageId()).queue();
     }
 
     /**
@@ -194,7 +191,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var channel = guild.getTextChannelById(tradingChannelId);
 
         if (channel == null) {
-            guildController.setTradingChannelId(guildId, null);
             throw new ChannelNotFoundException(
                     "Trading channel ID no longer exists in the specified guild in JDA.");
         }
