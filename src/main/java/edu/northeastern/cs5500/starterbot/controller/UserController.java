@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.User;
@@ -103,6 +104,7 @@ public class UserController {
      * @return the user obtained from the repository OR the user just created.
      */
     @Nonnull
+    @VisibleForTesting
     User getUserForMemberId(@Nonnull String discordMemberId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
@@ -153,6 +155,7 @@ public class UserController {
      *
      * @return the size of the user collection.
      */
+    @VisibleForTesting
     long getSizeUserCollection() {
         return userRepository.count();
     }

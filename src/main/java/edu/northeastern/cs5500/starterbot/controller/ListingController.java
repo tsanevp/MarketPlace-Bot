@@ -4,9 +4,7 @@ import com.mongodb.lang.NonNull;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,34 +30,35 @@ public class ListingController {
     }
 
     /**
-     * Deletes the all the listings of a specific user and stores the message ids of each listing.
+     * Deletes the all the listings of a specific user.
      *
      * @param discordMemberId - The userId of the discord user.
      * @param guild - The guild in which the listing is contained in.
-     * @returns A list of message ids where each id can be used to get the message object.
+     * @returns Whether listing is successfully deleted.
      */
-    public List<Long> deleteListingsForUser(String discordMemberId, String guildId) {
-        List<Long> messageIds = new ArrayList<>();
+    public boolean deleteListingsForUser(@NonNull String discordMemberId, @NonNull String guildId) {
+        if (countListingsByMemberId(discordMemberId, guildId) == 0) {
+            return false;
+        }
 
         for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
-            messageIds.add(listing.getMessageId());
             listingRepository.delete(listing.getId());
         }
 
-        return messageIds;
+        return true;
     }
 
     /**
      * Deletes the listings with a specified objectId.
      *
      * @param objectId - The objectId of the listing in the database.
-     * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(@Nonnull ObjectId objectId, String discordMemberId) {
+    public boolean deleteListingById(@Nonnull ObjectId objectId) {
         if (getListingById(objectId) == null) {
             return false;
         }
+
         listingRepository.delete(objectId);
         return true;
     }
@@ -83,7 +82,8 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getListingsWithKeyword(String keyword, String guildId) {
+    public Collection<Listing> getListingsWithKeyword(
+            @NonNull String keyword, @NonNull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
                 .toList();
@@ -97,7 +97,8 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getListingsByMemberId(String discordMemberId, String guildId) {
+    public Collection<Listing> getListingsByMemberId(
+            @NonNull String discordMemberId, @NonNull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
                 .toList();
@@ -121,7 +122,7 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getAllListingsInGuild(String guildId) {
+    public Collection<Listing> getAllListingsInGuild(@NonNull String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();

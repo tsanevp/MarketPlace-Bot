@@ -1,11 +1,12 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.NonNull;
 import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -16,6 +17,32 @@ public class GuildController {
     @Inject
     GuildController(GenericRepository<Guild> guildRepository) {
         this.guildRepository = guildRepository;
+    }
+
+    /**
+     * Sets the guild owner id for the current guild.
+     *
+     * @param guildId - The id of the guild to set the trading channel id for.
+     * @param guildOwnerId - The id of the owner to set for the guild.
+     */
+    public void setGuildOwnerId(@NonNull String guildId, @NonNull String guildOwnerId) {
+        var guild = getGuildByGuildId(guildId);
+
+        guild.setGuildOwnerId(guildOwnerId);
+        guildRepository.update(guild);
+    }
+
+    /**
+     * Gets and returns the guild owner id for the current guild.
+     *
+     * @param guildId - The id of the guild to get the owner id for.
+     * @return the guild owner id.
+     */
+    @NonNull
+    public String getGuildOwnerId(@NonNull String guildId) {
+        var guild = getGuildByGuildId(guildId);
+
+        return guild.getGuildOwnerId();
     }
 
     /**
@@ -36,14 +63,8 @@ public class GuildController {
      *
      * @param guildId - The id of the guild to add the user to.
      * @param discordMemberId - The id of the user that should be added to the guild.
-     * @returns Whether the user was successfully added into the guild.
      */
-    public boolean addUserToServer(@NonNull String guildId, @NonNull String discordMemberId) {
-
-        if (verifyUserInGuild(discordMemberId, guildId)) {
-            return false;
-        }
-
+    public void addUserToServer(@NonNull String guildId, @NonNull String discordMemberId) {
         var guild = getGuildByGuildId(guildId);
         var usersOnServer = guild.getUsersOnServer();
 
@@ -51,7 +72,25 @@ public class GuildController {
         guild.setUsersOnServer(usersOnServer);
 
         guildRepository.update(guild);
-        return true;
+    }
+
+    /**
+     * Adds all the current user in the guild to the list of user that are in the guild.
+     *
+     * @param guildId - The id of the guild to add the user to.
+     * @param listOfUserIds - A list of the user ids that should be added to the guild.
+     */
+    public void addAllCurrentUsersToServer(
+            @NonNull String guildId, @NonNull List<String> listOfUserIds) {
+        var guild = getGuildByGuildId(guildId);
+        var usersOnServer = guild.getUsersOnServer();
+
+        for (String userId : listOfUserIds) {
+            usersOnServer.add(userId);
+        }
+
+        guild.setUsersOnServer(usersOnServer);
+        guildRepository.update(guild);
     }
 
     /**
@@ -75,11 +114,11 @@ public class GuildController {
     }
 
     /**
-     * Method to get the size of the guild collection. Used mainly for test purposes.
+     * Method to check if the user already exists in the guild.
      *
      * @param discordMemberId - The discord user that may be contained in the guild.
      * @param guildId - The id of the guild to verify a user is in.
-     * @return the size of the guild collection.
+     * @return whether the user already exists in the guild.
      */
     public boolean verifyUserInGuild(@NonNull String discordMemberId, @NonNull String guildId) {
         return getGuildByGuildId(guildId).getUsersOnServer().contains(discordMemberId);
@@ -115,7 +154,7 @@ public class GuildController {
 
         Guild guild = new Guild();
         guild.setGuildId(guildId);
-        guild.setUsersOnServer(new ArrayList<>());
+        guild.setUsersOnServer(new HashSet<>());
         guildRepository.add(guild);
         return guild;
     }
@@ -130,7 +169,7 @@ public class GuildController {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild guild : guilds) {
             if (guild.getGuildId().equals(guildId)) {
-                guildRepository.delete(Objects.requireNonNull(guild.getId()));
+                guildRepository.delete(guild.getId());
                 return true;
             }
         }
@@ -142,6 +181,7 @@ public class GuildController {
      *
      * @return the size of the guild collection.
      */
+    @VisibleForTesting
     long getSizeGuildCollection() {
         return guildRepository.count();
     }

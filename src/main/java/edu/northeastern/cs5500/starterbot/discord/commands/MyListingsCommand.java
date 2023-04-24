@@ -168,7 +168,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throws GuildNotFoundException, ChannelNotFoundException {
         var channel = getTradingChannel(listing.getGuildId());
 
-        listingController.deleteListingById(listing.getId(), userId);
+        listingController.deleteListingById(listing.getId());
         channel.deleteMessageById(listing.getMessageId()).queue();
     }
 

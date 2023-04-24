@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import javax.annotation.Nonnull;
@@ -54,7 +55,8 @@ public class UpdateLocationCommand implements SlashCommandHandler {
      * @return the message to send to the user.
      */
     @Nonnull
-    private MessageCreateData createUpdateLocationMessage() {
+    @VisibleForTesting
+    MessageCreateData createUpdateLocationMessage() {
         var updateLocationString =
                 "To update your State and City, plese select the correct values from the drop-down menus below.";
 

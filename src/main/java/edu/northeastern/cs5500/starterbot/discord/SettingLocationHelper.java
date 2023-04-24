@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
@@ -124,13 +125,14 @@ public class SettingLocationHelper implements StringSelectHandler {
 
     /**
      * Method to create a StringSelectMenu with the MAX_MENU_SELECTIONS most populated cities for
-     * the given State
+     * the given State.
      *
-     * @param stateAbbreviation the abbreviation of the State that we need to pull city data on
-     * @return A MessageCreateBuilder with the StringSelectMenu of cities for the given State
+     * @param stateAbbreviation - the abbreviation of the State that we need to pull city data on.
+     * @return A MessageCreateBuilder with the StringSelectMenu of cities for the given State.
      */
     @Nonnull
-    private MessageCreateBuilder createCityMessageBuilder(@Nonnull String stateAbbreviation) {
+    @VisibleForTesting
+    MessageCreateBuilder createCityMessageBuilder(@Nonnull String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
 

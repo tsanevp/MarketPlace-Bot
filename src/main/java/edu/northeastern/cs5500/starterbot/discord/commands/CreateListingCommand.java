@@ -162,7 +162,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private ListingFields buildListingFields(
+    ListingFields buildListingFields(
             int cost,
             boolean shippingIncluded,
             @Nonnull String condition,
@@ -196,7 +196,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private Listing buildListing(
+    Listing buildListing(
             @Nonnull String title,
             @Nonnull String guildId,
             @Nonnull String userId,
@@ -235,7 +235,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private MessageCreateData createListingConfirmationMessage(
+    MessageCreateData createListingConfirmationMessage(
             @Nonnull String discordDisplayName, @Nonnull Listing listing) {
 
         var postButton = Button.success(getName() + ":ok", "Post");
@@ -257,7 +257,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
+    String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
         try {
             return Objects.requireNonNull(
                     String.format(
@@ -278,7 +278,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private String getDatePosted() {
+    String getDatePosted() {
         var dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
         var currentdateTime = LocalDateTime.now();
         return Objects.requireNonNull(dateTimeFormatter.format(currentdateTime));
@@ -295,7 +295,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      */
     @Nonnull
     @VisibleForTesting
-    private String reformatCostValue(int cost) {
+    String reformatCostValue(int cost) {
         // Reformat the price to include the currency being used
         return Objects.requireNonNull(String.format("%s %s", CURRENCY_USED, cost));
     }

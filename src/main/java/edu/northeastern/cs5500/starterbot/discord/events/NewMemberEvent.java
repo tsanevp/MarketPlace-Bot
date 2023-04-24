@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
 import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
@@ -10,6 +11,7 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
 @Slf4j
@@ -41,25 +43,36 @@ public class NewMemberEvent implements NewMemberHandler {
         // Add user to the List of guild members when they first join
         guildController.addUserToServer(guild.getId(), user.getId());
 
+        var newUserIntroMsg = createIntroMessageForNewUser(user.getName(), guild.getName());
+
+        messageBuilder.sendPrivateMessage(user, newUserIntroMsg);
+    }
+
+    /**
+     * Method to create the intro message to send the user when they first join the guild.
+     *
+     * @param userName - The display name of the user that joined.
+     * @param guildName - The name of the guild the user joined.
+     * @return the introduction message that is sent to the user that includes the state selection
+     *     menus.
+     */
+    @Nonnull
+    @VisibleForTesting
+    MessageCreateData createIntroMessageForNewUser(
+            @Nonnull String userName, @Nonnull String guildName) {
         var introMsg =
                 String.format(
                         "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
-                        user.getName());
+                        userName);
 
         var newUserWelcomeEmbed =
                 new EmbedBuilder()
-                        .setTitle(String.format("Welcome to %s!", guild.getName()))
+                        .setTitle(String.format("Welcome to %s!", guildName))
                         .setDescription(introMsg)
                         .setColor(EMBED_COLOR)
                         .build();
 
         // Create the message to send the new user. Includes state dropdown menus
-        var newUserIntroMsg =
-                location.createStatesMessageBuilder()
-                        .mention(user)
-                        .addEmbeds(newUserWelcomeEmbed)
-                        .build();
-
-        messageBuilder.sendPrivateMessage(user, newUserIntroMsg);
+        return location.createStatesMessageBuilder().addEmbeds(newUserWelcomeEmbed).build();
     }
 }

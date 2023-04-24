@@ -76,6 +76,6 @@ public class GuildControllerTest {
         // Add a user to the guild and check that size of list increases
         guildController.addUserToServer(guildId, userToAdd);
         assertThat(guild.getUsersOnServer().size()).isEqualTo(1);
-        assertThat(guild.getUsersOnServer().get(0)).isEqualTo(userToAdd);
+        assertThat(guild.getUsersOnServer().contains(userToAdd)).isEqualTo(true);
     }
 }

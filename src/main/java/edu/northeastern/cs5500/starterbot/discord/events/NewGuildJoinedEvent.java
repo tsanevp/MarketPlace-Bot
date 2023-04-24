@@ -1,11 +1,13 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
 import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -21,6 +23,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
 @Slf4j
@@ -30,7 +33,10 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
     private static final String CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION =
             "Please call the /createtradingchannel bot command to create a new text channel with a name you specify. Without doing this, the bot cannot function.";
     private static final String BOT_INTRO_MESSAGE_WHEN_FIRST_ADDED =
-            "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this new channel, the bot cannot funciton as intended.";
+            "Thank you for adding our MarketPlace Bot! For the bot to function as intended, a new text channel that handles item postings needs to be created. "
+                    + "Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or "
+                    + "if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this "
+                    + "new channel, the bot cannot funciton as intended.";
 
     @Nonnull
     private static final String TRADING_CHANNEL_NAME_ALREADY_EXISTS =
@@ -59,26 +65,35 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
-        log.info(event.getGuild().getName());
+
         // Get Guild Owner as a User
         var owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
         var membersInGuild = event.getGuild().getMembers();
         var guildId = event.getGuild().getId();
         var botId = event.getJDA().getSelfUser().getId();
 
-        askOwnerToCreateTradingChannel(owner, guildId);
+        var ownerIntroMessage = askOwnerToCreateTradingChannel(owner.getId(), guildId);
+
+        // Sends intro message to Guild owner as a DM
+        messageBuilder.sendPrivateMessage(owner, ownerIntroMessage);
 
         addUsersToGuildAndAskLocation(membersInGuild, guildId, botId);
     }
 
     /**
-     * Send an intro message to the Guild owner and ask if a new trading channel can be created by
-     * the bot.
+     * Set the guild owner and send an intro message to the Guild owner ro ask if a new trading
+     * channel can be created by the bot.
      *
-     * @param owner - The guild owner.
+     * @param ownerId - The id of the guild owner.
      * @param guildId - The id of the guild the bot was just added to.
      */
-    private void askOwnerToCreateTradingChannel(@Nonnull User owner, @Nonnull String guildId) {
+    @Nonnull
+    @VisibleForTesting
+    MessageCreateData askOwnerToCreateTradingChannel(
+            @Nonnull String ownerId, @Nonnull String guildId) {
+        // Sets the owner as the guild owner
+        guildController.setGuildOwnerId(guildId, ownerId);
+
         // Embed builder with intro message sent to guild owner
         var introMessageEmbed =
                 new EmbedBuilder()
@@ -97,14 +112,10 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
                 Button.primary(buttonIdDoNotCreateChannel, "I'll Create The Channel");
 
         // Message builder with buttons and the embed message. Is later sent to guild owner
-        var ownerIntroMessage =
-                new MessageCreateBuilder()
-                        .addActionRow(createChannelButton, doNotCreateChannelButton)
-                        .setEmbeds(introMessageEmbed)
-                        .build();
-
-        // Sends intro message to Guild owner as a DM
-        messageBuilder.sendPrivateMessage(owner, ownerIntroMessage);
+        return new MessageCreateBuilder()
+                .addActionRow(createChannelButton, doNotCreateChannelButton)
+                .setEmbeds(introMessageEmbed)
+                .build();
     }
 
     /**
@@ -117,13 +128,15 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
     private void addUsersToGuildAndAskLocation(
             @Nonnull List<Member> membersInGuild, @Nonnull String guildId, @Nonnull String botId) {
         var stateSelections = location.createStatesMessageBuilder().build();
+        List<String> listOfUserIds = new ArrayList<>();
 
         // Add each member to guild collection & ask their location
         for (Member member : membersInGuild) {
             var user = member.getUser();
             var userId = user.getId();
 
-            guildController.addUserToServer(guildId, userId);
+            // Store each id in the list. GuildController later adds each user to guild
+            listOfUserIds.add(userId);
 
             if (userId.equals(botId)) {
                 continue;
@@ -132,12 +145,14 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
             // Send user DM w/ state & city selection
             messageBuilder.sendPrivateMessage(user, stateSelections);
         }
+
+        guildController.addAllCurrentUsersToServer(guildId, listOfUserIds);
     }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        // Define the Guild owner and request the GuildId from the user collection
-        var owner = event.getUser(); // Only the owner can toggle this event, no need to
+        // This button interaction will only ever be accessed by the guild owner
+        var owner = event.getUser();
         var buttonLabel = event.getButton().getLabel();
         var buttonId = Objects.requireNonNull(event.getButton().getId());
         var guildId = Objects.requireNonNull(buttonId.split(":")[1]);
