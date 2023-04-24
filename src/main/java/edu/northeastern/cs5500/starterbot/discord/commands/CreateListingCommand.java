@@ -213,6 +213,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .guildId(guildId)
                         .title(titleReformatted)
                         .url(url)
+                        .images(imageURLs)
                         .fields(listingFields)
                         .build();
         Objects.requireNonNull(listing);

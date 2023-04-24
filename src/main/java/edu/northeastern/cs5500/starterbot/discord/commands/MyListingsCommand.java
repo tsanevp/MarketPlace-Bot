@@ -136,23 +136,24 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             event.reply(
                             "Listings are not updated. Please use /mylistings to recieve an updated list.")
                     .queue();
-        } else {
-            try {
-                onDeleteListingButtonClick(userId, listing);
-            } catch (GuildNotFoundException | ChannelNotFoundException e) {
-                log.error("myListing encountered an error when deleting listing", e);
-                event.reply("Unable to remove listing because the channel/server no longer exists.")
-                        .queue();
-            }
-
-            var deleteSuccessEmbed =
-                    new EmbedBuilder()
-                            .setDescription("Your post has been successfully deleted")
-                            .setColor(EMBED_COLOR)
-                            .build();
-
-            buttonEvent.setEmbeds(deleteSuccessEmbed).queue();
+            return;
         }
+
+        try {
+            onDeleteListingButtonClick(userId, listing);
+        } catch (GuildNotFoundException | ChannelNotFoundException e) {
+            log.error("myListing encountered an error when deleting listing", e);
+            event.reply("Unable to remove listing because the channel/server no longer exists.")
+                    .queue();
+        }
+
+        var deleteSuccessEmbed =
+                new EmbedBuilder()
+                        .setDescription("Your post has been successfully deleted")
+                        .setColor(EMBED_COLOR)
+                        .build();
+
+        buttonEvent.setEmbeds(deleteSuccessEmbed).queue();
     }
 
     /**

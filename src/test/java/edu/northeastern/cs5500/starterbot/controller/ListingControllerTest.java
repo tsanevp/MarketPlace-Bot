@@ -70,10 +70,12 @@ class ListingControllerTest {
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
 
         // mutation
-        assertTrue(listingController.deleteListingsForUser(USER_ID, GUILD_ID));
+        var listMessageIds = listingController.deleteListingsForUser(USER_ID, GUILD_ID);
+        assertThat(listMessageIds).isNotEmpty();
+        assertThat(listMessageIds.size()).isEqualTo(1);
+        assertThat(listMessageIds.get(0)).isEqualTo(testListing.getMessageId());
 
         // post
-        assertFalse(listingController.deleteListingsForUser(USER_ID, GUILD_ID));
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
     }
 

@@ -4,7 +4,9 @@ import com.mongodb.lang.NonNull;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,20 +32,21 @@ public class ListingController {
     }
 
     /**
-     * Deletes the all the listings of a specific user.
+     * Deletes the all the listings of a specific user and stores the message ids of each listing.
      *
      * @param discordMemberId - The userId of the discord user.
      * @param guild - The guild in which the listing is contained in.
-     * @returns Whether listing is successfully deleted.
+     * @returns A list of message ids where each id can be used to get the message object.
      */
-    public boolean deleteListingsForUser(String discordMemberId, String guildId) {
-        if (countListingsByMemberId(discordMemberId, guildId) == 0) {
-            return false;
-        }
+    public List<Long> deleteListingsForUser(String discordMemberId, String guildId) {
+        List<Long> messageIds = new ArrayList<>();
+
         for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
+            messageIds.add(listing.getMessageId());
             listingRepository.delete(listing.getId());
         }
-        return true;
+
+        return messageIds;
     }
 
     /**

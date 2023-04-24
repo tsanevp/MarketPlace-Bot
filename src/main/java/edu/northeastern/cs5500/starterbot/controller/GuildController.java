@@ -5,7 +5,6 @@ import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,7 +25,8 @@ public class GuildController {
      * @param tradingChannelId - The trading channel id to set for the guild.
      */
     public void setTradingChannelId(@NonNull String guildId, @NonNull String tradingChannelId) {
-        Guild guild = getGuildByGuildId(guildId);
+        var guild = getGuildByGuildId(guildId);
+
         guild.setTradingChannelId(tradingChannelId);
         guildRepository.update(guild);
     }
@@ -39,14 +39,17 @@ public class GuildController {
      * @returns Whether the user was successfully added into the guild.
      */
     public boolean addUserToServer(@NonNull String guildId, @NonNull String discordMemberId) {
+
         if (verifyUserInGuild(discordMemberId, guildId)) {
             return false;
         }
-        Guild guild = getGuildByGuildId(guildId);
-        var usersOnServer = guild.getUsersOnServer();
-        usersOnServer.add(discordMemberId);
 
+        var guild = getGuildByGuildId(guildId);
+        var usersOnServer = guild.getUsersOnServer();
+
+        usersOnServer.add(discordMemberId);
         guild.setUsersOnServer(usersOnServer);
+
         guildRepository.update(guild);
         return true;
     }
@@ -59,8 +62,16 @@ public class GuildController {
      * @returns Whether the user was successfully removed from the guild.
      */
     public boolean removeUserInServer(@NonNull String discordMemberId, @NonNull String guildId) {
-        List<String> guildUsers = getGuildByGuildId(guildId).getUsersOnServer();
-        return guildUsers.remove(discordMemberId);
+        var guild = getGuildByGuildId(guildId);
+        var guildUsers = guild.getUsersOnServer();
+
+        if (guildUsers.remove(discordMemberId)) {
+            guild.setUsersOnServer(guildUsers);
+            guildRepository.update(guild);
+            return true;
+        }
+
+        return false;
     }
 
     /**

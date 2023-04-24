@@ -25,7 +25,8 @@ public class UserController {
      * @param discordMemberId - The discord user to set the state of residence for.
      * @param stateOfResidence - The state that the user lives in.
      */
-    public void setStateOfResidence(String discordMemberId, String stateOfResidence) {
+    public void setStateOfResidence(
+            @Nonnull String discordMemberId, @Nonnull String stateOfResidence) {
         User user = getUserForMemberId(discordMemberId);
 
         user.setStateOfResidence(stateOfResidence);
@@ -39,7 +40,7 @@ public class UserController {
      * @return the state the user lives in.
      */
     @Nonnull
-    public String getStateOfResidence(String discordMemberId) {
+    public String getStateOfResidence(@Nonnull String discordMemberId) {
         return Objects.requireNonNull(getUserForMemberId(discordMemberId).getStateOfResidence());
     }
 
@@ -49,7 +50,8 @@ public class UserController {
      * @param discordMemberId - The discord user to set the city of residence for.
      * @param cityOfResidence - The city that the user lives in.
      */
-    public void setCityOfResidence(String discordMemberId, String cityOfResidence) {
+    public void setCityOfResidence(
+            @Nonnull String discordMemberId, @Nonnull String cityOfResidence) {
         User user = getUserForMemberId(discordMemberId);
 
         user.setCityOfResidence(cityOfResidence);
@@ -63,7 +65,7 @@ public class UserController {
      * @return the city the user lives in.
      */
     @Nonnull
-    public String getCityOfResidence(String discordMemberId) {
+    public String getCityOfResidence(@Nonnull String discordMemberId) {
         return Objects.requireNonNull(getUserForMemberId(discordMemberId).getCityOfResidence());
     }
 
@@ -72,7 +74,7 @@ public class UserController {
      *
      * @param discordMemberId - The discord user to set the current listing for.
      */
-    public void setCurrentListing(String discordMemberId, Listing currentListing) {
+    public void setCurrentListing(@Nonnull String discordMemberId, Listing currentListing) {
         User user = getUserForMemberId(discordMemberId);
         user.setCurrentListing(null);
         if (currentListing != null) {
@@ -89,7 +91,7 @@ public class UserController {
      * @return the current listing object.
      */
     @Nullable
-    public Listing getCurrentListing(String discordMemberId) {
+    public Listing getCurrentListing(@Nonnull String discordMemberId) {
         return getUserForMemberId(discordMemberId).getCurrentListing();
     }
 
@@ -101,7 +103,7 @@ public class UserController {
      * @return the user obtained from the repository OR the user just created.
      */
     @Nonnull
-    User getUserForMemberId(String discordMemberId) {
+    User getUserForMemberId(@Nonnull String discordMemberId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
             if (currentUser.getDiscordUserId().equals(discordMemberId)) {
@@ -109,6 +111,20 @@ public class UserController {
             }
         }
 
+        User user = new User();
+        user.setDiscordUserId(discordMemberId);
+        userRepository.add(user);
+        return user;
+    }
+
+    /**
+     * Creates a new user and adds them to the collection.
+     *
+     * @param discordMemberId - The discord user id to add to the collection.
+     * @return the user object just created.
+     */
+    @Nonnull
+    public User createNewUser(@Nonnull String discordMemberId) {
         User user = new User();
         user.setDiscordUserId(discordMemberId);
         userRepository.add(user);

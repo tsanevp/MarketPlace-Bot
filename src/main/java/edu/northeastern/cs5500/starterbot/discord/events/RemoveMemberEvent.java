@@ -37,7 +37,14 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
 
         // Remove user from discord server and delete all their listings
         guildController.removeUserInServer(userId, guildId);
-        listingController.deleteListingsForUser(userId, guildId);
+        var messageIds = listingController.deleteListingsForUser(userId, guildId);
+
+        var tradingChannelId = guildController.getGuildByGuildId(guildId).getTradingChannelId();
+        var channel = event.getGuild().getTextChannelById(tradingChannelId);
+
+        for (Long messageId : messageIds) {
+            channel.deleteMessageById(messageId).queue();
+        }
 
         // If user no longer exists in ANY guild, remove them from user collection
         if (guildController.verifyUserNoLongerExistsInAnyGuild(userId)) {

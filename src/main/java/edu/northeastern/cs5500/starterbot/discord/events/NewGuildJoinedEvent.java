@@ -59,7 +59,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         log.info("event: newguildjoined");
-
+        log.info(event.getGuild().getName());
         // Get Guild Owner as a User
         var owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
         var membersInGuild = event.getGuild().getMembers();
