@@ -1,4 +1,5 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
@@ -97,7 +98,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     private List<MessageCreateData> getListingsMessages(
             @Nonnull String discordUserId,
             @Nonnull String discordDisplayName,
-            @Nonnull String guildId) throws IllegalStateException {
+            @Nonnull String guildId)
+            throws IllegalStateException {
         var listing = listingController.getListingsByMemberId(discordUserId, guildId);
         List<MessageCreateData> messages = new ArrayList<>();
 
@@ -106,13 +108,9 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         }
 
         for (Listing list : listing) {
-            var listId = list.getId();
-            if (listId == null) {
-                throw new IllegalStateException("discordDisplayName");
-            }
-            var buttonId = String.format("%s:%s:delete", getName(), listId);
+            var buttonId = String.format("%s:%s:delete", getName(), list.getId());
             if (buttonId == null) {
-                 throw new IllegalStateException("Button ID was unavailable for listings.");
+                throw new IllegalStateException("Button ID was unavailable for listings.");
             }
             var button = Button.danger(buttonId, "Delete");
 
@@ -193,12 +191,14 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
         var guildId = listing.getGuildId();
         if (guildId.length() == 0) {
-            throw new IllegalStateException("Guild ID was invalid when attempting to delete listing");
+            throw new IllegalStateException(
+                    "Guild ID was invalid when attempting to delete listing");
         }
         var channel = getTradingChannel(guildId);
         var listingId = listing.getId();
         if (listingId == null) {
-            throw new IllegalStateException("Unable to delete listing ID because ID was not found.");
+            throw new IllegalStateException(
+                    "Unable to delete listing ID because ID was not found.");
         }
         listingController.deleteListingById(listingId, userId);
         channel.deleteMessageById(listing.getMessageId()).queue();
@@ -228,7 +228,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
                         guildController.getGuildByGuildId(guildId).getTradingChannelId());
 
         if (tradingChannelId.length() == 0) {
-            throw new IllegalStateException("Could to retrieve Trading Channel because ID was empty.");
+            throw new IllegalStateException(
+                    "Could to retrieve Trading Channel because ID was empty.");
         }
 
         var channel = guild.getTextChannelById(tradingChannelId);
