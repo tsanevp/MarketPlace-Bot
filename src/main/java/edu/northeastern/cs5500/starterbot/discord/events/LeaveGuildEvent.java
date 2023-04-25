@@ -34,11 +34,11 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
         log.info("event: guildleave");
 
         var guildId = event.getGuild().getId();
+
         guildController.removeGuildByGuildId(guildId);
         listingController.deleteListingsWithGuildId(guildId);
-        var guildData = guildController.getGuildByGuildId(guildId);
-        var membersList = guildData.getUsersOnServer();
 
+        var membersList = guildController.getGuildByGuildId(guildId).getUsersOnServer();
         var memberIdsToRemove =
                 membersList.stream()
                         .filter(
