@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListingFields {
+
     // Cost of item
     @Nonnull String cost;
 
