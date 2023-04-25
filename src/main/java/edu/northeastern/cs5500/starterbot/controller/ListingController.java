@@ -4,9 +4,9 @@ import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.NonNull;
 import org.bson.types.ObjectId;
 
 @Singleton
@@ -24,7 +24,7 @@ public class ListingController {
      *
      * @param listing - The listing object.
      */
-    public void addListing(@NonNull Listing listing) {
+    public void addListing(@Nonnull Listing listing) {
         listingRepository.add(listing);
     }
 
@@ -35,7 +35,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingsForUser(@NonNull String discordMemberId, @NonNull String guildId) {
+    public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
         if (countListingsByMemberId(discordMemberId, guildId) == 0) {
             return false;
         }
@@ -55,7 +55,7 @@ public class ListingController {
      * @param objectId - The objectId of the listing in the database.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(@NonNull ObjectId objectId, @NonNull String discordMemberId) {
+    public boolean deleteListingById(@Nonnull ObjectId objectId, @Nonnull String discordMemberId) {
         Listing listing = getListingById(objectId);
         if (listing == null || !listing.getDiscordUserId().equals(discordMemberId)) {
             return false;
@@ -72,7 +72,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return Number of listings.
      */
-    public int countListingsByMemberId(@NonNull String discordUserId, @NonNull String guildId) {
+    public int countListingsByMemberId(@Nonnull String discordUserId, @Nonnull String guildId) {
         return getListingsByMemberId(discordUserId, guildId).size();
     }
 
@@ -83,8 +83,8 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    public Collection<@NonNull Listing> getListingsWithKeyword(
-            @NonNull String keyword, @NonNull String guildId) {
+    public Collection<@Nonnull Listing> getListingsWithKeyword(
+            @Nonnull String keyword, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
                 .toList();
@@ -97,8 +97,8 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    public Collection<@NonNull Listing> getListingsByMemberId(
-            @NonNull String discordMemberId, @NonNull String guildId) {
+    public Collection<@Nonnull Listing> getListingsByMemberId(
+            @Nonnull String discordMemberId, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
                 .toList();
@@ -110,7 +110,7 @@ public class ListingController {
      * @param objectId - The object id of the listing.
      * @return A listing
      */
-    public Listing getListingById(@NonNull ObjectId objectId) {
+    public Listing getListingById(@Nonnull ObjectId objectId) {
         return listingRepository.get(objectId);
     }
 
@@ -120,7 +120,7 @@ public class ListingController {
      * @param guild - The guild that the listings contain in.
      * @return A collection of listings.
      */
-    public Collection<@NonNull Listing> getAllListingsInGuild(@NonNull String guildId) {
+    public Collection<@Nonnull Listing> getAllListingsInGuild(@Nonnull String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();
