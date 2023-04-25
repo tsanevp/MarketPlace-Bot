@@ -6,6 +6,7 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
+import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -42,7 +43,11 @@ public class MessageListener extends ListenerAdapter {
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         for (SlashCommandHandler command : commands) {
             if (command.getName().equals(event.getName())) {
-                command.onSlashCommandInteraction(event);
+                try {
+                    command.onSlashCommandInteraction(event);
+                } catch (GuildNotFoundException e) {
+                    log.error("There was an error in the slash command interaction", e);
+                }
                 return;
             }
         }

@@ -1,10 +1,9 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
-import com.mongodb.lang.NonNull;
-import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,29 +32,32 @@ public class ListingController {
      * Deletes the all the listings of a specific user.
      *
      * @param discordMemberId - The userId of the discord user.
-     * @param guild - The guild in which the listing is contained in.
+     * @param guild - The guild in which the listings is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingsForUser(@NonNull String discordMemberId, @NonNull String guildId) {
+    public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
         if (countListingsByMemberId(discordMemberId, guildId) == 0) {
             return false;
         }
 
         for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
-            listingRepository.delete(listing.getId());
+            var listingObjectId = listing.getId();
+            if (Objects.nonNull(listingObjectId)) {
+                listingRepository.delete(listingObjectId);
+            }
         }
-
         return true;
     }
 
     /**
-     * Deletes the listings with a specified objectId.
+     * Deletes the listing with a specified objectId.
      *
      * @param objectId - The objectId of the listing in the database.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(@Nonnull ObjectId objectId) {
-        if (getListingById(objectId) == null) {
+    public boolean deleteListingById(@Nonnull ObjectId objectId, @Nonnull String discordMemberId) {
+        Listing listing = getListingById(objectId);
+        if (listing == null || !listing.getDiscordUserId().equals(discordMemberId)) {
             return false;
         }
 
@@ -70,7 +72,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return Number of listings.
      */
-    public int countListingsByMemberId(String discordUserId, String guildId) {
+    public int countListingsByMemberId(@Nonnull String discordUserId, @Nonnull String guildId) {
         return getListingsByMemberId(discordUserId, guildId).size();
     }
 
@@ -81,9 +83,8 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    @NonNull
     public Collection<Listing> getListingsWithKeyword(
-            @NonNull String keyword, @NonNull String guildId) {
+            @Nonnull String keyword, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
                 .toList();
@@ -96,11 +97,22 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    @NonNull
     public Collection<Listing> getListingsByMemberId(
-            @NonNull String discordMemberId, @NonNull String guildId) {
+            @Nonnull String discordMemberId, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
+                .toList();
+    }
+
+    /**
+     * Retrieves all listings in a specific guild.
+     *
+     * @param guild - The guild that the listings contain in.
+     * @return A collection of listings.
+     */
+    public Collection<Listing> getAllListingsInGuild(@Nonnull String guildId) {
+        return listingRepository.getAll().stream()
+                .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();
     }
 
@@ -110,21 +122,7 @@ public class ListingController {
      * @param objectId - The object id of the listing.
      * @return A listing
      */
-    @Nullable
     public Listing getListingById(@Nonnull ObjectId objectId) {
         return listingRepository.get(objectId);
-    }
-
-    /**
-     * Retrieves all listings in a specific guild.
-     *
-     * @param guild - The guild that the listings contain in.
-     * @return A collection of listings.
-     */
-    @NonNull
-    public Collection<Listing> getAllListingsInGuild(@NonNull String guildId) {
-        return listingRepository.getAll().stream()
-                .filter(listing -> listing.getGuildId().equals(guildId))
-                .toList();
     }
 }
