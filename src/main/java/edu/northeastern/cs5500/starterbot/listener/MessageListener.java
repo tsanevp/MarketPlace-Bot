@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.listener;
 
+import edu.northeastern.cs5500.starterbot.discord.events.LeaveGuildEvent;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
@@ -32,6 +33,7 @@ public class MessageListener extends ListenerAdapter {
     @Inject NewMemberHandler newMemberEvent;
     @Inject NewGuildJoinedHandler newGuildJoined;
     @Inject RemoveMemberHandler removeMember;
+    @Inject LeaveGuildEvent guildLeaveEvent;
 
     @Inject
     public MessageListener() {
@@ -106,5 +108,10 @@ public class MessageListener extends ListenerAdapter {
     @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
         removeMember.onGuildMemberRemove(event);
+    }
+
+    @Override
+    public void onGuildLeaveEvent(@Nonnull GuildLeaveEvent event) {
+        guildLeaveEvent.onGuildLeaveEvent(event);
     }
 }

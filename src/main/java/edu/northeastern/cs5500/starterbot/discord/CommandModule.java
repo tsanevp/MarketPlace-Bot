@@ -7,10 +7,12 @@ import edu.northeastern.cs5500.starterbot.discord.commands.CreateListingCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.MyListingsCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.UpdateLocationCommand;
+import edu.northeastern.cs5500.starterbot.discord.events.LeaveGuildEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.NewGuildJoinedEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.NewMemberEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.RemoveMemberEvent;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.LeaveGuildEventHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
@@ -23,6 +25,11 @@ public class CommandModule {
     @Provides
     public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoinedEvent newGuildJoined) {
         return newGuildJoined;
+    }
+
+    @Provides
+    public LeaveGuildEventHandler provideGuildLeaveEvent(LeaveGuildEvent guildLeaveEvent) {
+        return guildLeaveEvent;
     }
 
     @Provides
