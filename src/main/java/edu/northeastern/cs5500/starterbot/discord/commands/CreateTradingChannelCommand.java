@@ -22,8 +22,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 @Slf4j
 public class CreateTradingChannelCommand implements SlashCommandHandler {
 
-    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
 
     @Inject
     public CreateTradingChannelCommand() {

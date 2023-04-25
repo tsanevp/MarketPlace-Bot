@@ -1,7 +1,7 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import com.mongodb.lang.NonNull;
 import com.mongodb.lang.Nullable;
+import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,10 +14,12 @@ import org.bson.types.ObjectId;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements Model {
+
+    // MongoDB id
     ObjectId id;
 
     // This is the "snowflake id" of the user
-    @NonNull String discordUserId;
+    @Nonnull String discordUserId;
 
     // The state the user lives in, null if user does not set state
     @Nullable String stateOfResidence;

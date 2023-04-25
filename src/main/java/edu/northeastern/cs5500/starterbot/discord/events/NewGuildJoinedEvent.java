@@ -46,9 +46,9 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
                             DEFAULT_TRADING_CHANNEL_NAME,
                             CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION));
 
-    @Inject SettingLocationHelper settingLocationHelper;
-    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
+    @Inject SettingLocationHelper settingLocationHelper;
     @Inject CreateTradingChannelCommand createTradingChannelCommand;
 
     @Inject

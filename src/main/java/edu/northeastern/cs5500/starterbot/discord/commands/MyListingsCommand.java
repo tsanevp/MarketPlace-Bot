@@ -37,10 +37,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject ListingController listingController;
     @Inject UserController userController;
-    @Inject MessageBuilderHelper messageBuilder;
+    @Inject ListingController listingController;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
     @Inject JDA jda;
 
     @Inject

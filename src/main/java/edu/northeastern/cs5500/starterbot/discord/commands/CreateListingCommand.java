@@ -41,8 +41,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
     @Inject UserController userController;
     @Inject ListingController listingController;
-    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
 
     @Inject
     public CreateListingCommand() {

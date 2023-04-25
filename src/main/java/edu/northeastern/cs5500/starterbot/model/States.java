@@ -1,11 +1,18 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import com.mongodb.lang.NonNull;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
-// This code is licensed under 'The Unlicense'. Link to liscense:
-// https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
+/***************************************************************************************
+ *   Title: US.java
+ *   Author: AustinC, harlanhaskins
+ *   Date: 2017
+ *   Code version: 1.1
+ *   Availability: https://github.com/AustinC/UnitedStates/blob/master/src/main/java/unitedstates/US.java
+ *   License: https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
+ *
+ ***************************************************************************************/
 public enum States {
     ALABAMA("Alabama", "AL", "01"),
     ALASKA("Alaska", "AK", "02"),
@@ -60,16 +67,16 @@ public enum States {
     UNKNOWN("Unknown", "", "");
 
     /** The state's name. */
-    private String name;
+    @Nonnull private String name;
 
     /** The state's abbreviation. */
-    private String abbreviation;
+    @Nonnull private String abbreviation;
 
     /** The state's FIPS code */
-    private String stateCode;
+    @Nonnull private String stateCode;
 
     /** The set of states addressed by abbreviations. */
-    private static final Map<String, States> STATES_BY_ABBR = new HashMap<>();
+    @Nonnull private static final Map<String, States> STATES_BY_ABBR = new HashMap<>();
 
     /* static initializer that maps the state abrv to it's enum's values */
     static {
@@ -85,7 +92,7 @@ public enum States {
      * @param abbreviation the state's abbreviation.
      * @param stateCode the state's FIPS code.
      */
-    States(String name, String abbreviation, String stateCode) {
+    States(@Nonnull String name, @Nonnull String abbreviation, @Nonnull String stateCode) {
         this.name = name;
         this.abbreviation = abbreviation;
         this.stateCode = stateCode;
@@ -96,7 +103,7 @@ public enum States {
      *
      * @return the state's abbreviation.
      */
-    @NonNull
+    @Nonnull
     public String getAbbreviation() {
         return abbreviation;
     }
@@ -106,7 +113,7 @@ public enum States {
      *
      * @return the state's state code.
      */
-    @NonNull
+    @Nonnull
     public String getStateCode() {
         return stateCode;
     }
@@ -117,6 +124,7 @@ public enum States {
      * @param abbr the state's abbreviation.
      * @return the enum constant with the specified abbreviation.
      */
+    @Nonnull
     public static States valueOfAbbreviation(final String abbr) {
         final States state = STATES_BY_ABBR.get(abbr);
         if (state != null) {
@@ -131,8 +139,10 @@ public enum States {
      *
      * @param name the state's name.
      * @return the enum constant's values (name, abrv, state code).
+     * @throws IllegalArgumentException if the name does not exist.
      */
-    public static States valueOfName(final @NonNull String name) {
+    @Nonnull
+    public static States valueOfName(final @Nonnull String name) {
         final String enumName = name.toUpperCase().replace(" ", "_");
         try {
             return valueOf(enumName);
@@ -147,6 +157,7 @@ public enum States {
      * @return the state name as a string.
      */
     @Override
+    @Nonnull
     public String toString() {
         return name;
     }
