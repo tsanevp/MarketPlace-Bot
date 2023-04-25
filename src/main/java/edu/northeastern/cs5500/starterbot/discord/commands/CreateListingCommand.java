@@ -424,7 +424,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return the command input the user entered as a string.
      */
     @Nonnull
-    private String createListingCommandAsString(@Nonnull Listing currentListing) {
+    @VisibleForTesting
+    String createListingCommandAsString(@Nonnull Listing currentListing) {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
         var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
