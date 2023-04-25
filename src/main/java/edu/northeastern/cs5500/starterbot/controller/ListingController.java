@@ -32,7 +32,7 @@ public class ListingController {
      * Deletes the all the listings of a specific user.
      *
      * @param discordMemberId - The userId of the discord user.
-     * @param guild - The guild in which the listings is contained in.
+     * @param guild - The guild in which the listings are contained in.
      * @returns Whether listing is successfully deleted.
      */
     public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
@@ -43,7 +43,7 @@ public class ListingController {
     /**
      * Deletes the all the listings of a specific guild.
      *
-     * @param guild - The guild in which the listings is contained in.
+     * @param guild - The guild in which the listings are contained in.
      * @returns Whether listing is successfully deleted.
      */
     public boolean deleteListingsWithGuildId(@Nonnull String guildId) {
