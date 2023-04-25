@@ -46,7 +46,7 @@ class ListingControllerTest {
                         .title(TITLE)
                         .url("test url")
                         .images(new ArrayList<>(Arrays.asList("Test url", "test")))
-                        .fields(listingFields)
+                        .fields(LISTING_FIELDS)
                         .build();
     }
 
