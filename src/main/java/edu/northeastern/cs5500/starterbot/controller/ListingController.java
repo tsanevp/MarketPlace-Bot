@@ -83,7 +83,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    public Collection<@Nonnull Listing> getListingsWithKeyword(
+    public Collection<Listing> getListingsWithKeyword(
             @Nonnull String keyword, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
@@ -97,7 +97,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
-    public Collection<@Nonnull Listing> getListingsByMemberId(
+    public Collection<Listing> getListingsByMemberId(
             @Nonnull String discordMemberId, @Nonnull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
@@ -120,7 +120,7 @@ public class ListingController {
      * @param guild - The guild that the listings contain in.
      * @return A collection of listings.
      */
-    public Collection<@Nonnull Listing> getAllListingsInGuild(@Nonnull String guildId) {
+    public Collection<Listing> getAllListingsInGuild(@Nonnull String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();
