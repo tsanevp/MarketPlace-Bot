@@ -59,7 +59,8 @@ public class SettingLocationHelper implements StringSelectHandler {
             event.deferEdit().setComponents().setEmbeds(messageEmbed).queue();
 
         } else {
-            var stateAbbreviation = States.valueOfName(selectedCityOrState).getAbbreviation();
+            var stateAbbreviation =
+                    States.valueOfFullName(selectedCityOrState).getAbbreviatedName();
             var messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
 
             userController.setStateOfResidence(userId, stateAbbreviation);
@@ -107,7 +108,7 @@ public class SettingLocationHelper implements StringSelectHandler {
         for (States state : States.values()) {
 
             if (!state.equals(States.UNKNOWN)) {
-                var stateName = state.getName();
+                var stateName = state.getFullName();
 
                 if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);

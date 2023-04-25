@@ -8,17 +8,17 @@ import org.junit.jupiter.api.Test;
 public class StatesTest {
 
     @Test
-    void testGetNameReturnsTheCorrectName() {
-        assertThat(States.WASHINGTON.getName()).isEqualTo("Washington");
-        assertThat(States.OREGON.getName()).isEqualTo("Oregon");
-        assertThat(States.WASHINGTON.getName()).isNotEqualTo("OR");
+    void testGetUnabbreviatedNameReturnsTheCorrectName() {
+        assertThat(States.WASHINGTON.getFullName()).isEqualTo("Washington");
+        assertThat(States.OREGON.getFullName()).isEqualTo("Oregon");
+        assertThat(States.WASHINGTON.getFullName()).isNotEqualTo("OR");
     }
 
     @Test
     void testGetAbbreviationReturnsTheCorrectAbbreviation() {
-        assertThat(States.WASHINGTON.getAbbreviation()).isEqualTo("WA");
-        assertThat(States.OREGON.getAbbreviation()).isEqualTo("OR");
-        assertThat(States.WASHINGTON.getAbbreviation()).isNotEqualTo("OR");
+        assertThat(States.WASHINGTON.getAbbreviatedName()).isEqualTo("WA");
+        assertThat(States.OREGON.getAbbreviatedName()).isEqualTo("OR");
+        assertThat(States.WASHINGTON.getAbbreviatedName()).isNotEqualTo("OR");
     }
 
     @Test
@@ -30,13 +30,13 @@ public class StatesTest {
 
     @Test
     void testValueOfAbbreviationReturnsTheCorrectValueOfAbbreviation() {
-        assertThat(States.valueOfAbbreviation("WA")).isEqualTo(States.WASHINGTON);
-        assertThat(States.valueOfAbbreviation(null)).isEqualTo(States.UNKNOWN);
+        assertThat(States.valueOfAbbreviatedName("WA")).isEqualTo(States.WASHINGTON);
+        assertThat(States.valueOfAbbreviatedName(null)).isEqualTo(States.UNKNOWN);
     }
 
     @Test
     void testValueOfNameReturnsTheCorrectValueOfName() {
-        assertThat(States.valueOfName("washington")).isEqualTo(States.WASHINGTON);
-        assertThat(States.valueOfName("fakename")).isEqualTo(States.UNKNOWN);
+        assertThat(States.valueOfFullName("washington")).isEqualTo(States.WASHINGTON);
+        assertThat(States.valueOfFullName("fakename")).isEqualTo(States.UNKNOWN);
     }
 }
