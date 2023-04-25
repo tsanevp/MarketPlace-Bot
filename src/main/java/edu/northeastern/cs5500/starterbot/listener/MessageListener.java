@@ -1,11 +1,11 @@
 package edu.northeastern.cs5500.starterbot.listener;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.NewGuildJoinedHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.NewMemberHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.RemoveMemberHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.StringSelectHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;

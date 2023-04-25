@@ -36,13 +36,15 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingsForUser(String discordMemberId, String guildId) {
+    public boolean deleteListingsForUser(@NonNull String discordMemberId, @NonNull String guildId) {
         if (countListingsByMemberId(discordMemberId, guildId) == 0) {
             return false;
         }
+
         for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
             listingRepository.delete(listing.getId());
         }
+
         return true;
     }
 
@@ -50,13 +52,13 @@ public class ListingController {
      * Deletes the listings with a specified objectId.
      *
      * @param objectId - The objectId of the listing in the database.
-     * @param guild - The guild in which the listing is contained in.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingById(@Nonnull ObjectId objectId, String discordMemberId) {
+    public boolean deleteListingById(@Nonnull ObjectId objectId) {
         if (getListingById(objectId) == null) {
             return false;
         }
+
         listingRepository.delete(objectId);
         return true;
     }
@@ -80,7 +82,8 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getListingsWithKeyword(String keyword, String guildId) {
+    public Collection<Listing> getListingsWithKeyword(
+            @NonNull String keyword, @NonNull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
                 .toList();
@@ -94,7 +97,8 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getListingsByMemberId(String discordMemberId, String guildId) {
+    public Collection<Listing> getListingsByMemberId(
+            @NonNull String discordMemberId, @NonNull String guildId) {
         return getAllListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
                 .toList();
@@ -118,7 +122,7 @@ public class ListingController {
      * @return A collection of listings.
      */
     @NonNull
-    public Collection<Listing> getAllListingsInGuild(String guildId) {
+    public Collection<Listing> getAllListingsInGuild(@NonNull String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();

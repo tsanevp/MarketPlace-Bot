@@ -7,6 +7,7 @@ import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,30 +26,6 @@ public class UserControllerTest {
     @BeforeEach
     void initializeUserController() {
         userController = new UserController(new InMemoryRepository<>());
-    }
-
-    @Test
-    void testSetAndGetGuildIdForUserActuallySetsAndGetsGuildId() {
-        // Need to first set Guild Id since it is @NonNull
-        userController.setGuildIdForUser(DISCORD_ID_1, GUILD_ID_1);
-
-        // Check to see the correct Guild id is returned
-        assertThat(userController.getGuildIdForUser(DISCORD_ID_1)).isNotNull();
-        assertThat(userController.getGuildIdForUser(DISCORD_ID_1)).isEqualTo(GUILD_ID_1);
-    }
-
-    @Test
-    void testSetAndGetTradingChannelIdForUserActuallySetsAndGetsTradingChannelId() {
-        // Check that trading channel id is initially null
-        assertThat(userController.getTradingChannelId(DISCORD_ID_1)).isNull();
-
-        // Set trading channel id
-        userController.setTradingChannelId(DISCORD_ID_1, TRADING_CHANNEL_ID_1);
-
-        // Check to see the correct Guild id is returned
-        assertThat(userController.getTradingChannelId(DISCORD_ID_1)).isNotNull();
-        assertThat(userController.getTradingChannelId(DISCORD_ID_1))
-                .isEqualTo(TRADING_CHANNEL_ID_1);
     }
 
     @Test
@@ -74,38 +51,29 @@ public class UserControllerTest {
 
     @Test
     void testSetCurrentListing() {
-        ListingController listingController = new ListingController(new InMemoryRepository<>());
-
-        // Define ListingFields parameters
-        var cost = "50";
-        var shippingIncluded = false;
-        var condition = "very good";
-        var description = "test description";
-        var datePosted = "4/15/23";
         // Create ListingFields object
         var listingFields =
                 ListingFields.builder()
-                        .cost(cost)
-                        .shippingIncluded(shippingIncluded)
-                        .condition(condition)
-                        .description(description)
-                        .datePosted(datePosted)
+                        .cost("50")
+                        .shippingIncluded(false)
+                        .condition("very good")
+                        .description("test description")
+                        .datePosted("4/15/23")
                         .build();
+        Objects.requireNonNull(listingFields);
 
         // Define Listing parameters
-        var title = "test title";
         var url = "test url";
         List<String> imageUrl = new ArrayList<>();
         imageUrl.add(url);
-        var guildId = "234257657568";
 
         // Create Listing object
         var listing =
                 Listing.builder()
                         .messageId(0)
                         .discordUserId(DISCORD_ID_1)
-                        .guildId(guildId)
-                        .title(title)
+                        .guildId("234257657568")
+                        .title("test title")
                         .url(url)
                         .images(imageUrl)
                         .fields(listingFields)
@@ -143,19 +111,18 @@ public class UserControllerTest {
     }
 
     @Test
-    void testRemoveUserByMemberAndGuildIdRemovesUserCorrectly() {
+    void testRemoveUserByMemberIdRemovesUserCorrectly() {
         // First check user collection is empty to start
         assertThat(userController.getSizeUserCollection()).isEqualTo(0);
 
         // Create and add a new user to the collection
-        var testUser1 = userController.getUserForMemberId(DISCORD_ID_1);
-        userController.setGuildIdForUser(testUser1.getDiscordUserId(), GUILD_ID_1);
+        userController.getUserForMemberId(DISCORD_ID_1);
 
         // Check that size of collection increased to 1
         assertThat(userController.getSizeUserCollection()).isEqualTo(1);
 
         // Remove the user and check if collection reduced size back to 0
-        userController.removeUserByMemberAndGuildId(DISCORD_ID_1, GUILD_ID_1);
+        userController.removeUserByMemberId(DISCORD_ID_1);
         assertThat(userController.getSizeUserCollection()).isEqualTo(0);
     }
 
@@ -165,18 +132,13 @@ public class UserControllerTest {
         assertThat(userController.getSizeUserCollection()).isEqualTo(0);
 
         // Create and add a new user to the collection
-        var testUser1 = userController.getUserForMemberId(DISCORD_ID_1);
-        userController.setGuildIdForUser(testUser1.getDiscordUserId(), GUILD_ID_1);
+        userController.getUserForMemberId(DISCORD_ID_1);
 
         // Check that size of collection increased to 1
         assertThat(userController.getSizeUserCollection()).isEqualTo(1);
 
-        // Passed different guild id than the one used to create the user
-        userController.removeUserByMemberAndGuildId(DISCORD_ID_1, GUILD_ID_2);
-        assertThat(userController.getSizeUserCollection()).isEqualTo(1);
-
         // Passed different user id than one used to create the user
-        userController.removeUserByMemberAndGuildId(DISCORD_ID_2, GUILD_ID_1);
+        userController.removeUserByMemberId(DISCORD_ID_2);
         assertThat(userController.getSizeUserCollection()).isEqualTo(1);
     }
 }

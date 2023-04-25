@@ -87,15 +87,11 @@ class ListingControllerTest {
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
 
         // mutation
-        assertTrue(
-                listingController.deleteListingById(
-                        testListing.getId(), testListing.getDiscordUserId()));
+        assertTrue(listingController.deleteListingById(testListing.getId()));
 
         // post
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
-        assertFalse(
-                listingController.deleteListingById(
-                        testListing.getId(), testListing.getDiscordUserId()));
+        assertFalse(listingController.deleteListingById(testListing.getId()));
     }
 
     @Test

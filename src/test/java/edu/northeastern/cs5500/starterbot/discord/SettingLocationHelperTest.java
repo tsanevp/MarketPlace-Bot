@@ -1,17 +1,17 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class LocationTest {
+class SettingLocationHelperTest {
 
-    Location location;
+    SettingLocationHelper location;
 
     @BeforeEach
     void createLocationInstance() {
-        location = new Location();
+        location = new SettingLocationHelper();
     }
 
     @Test
