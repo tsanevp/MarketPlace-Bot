@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -35,7 +36,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 @Singleton
 @Slf4j
 public class CreateListingCommand implements SlashCommandHandler, ButtonHandler {
-    private static final String CURRENCY_USED = "USD ";
+    private static final String CURRENCY_USED = "USD";
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject UserController userController;
@@ -144,8 +145,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var listingFields = buildListingFields(cost, shippingIncluded, condition, description);
         var listing = buildListing(title, guildId, userId, imageURLs, listingFields);
 
+        // Temporarily store the listing in MongoDB
+        userController.setCurrentListing(userId, listing);
+
         // Create listing confirmation message
-        var listingConfirmation = createListingConfirmationMessage(discordDisplayName, listing);
+        var listingAsEmbed = messageBuilder.toMessageEmbed(listing, discordDisplayName);
+        var listingConfirmation = createListingConfirmationMessage(listingAsEmbed);
 
         // Send listing confirmation to the user
         event.reply(listingConfirmation).setEphemeral(true).queue();
@@ -218,9 +223,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .build();
         Objects.requireNonNull(listing);
 
-        // Temporarily store the listing in MongoDB
-        userController.setCurrentListing(userId, listing);
-
         return listing;
     }
 
@@ -236,7 +238,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Nonnull
     @VisibleForTesting
     MessageCreateData createListingConfirmationMessage(
-            @Nonnull String discordDisplayName, @Nonnull Listing listing) {
+            @Nonnull List<MessageEmbed> listingAsMessageEmbed) {
 
         var postButton = Button.success(getName() + ":ok", "Post");
         var editButton = Button.primary(getName() + ":edit", "Edit");
@@ -244,7 +246,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         return new MessageCreateBuilder()
                 .addActionRow(postButton, editButton, cancelButton)
-                .setEmbeds(messageBuilder.toMessageEmbed(listing, discordDisplayName))
+                .setEmbeds(listingAsMessageEmbed)
                 .build();
     }
 
@@ -256,8 +258,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @return the title of the listing with the city and state added to it.
      */
     @Nonnull
-    @VisibleForTesting
-    String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
+    private String reformatListingTitle(@Nonnull String userId, @Nonnull String title) {
         try {
             return Objects.requireNonNull(
                     String.format(
@@ -266,7 +267,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                             userController.getStateOfResidence(userId),
                             title));
         } catch (Exception e) {
-            log.info("event: /createlisting");
+            log.info("User has not set their city or state of residence");
         }
         return title;
     }
@@ -428,12 +429,15 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     String createListingCommandAsString(@Nonnull Listing currentListing) {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
-        var titleStateCityRemoved = currentListing.getTitle().split("]")[1];
+        var title = currentListing.getTitle();
+        if (title.contains("]")) {
+            title = title.split("]")[1];
+        }
 
         return Objects.requireNonNull(
                 String.format(
                         "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
-                        titleStateCityRemoved,
+                        title,
                         cost,
                         fields.getShippingIncluded(),
                         fields.getDescription(),

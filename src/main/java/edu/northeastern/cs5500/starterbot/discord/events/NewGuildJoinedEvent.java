@@ -72,28 +72,27 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
         var guildId = event.getGuild().getId();
         var botId = event.getJDA().getSelfUser().getId();
 
-        var ownerIntroMessage = askOwnerToCreateTradingChannel(owner.getId(), guildId);
+        // Sets the owner as the guild owner and creates intro message
+        guildController.setGuildOwnerId(guildId, owner.getId());
+        var ownerIntroMessage = createIntroMessageForOwner(guildId);
 
         // Sends intro message to Guild owner as a DM
         messageBuilder.sendPrivateMessage(owner, ownerIntroMessage);
 
+        // Adds each user to the guild and send them an intro message
         addUsersToGuildAndAskLocation(membersInGuild, guildId, botId);
     }
 
     /**
-     * Set the guild owner and send an intro message to the Guild owner ro ask if a new trading
-     * channel can be created by the bot.
+     * Creates an intro message that will be sent to the Guild owner to ask if a new trading channel
+     * can be created by the bot.
      *
-     * @param ownerId - The id of the guild owner.
      * @param guildId - The id of the guild the bot was just added to.
+     * @return the intro message created that will eventually be sent to the guild owner.
      */
     @Nonnull
     @VisibleForTesting
-    MessageCreateData askOwnerToCreateTradingChannel(
-            @Nonnull String ownerId, @Nonnull String guildId) {
-        // Sets the owner as the guild owner
-        guildController.setGuildOwnerId(guildId, ownerId);
-
+    MessageCreateData createIntroMessageForOwner(@Nonnull String guildId) {
         // Embed builder with intro message sent to guild owner
         var introMessageEmbed =
                 new EmbedBuilder()
@@ -146,6 +145,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
             messageBuilder.sendPrivateMessage(user, stateSelections);
         }
 
+        // Sends a list of user ids to add to the guild
         guildController.addAllCurrentUsersToServer(guildId, listOfUserIds);
     }
 
