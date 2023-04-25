@@ -45,6 +45,9 @@ dependencies {
     // Force JRE Guava to work around issues with Truth
     testImplementation "com.google.guava:guava:_"
 
+    // @VisibleForTesting annotation
+    implementation "com.google.guava:guava:_"
+
     // Fluent assertions for testing
     testImplementation 'com.google.truth:truth:_'
 
@@ -107,7 +110,7 @@ jacocoTestCoverageVerification {
         rule {
             limit {
                 counter = 'LINE'
-                minimum = 0.30
+                minimum = 0.35
             }
         }
         rule {

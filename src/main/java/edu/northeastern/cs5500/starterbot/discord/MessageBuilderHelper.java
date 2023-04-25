@@ -1,4 +1,4 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord;
 
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
@@ -12,11 +12,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
-public class MessageBuilder {
+public class MessageBuilderHelper {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
     @Inject
-    public MessageBuilder() {
+    public MessageBuilderHelper() {
         // Defined public and empty for Dagger injection
     }
 
@@ -55,6 +55,7 @@ public class MessageBuilder {
         // Create child embeds that "append" additional images to parent embed
         var isFirstImage = true;
         for (String imageUrl : listing.getImages()) {
+
             if (isFirstImage) {
                 isFirstImage = false;
                 continue;
@@ -69,6 +70,7 @@ public class MessageBuilder {
 
             listingsMessage.add(additionalImageEmbeds);
         }
+
         return listingsMessage;
     }
 

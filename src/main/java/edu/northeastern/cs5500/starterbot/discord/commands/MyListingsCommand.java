@@ -1,10 +1,12 @@
-package edu.northeastern.cs5500.starterbot.command;
+package edu.northeastern.cs5500.starterbot.discord.commands;
 
-import edu.northeastern.cs5500.starterbot.command.handlers.ButtonHandler;
-import edu.northeastern.cs5500.starterbot.command.handlers.SlashCommandHandler;
+import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
+import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.exceptions.ChannelNotFoundException;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
@@ -35,7 +37,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     @Inject ListingController listingController;
     @Inject UserController userController;
-    @Inject MessageBuilder messageBuilder;
+    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
     @Inject JDA jda;
 
@@ -105,6 +107,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
                             .build();
             messages.add(messageCreateData);
         }
+
         return messages;
     }
 
@@ -114,7 +117,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param user - The user who intiated the command.
      * @param listingsMessages - The user's listings in message format.
      */
-    private void sendListingsMessageToUser(User user, List<MessageCreateData> listingsMessages) {
+    private void sendListingsMessageToUser(
+            @Nonnull User user, @Nonnull List<MessageCreateData> listingsMessages) {
         for (MessageCreateData message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message);
         }
@@ -122,10 +126,34 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        var userId = event.getUser().getId();
         var buttonIds = event.getButton().getId().split(":");
+        var buttonEvent = event.deferEdit().setComponents();
         var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
 
-        onDeleteListingButtonClick(event, listing);
+        if (listing == null) {
+            log.error("Listing is no longer in database");
+            event.reply(
+                            "Listings are not updated. Please use /mylistings to recieve an updated list.")
+                    .queue();
+            return;
+        }
+
+        try {
+            onDeleteListingButtonClick(userId, listing);
+        } catch (GuildNotFoundException | ChannelNotFoundException e) {
+            log.error("myListing encountered an error when deleting listing", e);
+            event.reply("Unable to remove listing because the channel/server no longer exists.")
+                    .queue();
+        }
+
+        var deleteSuccessEmbed =
+                new EmbedBuilder()
+                        .setDescription("Your post has been successfully deleted")
+                        .setColor(EMBED_COLOR)
+                        .build();
+
+        buttonEvent.setEmbeds(deleteSuccessEmbed).queue();
     }
 
     /**
@@ -133,35 +161,15 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      *
      * @param event - the event of a button interaction
      * @param listing - the listing to be deleted.
+     * @throws GuildNotFoundException - guild was not found in JDA.
+     * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    void onDeleteListingButtonClick(
-            @Nonnull ButtonInteractionEvent event, @Nonnull Listing listing) {
-        MessageChannel channel;
-        try {
-            channel = getTradingChannel(listing.getGuildId());
-            var buttonEvent = event.deferEdit().setComponents();
+    private void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
+            throws GuildNotFoundException, ChannelNotFoundException {
+        var channel = getTradingChannel(listing.getGuildId());
 
-            var userId = event.getUser().getId();
-
-            listingController.deleteListingById(listing.getId(), userId);
-            channel.deleteMessageById(listing.getMessageId()).queue();
-
-            buttonEvent
-                    .setEmbeds(
-                            new EmbedBuilder()
-                                    .setDescription("Your post has been successfully deleted")
-                                    .setColor(EMBED_COLOR)
-                                    .build())
-                    .queue();
-        } catch (GuildNotFoundException e) {
-            log.error("myListing encountered an error when retrieving server.", e);
-            event.reply("Unable to remove listing because the server no longer exists.").complete();
-        } catch (ChannelNotFoundException e) {
-            log.error("myListing encountered an error when retrieving channel.", e);
-            event.reply(
-                            "Unable to remove listing because the channel no longer exists. Please use /createtradingchannel in the server.")
-                    .complete();
-        }
+        listingController.deleteListingById(listing.getId());
+        channel.deleteMessageById(listing.getMessageId()).queue();
     }
 
     /**
@@ -172,7 +180,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    MessageChannel getTradingChannel(@Nonnull String guildId)
+    @Nullable
+    private MessageChannel getTradingChannel(@Nonnull String guildId)
             throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
 
@@ -185,10 +194,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var channel = guild.getTextChannelById(tradingChannelId);
 
         if (channel == null) {
-            guildController.setTradingChannelId(guildId, null);
             throw new ChannelNotFoundException(
                     "Trading channel ID no longer exists in the specified guild in JDA.");
         }
+
         return channel;
     }
 }

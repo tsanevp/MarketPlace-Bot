@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import edu.northeastern.cs5500.starterbot.service.CensusService;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("null")
 class CityControllerTest {
 
     CityController cityController;
