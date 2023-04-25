@@ -32,7 +32,7 @@ import org.bson.types.ObjectId;
 
 @Singleton
 @Slf4j
-public class SearchListingsCommand implements SlashCommandHandler {
+public class SearchListingsCommand implements SlashCommandHandler,  {
 
     @Inject ListingController listingController;
     @Inject UserController userController;
