@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
-import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
@@ -55,10 +54,9 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
      * @param userId - The userId of the discord user.
      * @param guildId - The guild id that the user was removed from or left.
      */
-    @VisibleForTesting
-    void deleteUserAndListingsMade(@Nonnull String userId, @Nonnull String guildId) {
+    private void deleteUserAndListingsMade(@Nonnull String userId, @Nonnull String guildId) {
         // Remove user from discord server and delete all their listings
-        guildController.removeUserInServer(userId, guildId);
+        guildController.removeUserInServer(guildId, userId);
         listingController.deleteListingsForUser(userId, guildId);
 
         // If user no longer exists in ANY guild, remove them from user collection

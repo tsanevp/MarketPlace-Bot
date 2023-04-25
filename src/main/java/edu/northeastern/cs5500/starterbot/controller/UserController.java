@@ -120,20 +120,6 @@ public class UserController {
     }
 
     /**
-     * Creates a new user and adds them to the collection.
-     *
-     * @param discordMemberId - The discord user id to add to the collection.
-     * @return the user object just created.
-     */
-    @Nonnull
-    public User createNewUser(@Nonnull String discordMemberId) {
-        User user = new User();
-        user.setDiscordUserId(discordMemberId);
-        userRepository.add(user);
-        return user;
-    }
-
-    /**
      * Removes the user associated with the discordMemberId and guildId passed from the user
      * collection.
      *

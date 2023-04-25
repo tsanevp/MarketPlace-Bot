@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
@@ -18,7 +19,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 public class NewMemberEvent implements NewMemberHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject SettingLocationHelper location;
+    @Inject SettingLocationHelper settingLocationHelper;
     @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
 
@@ -43,7 +44,10 @@ public class NewMemberEvent implements NewMemberHandler {
         // Add user to the List of guild members when they first join
         guildController.addUserToServer(guild.getId(), user.getId());
 
-        var newUserIntroMsg = createIntroMessageForNewUser(user.getName(), guild.getName());
+        var statesSelectMessageBuilder = settingLocationHelper.createStatesMessageBuilder();
+        var newUserIntroMsg =
+                createIntroMessageForNewUser(
+                        user.getName(), guild.getName(), statesSelectMessageBuilder);
 
         messageBuilder.sendPrivateMessage(user, newUserIntroMsg);
     }
@@ -53,13 +57,17 @@ public class NewMemberEvent implements NewMemberHandler {
      *
      * @param userName - The display name of the user that joined.
      * @param guildName - The name of the guild the user joined.
+     * @param statesSelectMessageBuilder - A message create builder containing both the state select
+     *     menus.
      * @return the introduction message that is sent to the user that includes the state selection
      *     menus.
      */
     @Nonnull
     @VisibleForTesting
     MessageCreateData createIntroMessageForNewUser(
-            @Nonnull String userName, @Nonnull String guildName) {
+            @Nonnull String userName,
+            @Nonnull String guildName,
+            @Nonnull MessageCreateBuilder statesSelectMessageBuilder) {
         var introMsg =
                 String.format(
                         "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
@@ -73,6 +81,6 @@ public class NewMemberEvent implements NewMemberHandler {
                         .build();
 
         // Create the message to send the new user. Includes state dropdown menus
-        return location.createStatesMessageBuilder().addEmbeds(newUserWelcomeEmbed).build();
+        return statesSelectMessageBuilder.addEmbeds(newUserWelcomeEmbed).build();
     }
 }

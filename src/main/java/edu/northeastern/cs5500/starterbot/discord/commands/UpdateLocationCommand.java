@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 @Singleton
@@ -18,7 +19,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 public class UpdateLocationCommand implements SlashCommandHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject SettingLocationHelper location;
+    @Inject SettingLocationHelper settingLocationHelper;
 
     @Inject
     public UpdateLocationCommand() {
@@ -42,7 +43,8 @@ public class UpdateLocationCommand implements SlashCommandHandler {
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         log.info("event: updatelocation");
 
-        var updateLocationMessage = createUpdateLocationMessage();
+        var statesSelectMessageBuilder = settingLocationHelper.createStatesMessageBuilder();
+        var updateLocationMessage = createUpdateLocationMessage(statesSelectMessageBuilder);
 
         event.reply(updateLocationMessage).setEphemeral(true).queue();
     }
@@ -51,12 +53,15 @@ public class UpdateLocationCommand implements SlashCommandHandler {
      * Creates the message to send the user with instructions on how to properly select the state
      * and city they are located in.
      *
-     * @param user - the user to send the message to.
-     * @return the message to send to the user.
+     * @param statesSelectMessageBuilder - A message create builder containing both the state select
+     *     menus.
+     * @return the message to send to the user with how to update their location and the state
+     *     select menus.
      */
     @Nonnull
     @VisibleForTesting
-    MessageCreateData createUpdateLocationMessage() {
+    MessageCreateData createUpdateLocationMessage(
+            @Nonnull MessageCreateBuilder statesSelectMessageBuilder) {
         var updateLocationString =
                 "To update your State and City, plese select the correct values from the drop-down menus below.";
 
@@ -68,6 +73,6 @@ public class UpdateLocationCommand implements SlashCommandHandler {
                         .build();
 
         // Message that includes update instructions and location selection menus
-        return location.createStatesMessageBuilder().addEmbeds(updateLocationInstructions).build();
+        return statesSelectMessageBuilder.addEmbeds(updateLocationInstructions).build();
     }
 }

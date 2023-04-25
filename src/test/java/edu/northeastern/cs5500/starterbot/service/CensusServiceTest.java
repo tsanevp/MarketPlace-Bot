@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
+@SuppressWarnings("null")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class CensusServiceTest {
 

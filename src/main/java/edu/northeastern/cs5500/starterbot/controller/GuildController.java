@@ -33,19 +33,6 @@ public class GuildController {
     }
 
     /**
-     * Gets and returns the guild owner id for the current guild.
-     *
-     * @param guildId - The id of the guild to get the owner id for.
-     * @return the guild owner id.
-     */
-    @NonNull
-    public String getGuildOwnerId(@NonNull String guildId) {
-        var guild = getGuildByGuildId(guildId);
-
-        return guild.getGuildOwnerId();
-    }
-
-    /**
      * Sets the trading channel id for the current guild.
      *
      * @param guildId - The id of the guild to set the trading channel id for.
@@ -100,7 +87,7 @@ public class GuildController {
      * @param guildId - The id of the guild that the user is in.
      * @returns Whether the user was successfully removed from the guild.
      */
-    public boolean removeUserInServer(@NonNull String discordMemberId, @NonNull String guildId) {
+    public boolean removeUserInServer(@NonNull String guildId, @NonNull String discordMemberId) {
         var guild = getGuildByGuildId(guildId);
         var guildUsers = guild.getUsersOnServer();
 
@@ -120,7 +107,7 @@ public class GuildController {
      * @param guildId - The id of the guild to verify a user is in.
      * @return whether the user already exists in the guild.
      */
-    public boolean verifyUserInGuild(@NonNull String discordMemberId, @NonNull String guildId) {
+    public boolean verifyUserInGuild(@NonNull String guildId, @NonNull String discordMemberId) {
         return getGuildByGuildId(guildId).getUsersOnServer().contains(discordMemberId);
     }
 
