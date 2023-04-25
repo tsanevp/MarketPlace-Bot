@@ -13,6 +13,8 @@ import javax.annotation.Nonnull;
  *   License: https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
  *
  ***************************************************************************************/
+
+// <-------------------- START OF LICENSE ------------------>
 public enum States {
     ALABAMA("Alabama", "AL", "01"),
     ALASKA("Alaska", "AK", "02"),
@@ -75,7 +77,7 @@ public enum States {
     /** The state's FIPS code */
     @Nonnull private String stateCode;
 
-    /** The set of states addressed by abbreviations. */
+    /** The set of states mapped by abbreviations. */
     @Nonnull private static final Map<String, States> STATES_BY_ABBR = new HashMap<>();
 
     /* static initializer that maps the state abrv to it's enum's values */
@@ -96,6 +98,16 @@ public enum States {
         this.name = name;
         this.abbreviation = abbreviation;
         this.stateCode = stateCode;
+    }
+
+    /**
+     * Returns the state's name.
+     *
+     * @return the state's name.
+     */
+    @Nonnull
+    public String getName() {
+        return name;
     }
 
     /**
@@ -149,16 +161,5 @@ public enum States {
         } catch (final IllegalArgumentException e) {
             return States.UNKNOWN;
         }
-    }
-
-    /**
-     * Returns the state name as a string.
-     *
-     * @return the state name as a string.
-     */
-    @Override
-    @Nonnull
-    public String toString() {
-        return name;
     }
 }

@@ -8,6 +8,13 @@ import org.junit.jupiter.api.Test;
 public class StatesTest {
 
     @Test
+    void testGetNameReturnsTheCorrectName() {
+        assertThat(States.WASHINGTON.getName()).isEqualTo("Washington");
+        assertThat(States.OREGON.getName()).isEqualTo("Oregon");
+        assertThat(States.WASHINGTON.getName()).isNotEqualTo("OR");
+    }
+
+    @Test
     void testGetAbbreviationReturnsTheCorrectAbbreviation() {
         assertThat(States.WASHINGTON.getAbbreviation()).isEqualTo("WA");
         assertThat(States.OREGON.getAbbreviation()).isEqualTo("OR");
@@ -31,10 +38,5 @@ public class StatesTest {
     void testValueOfNameReturnsTheCorrectValueOfName() {
         assertThat(States.valueOfName("washington")).isEqualTo(States.WASHINGTON);
         assertThat(States.valueOfName("fakename")).isEqualTo(States.UNKNOWN);
-    }
-
-    @Test
-    void testToString() {
-        assertThat(States.WASHINGTON.toString()).isEqualTo("Washington");
     }
 }

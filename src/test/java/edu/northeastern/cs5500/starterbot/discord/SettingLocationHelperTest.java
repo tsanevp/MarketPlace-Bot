@@ -27,9 +27,9 @@ class SettingLocationHelperTest {
 
         var statesMessageBuilderAsString = statesMessageData.toData().toString();
         assertThat(statesMessageBuilderAsString).isNotNull();
-        assertThat(statesMessageBuilderAsString).contains("IDAHO");
-        assertThat(statesMessageBuilderAsString).contains("NEW_YORK");
-        assertThat(statesMessageBuilderAsString).contains("WASHINGTON");
-        assertThat(statesMessageBuilderAsString).contains("ALABAMA");
+        assertThat(statesMessageBuilderAsString).contains("Idaho");
+        assertThat(statesMessageBuilderAsString).contains("New York");
+        assertThat(statesMessageBuilderAsString).contains("Washington");
+        assertThat(statesMessageBuilderAsString).contains("Alabama");
     }
 }

@@ -107,7 +107,7 @@ public class SettingLocationHelper implements StringSelectHandler {
         for (States state : States.values()) {
 
             if (!state.equals(States.UNKNOWN)) {
-                var stateName = Objects.requireNonNull(state.name());
+                var stateName = state.getName();
 
                 if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);
