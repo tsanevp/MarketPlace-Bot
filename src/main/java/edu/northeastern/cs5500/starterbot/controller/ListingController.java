@@ -36,16 +36,40 @@ public class ListingController {
      * @returns Whether listing is successfully deleted.
      */
     public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
-        if (countListingsByMemberId(discordMemberId, guildId) == 0) {
+        Collection<Listing> listingsWithMemberId = getListingsByMemberId(discordMemberId, guildId);
+        return deleteCollectionOfListings(listingsWithMemberId);
+    }
+
+    /**
+     * Deletes the all the listings of a specific guild.
+     *
+     * @param guild - The guild in which the listings is contained in.
+     * @returns Whether listing is successfully deleted.
+     */
+    public boolean deleteListingsWithGuildId(@Nonnull String guildId) {
+        Collection<Listing> listingsInGuild = getAllListingsInGuild(guildId);
+        return deleteCollectionOfListings(listingsInGuild);
+    }
+
+    /**
+     * Deletes all the listings of the collection.
+     *
+     * @param listings - the collection of listings that need to be deleted.
+     * @returns Whether listing is successfully deleted.
+     */
+    public boolean deleteCollectionOfListings(Collection<Listing> listings) {
+        if (listings.isEmpty()) {
             return false;
         }
 
-        for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
+        for (Listing listing : listings) {
             var listingObjectId = listing.getId();
+
             if (Objects.nonNull(listingObjectId)) {
                 listingRepository.delete(listingObjectId);
             }
         }
+
         return true;
     }
 

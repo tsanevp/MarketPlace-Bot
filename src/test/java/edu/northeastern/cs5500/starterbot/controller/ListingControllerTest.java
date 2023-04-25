@@ -36,7 +36,9 @@ class ListingControllerTest {
                         .condition("Good")
                         .datePosted("test date")
                         .build();
+
         Objects.requireNonNull(LISTING_FIELDS);
+
         TEST_LISTING =
                 Listing.builder()
                         .id(new ObjectId())
@@ -52,6 +54,7 @@ class ListingControllerTest {
 
     @BeforeEach
     void getListingController() {
+        // setup
         listingController = new ListingController(new InMemoryRepository<>());
     }
 
@@ -73,7 +76,7 @@ class ListingControllerTest {
     }
 
     @Test
-    void testDeleteListingByMemberIdActuallyDeletesListing() {
+    void testDeleteListingsForUserActuallyDeletesListings() {
         // precondition
         listingController.addListing(TEST_LISTING);
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
@@ -84,6 +87,36 @@ class ListingControllerTest {
         // post
         assertThat(listingController.deleteListingsForUser(USER_ID, GUILD_ID)).isFalse();
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
+    }
+
+    @Test
+    void testDeleteListingsByGuildIdActuallyDeletesListings() {
+        // precondition
+        listingController.addListing(TEST_LISTING);
+        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isNotEmpty();
+
+        // mutation
+        assertThat(listingController.deleteListingsWithGuildId(GUILD_ID)).isTrue();
+
+        // post
+        assertThat(listingController.deleteListingsWithGuildId(GUILD_ID)).isFalse();
+        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isEmpty();
+    }
+
+    @Test
+    void testDeleteCollectionOfListings() {
+        // precondition
+        Collection<Listing> testCollection = new ArrayList<>();
+        assertThat(listingController.deleteCollectionOfListings(testCollection)).isFalse();
+
+        Listing ListingWithNullObjectId = TEST_LISTING;
+        ListingWithNullObjectId.setId(null);
+        // mutation
+        testCollection.add(TEST_LISTING);
+        testCollection.add(ListingWithNullObjectId);
+
+        // post
+        assertThat(listingController.deleteCollectionOfListings(testCollection)).isTrue();
     }
 
     @Test

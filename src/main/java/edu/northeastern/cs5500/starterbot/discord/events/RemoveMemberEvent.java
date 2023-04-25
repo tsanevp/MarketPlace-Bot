@@ -39,8 +39,14 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
         var tradingChannelId = guildController.getGuildByGuildId(guildId).getTradingChannelId();
         var channel = event.getGuild().getTextChannelById(tradingChannelId);
 
+        if (channel == null) {
+            throw new IllegalStateException("Channel was unable to be retrieved.");
+        }
+
+        var listingsOfMember = listingController.getListingsByMemberId(userId, guildId);
+
         // Remove all the posted listing the user has made from the trading channel
-        for (Listing listing : listingController.getListingsByMemberId(userId, guildId)) {
+        for (Listing listing : listingsOfMember) {
             channel.deleteMessageById(listing.getMessageId()).queue();
         }
 

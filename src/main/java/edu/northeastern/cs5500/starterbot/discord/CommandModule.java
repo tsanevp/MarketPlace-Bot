@@ -28,7 +28,7 @@ public class CommandModule {
     }
 
     @Provides
-    public LeaveGuildEventHandler provideGuildLeaveEvent(LeaveGuildEvent guildLeaveEvent) {
+    public LeaveGuildEventHandler provideLeaveGuildevent(LeaveGuildEvent guildLeaveEvent) {
         return guildLeaveEvent;
     }
 

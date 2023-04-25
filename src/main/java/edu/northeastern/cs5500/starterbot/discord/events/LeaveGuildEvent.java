@@ -1,22 +1,23 @@
 package edu.northeastern.cs5500.starterbot.discord.events;
 
+import edu.northeastern.cs5500.starterbot.controller.GuildController;
+import edu.northeastern.cs5500.starterbot.controller.ListingController;
+import edu.northeastern.cs5500.starterbot.controller.UserController;
+import edu.northeastern.cs5500.starterbot.discord.handlers.LeaveGuildEventHandler;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import edu.northeastern.cs5500.starterbot.controller.GuildController;
-import edu.northeastern.cs5500.starterbot.controller.ListingController;
-import edu.northeastern.cs5500.starterbot.discord.handlers.LeaveGuildEventHandler;
-import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 
 @Singleton
 @Slf4j
 public class LeaveGuildEvent implements LeaveGuildEventHandler {
-    
+
     @Inject GuildController guildController;
     @Inject ListingController listingController;
-    
+    @Inject UserController userController;
+
     @Inject
     public LeaveGuildEvent() {
         // Defined public and empty for Dagger injection
@@ -34,8 +35,18 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
 
         var guildId = event.getGuild().getId();
         guildController.removeGuildByGuildId(guildId);
-        
+        listingController.deleteListingsWithGuildId(guildId);
+        var guildData = guildController.getGuildByGuildId(guildId);
+        var membersList = guildData.getUsersOnServer();
 
-        
+        var memberIdsToRemove =
+                membersList.stream()
+                        .filter(
+                                memberId ->
+                                        guildController.verifyUserNoLongerExistsInAnyGuild(
+                                                memberId))
+                        .toList();
+
+        memberIdsToRemove.forEach(memberId -> userController.removeUserByMemberId(memberId));
     }
 }

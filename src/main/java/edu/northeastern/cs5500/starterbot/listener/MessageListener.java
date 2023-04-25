@@ -1,7 +1,7 @@
 package edu.northeastern.cs5500.starterbot.listener;
 
-import edu.northeastern.cs5500.starterbot.discord.events.LeaveGuildEvent;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.LeaveGuildEventHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -34,7 +35,7 @@ public class MessageListener extends ListenerAdapter {
     @Inject NewMemberHandler newMemberEvent;
     @Inject NewGuildJoinedHandler newGuildJoined;
     @Inject RemoveMemberHandler removeMember;
-    @Inject LeaveGuildEvent guildLeaveEvent;
+    @Inject LeaveGuildEventHandler guildLeaveEvent;
 
     @Inject
     public MessageListener() {
@@ -111,12 +112,12 @@ public class MessageListener extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
-        removeMember.onGuildMemberRemove(event);
+    public void onGuildLeave(@Nonnull GuildLeaveEvent event) {
+        guildLeaveEvent.onGuildLeaveEvent(event);
     }
 
     @Override
-    public void onGuildLeaveEvent(@Nonnull GuildLeaveEvent event) {
-        guildLeaveEvent.onGuildLeaveEvent(event);
+    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        removeMember.onGuildMemberRemove(event);
     }
 }
