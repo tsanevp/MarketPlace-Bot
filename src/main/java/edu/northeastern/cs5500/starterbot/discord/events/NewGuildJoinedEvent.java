@@ -46,7 +46,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
                             DEFAULT_TRADING_CHANNEL_NAME,
                             CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION));
 
-    @Inject SettingLocationHelper location;
+    @Inject SettingLocationHelper settingLocationHelper;
     @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
     @Inject CreateTradingChannelCommand createTradingChannelCommand;
@@ -126,7 +126,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
      */
     private void addUsersToGuildAndAskLocation(
             @Nonnull List<Member> membersInGuild, @Nonnull String guildId, @Nonnull String botId) {
-        var stateSelections = location.createStatesMessageBuilder().build();
+        var stateSelections = settingLocationHelper.createStatesMessageBuilder().build();
         List<String> listOfUserIds = new ArrayList<>();
 
         // Add each member to guild collection & ask their location
