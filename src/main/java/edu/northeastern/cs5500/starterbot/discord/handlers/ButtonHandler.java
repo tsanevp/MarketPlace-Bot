@@ -7,5 +7,6 @@ public interface ButtonHandler {
     @Nonnull
     public String getName();
 
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event);
+    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event)
+            throws IllegalStateException;
 }
