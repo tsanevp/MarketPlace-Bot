@@ -40,9 +40,9 @@ public class UserController {
      * @param discordMemberId - The discord user to get the state of residence for.
      * @return the state the user lives in.
      */
-    @Nonnull
+    @Nullable
     public String getStateOfResidence(@Nonnull String discordMemberId) {
-        return Objects.requireNonNull(getUserForMemberId(discordMemberId).getStateOfResidence());
+        return getUserForMemberId(discordMemberId).getStateOfResidence();
     }
 
     /**
@@ -65,9 +65,9 @@ public class UserController {
      * @param discordMemberId - The discord user to get the city of residence for.
      * @return the city the user lives in.
      */
-    @Nonnull
+    @Nullable
     public String getCityOfResidence(@Nonnull String discordMemberId) {
-        return Objects.requireNonNull(getUserForMemberId(discordMemberId).getCityOfResidence());
+        return getUserForMemberId(discordMemberId).getCityOfResidence();
     }
 
     /**
