@@ -32,7 +32,7 @@ public class ListingController {
      * Deletes the all the listings of a specific user.
      *
      * @param discordMemberId - The userId of the discord user.
-     * @param guild - The guild in which the listing is contained in.
+     * @param guild - The guild in which the listings is contained in.
      * @returns Whether listing is successfully deleted.
      */
     public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
@@ -50,7 +50,7 @@ public class ListingController {
     }
 
     /**
-     * Deletes the listings with a specified objectId.
+     * Deletes the listing with a specified objectId.
      *
      * @param objectId - The objectId of the listing in the database.
      * @returns Whether listing is successfully deleted.
@@ -105,16 +105,6 @@ public class ListingController {
     }
 
     /**
-     * Retrieves listing by object id.
-     *
-     * @param objectId - The object id of the listing.
-     * @return A listing
-     */
-    public Listing getListingById(@Nonnull ObjectId objectId) {
-        return listingRepository.get(objectId);
-    }
-
-    /**
      * Retrieves all listings in a specific guild.
      *
      * @param guild - The guild that the listings contain in.
@@ -124,5 +114,15 @@ public class ListingController {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();
+    }
+
+    /**
+     * Retrieves listing by object id.
+     *
+     * @param objectId - The object id of the listing.
+     * @return A listing
+     */
+    public Listing getListingById(@Nonnull ObjectId objectId) {
+        return listingRepository.get(objectId);
     }
 }

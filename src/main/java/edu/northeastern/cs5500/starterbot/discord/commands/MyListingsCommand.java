@@ -69,9 +69,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
         var guild = event.getGuild();
+
         if (guild == null) {
             throw new GuildNotFoundException("Event has no guild.");
         }
+
         var guildId = guild.getId();
         List<MessageCreateData> listingsMessages =
                 getListingsMessages(discordUserId, discordDisplayName, guildId);
@@ -109,9 +111,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
         for (Listing list : listing) {
             var buttonId = String.format("%s:%s:delete", getName(), list.getId());
+
             if (buttonId == null) {
                 throw new IllegalStateException("Button ID was unavailable for listings.");
             }
+
             var button = Button.danger(buttonId, "Delete");
 
             var messageCreateData =

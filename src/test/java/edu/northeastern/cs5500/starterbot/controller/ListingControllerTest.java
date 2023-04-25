@@ -28,7 +28,7 @@ class ListingControllerTest {
 
     @BeforeAll
     void createListing() {
-        var listingFields =
+        LISTING_FIELDS =
                 ListingFields.builder()
                         .cost("123")
                         .description("test description")
@@ -36,9 +36,7 @@ class ListingControllerTest {
                         .condition("Good")
                         .datePosted("test date")
                         .build();
-
-        LISTING_FIELDS = listingFields;
-        Objects.requireNonNull(listingFields);
+        Objects.requireNonNull(LISTING_FIELDS);
         TEST_LISTING =
                 Listing.builder()
                         .id(new ObjectId())
@@ -101,15 +99,6 @@ class ListingControllerTest {
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
         assertThat(listingController.deleteListingById(TEST_LISTING.getId(), USER_ID)).isFalse();
 
-        ListingFields listingFields =
-                ListingFields.builder()
-                        .cost("123")
-                        .description("test description")
-                        .shippingIncluded(false)
-                        .condition("Good")
-                        .datePosted("test date")
-                        .build();
-
         Listing listingNotMatch =
                 Listing.builder()
                         .id(new ObjectId())
@@ -119,7 +108,7 @@ class ListingControllerTest {
                         .title(TITLE)
                         .url("url")
                         .images(new ArrayList<>(Arrays.asList("url", "test")))
-                        .fields(listingFields)
+                        .fields(LISTING_FIELDS)
                         .build();
 
         listingController.addListing(listingNotMatch);
