@@ -11,6 +11,7 @@ import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("null")
 public class UserControllerTest {
 
     static final String DISCORD_ID_1 = "testUser1";
@@ -104,7 +105,10 @@ public class UserControllerTest {
 
         // Check that passing the same discord id returns the same user
         var userIdTestUser1 = testUser1.getDiscordUserId();
-        assertThat(userController.getUserForMemberId(userIdTestUser1)).isEqualTo(testUser1);
+
+        if (userIdTestUser1 != null) {
+            assertThat(userController.getUserForMemberId(userIdTestUser1)).isEqualTo(testUser1);
+        }
 
         // Makes sure that when a different id is passed a different user is returned
         assertThat(userController.getUserForMemberId(GUILD_ID_2)).isNotEqualTo(testUser1);
