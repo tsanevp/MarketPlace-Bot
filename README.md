@@ -21,16 +21,16 @@ To view all documentation related to our bot, please use the following links:
 
 
 # Getting Started
-- This project was built in VS Code
+- This project was built in VS Code.
 - Please see the build.gradle file for dependencies.
 ## Building and Deploying the Bot
 <i>Skip these steps if using our [production bot](#join-our-production-server) </i>
-1. Clone this repository to your local machine
+1. Clone this repository to your local machine.
 2. Create an Application at the Discord Developer Portal.
 3. Generate an invite link for the application using the OAuth2 URL Generator with scopes as <b>bot</b> and bot permission set as <b>Administrator</b>.
 4. Invite the bot into the server of choice.
 5. Set the following environment variables or export these tokens:
-- BOT_TOKEN: Your Discord bot token
+- BOT_TOKEN: Your Discord bot token.
 - MONGODB_URI: Your MongoDB URI.
 
 After exporting the tokens or running the environment variables, run the bot by running `./gradlew run`.
@@ -59,7 +59,7 @@ After filling out the template, the user can choose to edit, cancel, or post the
 ![updateLocationState](images/updateLocationStates.PNG)<br>
 ![updateLocationCity](images/updateLocationCity.PNG)
 ## Creating a New Trading Channel
-`/createtradingchannel`: Creates a new text-channel using a unique name of the user's choice. This channel has special permissions where only the bot can send messages.
+`/createtradingchannel`: Creates a new text-channel using a unique name of the user's choice. This channel has special permissions where only the bot can send messages.<br>
 ![createTradingChannel](images/createTradingChannel.PNG)
 # Events
 ## Bot Joins / Removed From Server
