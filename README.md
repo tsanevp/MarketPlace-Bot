@@ -1,5 +1,4 @@
 # Marketplace (Discord Bot)
-## Goal
 Marketplace aims to simplify the process of buying/selling/trading items. This user-friendly tool is built using JDA (Java Discord API), and all data is stored in MongoDB.
 ## Features
 Unlike other online marketplaces or discussion forums, our bot targets Discord users who would like to exchanges goods within their niche interest groups, narrowing the search for sellers/buyers of specific goods. The bot streamlines sharing and filtering items being sold, making the selling experience <b>easier</b> and the search for items <b>faster</b>.
@@ -38,7 +37,7 @@ After exporting the tokens or running the environment variables, run the bot by 
 ## Join Our Production Server
 Use the following invite link to join our Production Discord server: [Invite Link To Our Server](https://discord.gg/sFcdK3xj)
 
-## Adding The Bot To A Server
+## Adding The Bot to a Server
 Use the following invite link to add the bot to a server: [Bot Invite Link](https://discord.com/api/oauth2/authorize?client_id=1093746738361270373&permissions=8&scope=bot)
 
 Upon adding the bot to a server, please see what happens when [bot joins server](#bot-joins--removed-from-server) below.
