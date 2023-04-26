@@ -35,7 +35,7 @@ public class SettingLocationHelper implements StringSelectHandler {
     @Override
     @Nonnull
     public String getName() {
-        return "location";
+        return "settinglocationhelper";
     }
 
     /**
