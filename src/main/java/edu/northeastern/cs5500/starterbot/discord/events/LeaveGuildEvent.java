@@ -35,9 +35,6 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
 
         var guildId = event.getGuild().getId();
         var listingsInGuild = listingController.getListingsInGuild(guildId);
-
-        listingController.deleteCollectionOfListings(listingsInGuild);
-
         var membersList = guildController.getGuildByGuildId(guildId).getUsersOnServer();
 
         for (String memberId : membersList) {
@@ -46,6 +43,7 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
             }
         }
 
+        listingController.deleteCollectionOfListings(listingsInGuild);
         guildController.removeGuildByGuildId(guildId);
     }
 }
