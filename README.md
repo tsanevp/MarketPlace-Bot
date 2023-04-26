@@ -1,7 +1,7 @@
 # Marketplace (Discord Bot)
 Marketplace aims to simplify the process of buying/selling/trading items. This user-friendly tool is built using JDA (Java Discord API), and all data is stored in MongoDB.
 ## Features
-Unlike other online marketplaces or discussion forums, our bot targets Discord users who would like to exchanges goods within their niche interest groups, narrowing the search for sellers/buyers of specific goods. The bot streamlines sharing and filtering items being sold, making the selling experience <b>easier</b> and the search for items <b>faster</b>.
+Unlike other online marketplaces or discussion forums, our bot targets Discord users who would like to buy/sell/trade amongst others within the same server. This narrows the search for sellers/buyers of specific items that may be related to their interest group. The bot streamlines sharing and filtering items being sold, making the selling experience <b>easier</b> and the search for items <b>faster</b>.
 
 Marketplace Bot has the following features:
 - [Creating a Listing](#creating-a-listing): Users can create their own listings by filling out a pre-made template that includes the essential details of the item being sold.
