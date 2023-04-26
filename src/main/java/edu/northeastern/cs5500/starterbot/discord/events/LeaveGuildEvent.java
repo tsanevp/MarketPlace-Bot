@@ -14,9 +14,9 @@ import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 @Slf4j
 public class LeaveGuildEvent implements LeaveGuildEventHandler {
 
-    @Inject GuildController guildController;
-    @Inject ListingController listingController;
     @Inject UserController userController;
+    @Inject ListingController listingController;
+    @Inject GuildController guildController;
 
     @Inject
     public LeaveGuildEvent() {

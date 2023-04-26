@@ -23,6 +23,11 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 public class CommandModule {
 
     @Provides
+    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
+        return newMember;
+    }
+
+    @Provides
     public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoinedEvent newGuildJoined) {
         return newGuildJoined;
     }
@@ -35,11 +40,6 @@ public class CommandModule {
     @Provides
     public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
         return removeMember;
-    }
-
-    @Provides
-    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
-        return newMember;
     }
 
     @Provides
