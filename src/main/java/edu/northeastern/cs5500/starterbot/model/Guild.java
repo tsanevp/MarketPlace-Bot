@@ -1,7 +1,7 @@
 package edu.northeastern.cs5500.starterbot.model;
 
-import com.mongodb.lang.NonNull;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,17 +14,19 @@ import org.bson.types.ObjectId;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Guild implements Model {
+
+    // MongoDB id
     ObjectId id;
 
     // The Guild id of the Guild
-    @NonNull String guildId;
+    @Nonnull String guildId;
 
     // The id of the guild owner
-    @NonNull String guildOwnerId;
+    @Nonnull String guildOwnerId;
 
     // The id of the trading channel in the Guild
-    @NonNull String tradingChannelId;
+    @Nonnull String tradingChannelId;
 
     // A set of users ids in the Guild
-    @NonNull Set<String> usersOnServer;
+    @Nonnull Set<String> usersOnServer;
 }
