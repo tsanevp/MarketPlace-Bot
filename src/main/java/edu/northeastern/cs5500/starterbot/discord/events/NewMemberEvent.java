@@ -19,9 +19,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 public class NewMemberEvent implements NewMemberHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject SettingLocationHelper settingLocationHelper;
-    @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
+    @Inject SettingLocationHelper settingLocationHelper;
 
     @Inject
     public NewMemberEvent() {

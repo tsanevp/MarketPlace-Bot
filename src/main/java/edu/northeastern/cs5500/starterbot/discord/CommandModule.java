@@ -8,10 +8,12 @@ import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelC
 import edu.northeastern.cs5500.starterbot.discord.commands.MyListingsCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.SearchListingsCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.UpdateLocationCommand;
+import edu.northeastern.cs5500.starterbot.discord.events.LeaveGuildEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.NewGuildJoinedEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.NewMemberEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.RemoveMemberEvent;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.LeaveGuildEventHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
@@ -22,14 +24,23 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 public class CommandModule {
 
     @Provides
+    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
+        return newMember;
+    }
+
+    @Provides
     public NewGuildJoinedHandler provideNewGuildJoin(NewGuildJoinedEvent newGuildJoined) {
         return newGuildJoined;
     }
 
     @Provides
-    @IntoSet
-    public StringSelectHandler provideLocation(SettingLocationHelper stringSelectLocation) {
-        return stringSelectLocation;
+    public LeaveGuildEventHandler provideLeaveGuildevent(LeaveGuildEvent guildLeaveEvent) {
+        return guildLeaveEvent;
+    }
+
+    @Provides
+    public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
+        return removeMember;
     }
 
     @Provides
@@ -39,8 +50,9 @@ public class CommandModule {
     }
 
     @Provides
-    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
-        return newMember;
+    @IntoSet
+    public StringSelectHandler provideLocation(SettingLocationHelper stringSelectLocation) {
+        return stringSelectLocation;
     }
 
     @Provides
@@ -81,11 +93,6 @@ public class CommandModule {
     public SlashCommandHandler provideUpdateLocationCommand(
             UpdateLocationCommand updateLocationCommand) {
         return updateLocationCommand;
-    }
-
-    @Provides
-    public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
-        return removeMember;
     }
 
     @Provides

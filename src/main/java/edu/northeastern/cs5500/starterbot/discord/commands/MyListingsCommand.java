@@ -1,5 +1,6 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
@@ -12,6 +13,7 @@ import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,10 +37,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
-    @Inject ListingController listingController;
     @Inject UserController userController;
-    @Inject MessageBuilderHelper messageBuilder;
+    @Inject ListingController listingController;
     @Inject GuildController guildController;
+    @Inject MessageBuilderHelper messageBuilder;
     @Inject JDA jda;
 
     @Inject
@@ -59,14 +61,22 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     }
 
     @Override
-    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
+    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
+            throws GuildNotFoundException {
         log.info("event: /mylistings");
 
         var user = event.getUser();
         var discordUserId = user.getId();
         var discordDisplayName = user.getName();
-        var guildId = event.getGuild().getId();
-        var listingsMessages = getListingsMessages(discordUserId, discordDisplayName, guildId);
+        var guild = event.getGuild();
+
+        if (guild == null) {
+            throw new GuildNotFoundException("Event has no guild.");
+        }
+
+        var guildId = guild.getId();
+        List<MessageCreateData> listingsMessages =
+                getListingsMessages(discordUserId, discordDisplayName, guildId);
 
         if (listingsMessages.isEmpty()) {
             event.reply("No listings available").setEphemeral(true).complete();
@@ -83,12 +93,15 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param discordUserId - The user's id in discord.
      * @param discordDisplayName - The user's display name in discord.
      * @return List<MessageCreateBuilder>
+     * @throws InvalidIDException
      */
+    @VisibleForTesting
     @Nonnull
     private List<MessageCreateData> getListingsMessages(
             @Nonnull String discordUserId,
             @Nonnull String discordDisplayName,
-            @Nonnull String guildId) {
+            @Nonnull String guildId)
+            throws IllegalStateException {
         var listing = listingController.getListingsByMemberId(discordUserId, guildId);
         List<MessageCreateData> messages = new ArrayList<>();
 
@@ -98,6 +111,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
         for (Listing list : listing) {
             var buttonId = String.format("%s:%s:delete", getName(), list.getId());
+
+            if (buttonId == null) {
+                throw new IllegalStateException("Button ID was unavailable for listings.");
+            }
+
             var button = Button.danger(buttonId, "Delete");
 
             var messageCreateData =
@@ -120,16 +138,24 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     private void sendListingsMessageToUser(
             @Nonnull User user, @Nonnull List<MessageCreateData> listingsMessages) {
         for (MessageCreateData message : listingsMessages) {
+            if (message == null) {
+                continue;
+            }
             messageBuilder.sendPrivateMessage(user, message);
         }
     }
 
     @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event)
+            throws IllegalStateException {
         var userId = event.getUser().getId();
-        var buttonIds = event.getButton().getId().split(":");
+        var buttonId = event.getButton().getId();
+        if (buttonId == null) {
+            throw new IllegalStateException("Button event had no id");
+        }
+        var buttonIdSplit = buttonId.split(":");
         var buttonEvent = event.deferEdit().setComponents();
-        var listing = listingController.getListingById(new ObjectId(buttonIds[1]));
+        var listing = listingController.getListingById(new ObjectId(buttonIdSplit[1]));
 
         if (listing == null) {
             log.error("Listing is no longer in database");
@@ -163,12 +189,22 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param listing - the listing to be deleted.
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
+     * @throws InvalidIDException
      */
     private void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
-            throws GuildNotFoundException, ChannelNotFoundException {
-        var channel = getTradingChannel(listing.getGuildId());
-
-        listingController.deleteListingById(listing.getId());
+            throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
+        var guildId = listing.getGuildId();
+        if (guildId.length() == 0) {
+            throw new IllegalStateException(
+                    "Guild ID was invalid when attempting to delete listing");
+        }
+        var channel = getTradingChannel(guildId);
+        var listingId = listing.getId();
+        if (listingId == null) {
+            throw new IllegalStateException(
+                    "Unable to delete listing ID because ID was not found.");
+        }
+        listingController.deleteListingById(listingId, userId);
         channel.deleteMessageById(listing.getMessageId()).queue();
     }
 
@@ -179,10 +215,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @return - The trading channel
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
+     * @throws InvalidIDException
      */
     @Nullable
     private MessageChannel getTradingChannel(@Nonnull String guildId)
-            throws GuildNotFoundException, ChannelNotFoundException {
+            throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
         var guild = jda.getGuildById(guildId);
 
         if (guild == null) {
@@ -190,7 +227,15 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throw new GuildNotFoundException("Guild ID no longer exists in JDA.");
         }
 
-        var tradingChannelId = guildController.getGuildByGuildId(guildId).getTradingChannelId();
+        var tradingChannelId =
+                Objects.requireNonNull(
+                        guildController.getGuildByGuildId(guildId).getTradingChannelId());
+
+        if (tradingChannelId.length() == 0) {
+            throw new IllegalStateException(
+                    "Could to retrieve Trading Channel because ID was empty.");
+        }
+
         var channel = guild.getTextChannelById(tradingChannelId);
 
         if (channel == null) {
