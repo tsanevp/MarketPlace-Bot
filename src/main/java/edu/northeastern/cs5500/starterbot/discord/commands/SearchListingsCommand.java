@@ -4,42 +4,42 @@ import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.MessageBuilderHelper;
-import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
-import edu.northeastern.cs5500.starterbot.exceptions.ChannelNotFoundException;
-import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
+import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import org.bson.types.ObjectId;
 
 @Singleton
 @Slf4j
-public class SearchListingsCommand implements SlashCommandHandler{
+public class SearchListingsCommand implements SlashCommandHandler, StringSelectHandler {
 
     @Inject ListingController listingController;
     @Inject UserController userController;
     @Inject MessageBuilderHelper messageBuilder;
     @Inject GuildController guildController;
     @Inject JDA jda;
+    private static List<Listing> listings;
+    private static String choice = "None";
 
     @Inject
     public SearchListingsCommand() {
@@ -55,29 +55,24 @@ public class SearchListingsCommand implements SlashCommandHandler{
     @Override
     @Nonnull
     public CommandData getCommandData() {
-        return Commands.slash(getName(), "View all the listings that you have posted")
-                    .addOption(OptionType.STRING, "keyword",
-                        "Please provide the keyword for the search", true);
+        return Commands.slash(getName(), "Search listings with keyword")
+                .addOption(
+                        OptionType.STRING,
+                        "keyword",
+                        "Please provide the keyword for the search",
+                        true);
     }
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         log.info("event: /searchlistings");
+        var guildId = event.getGuild().getId();
+        var user = event.getUser();
 
         var keyword = Objects.requireNonNull(event.getOption("keyword")).getAsString();
-        var user = event.getUser();
-        var discordUserId = user.getId();
-        var discordDisplayName = user.getName();
-        var guildId = event.getGuild().getId();
-
-        var listingsMessages = getListingsMessagesWithKeyword(keyword, discordUserId, discordDisplayName, guildId);
-
-        if (listingsMessages.isEmpty()) {
-            event.reply("No listings available").setEphemeral(true).complete();
-            return;
-        }
-
-        sendListingsMessageToUser(user, listingsMessages);
+        listings = new ArrayList<>(listingController.getListingsWithKeyword(keyword, guildId));
+        var messageCreateBuilder = createSortingOptionMessageBuilder();
+        messageBuilder.sendPrivateMessage(user, messageCreateBuilder.build());
         event.reply("Your listings has been sent to your DM").setEphemeral(true).complete();
     }
 
@@ -89,19 +84,16 @@ public class SearchListingsCommand implements SlashCommandHandler{
      * @return List<MessageCreateBuilder>
      */
     @Nonnull
-    private List<MessageCreateData> getListingsMessagesWithKeyword(
-            @Nonnull String keyword,
-            @Nonnull String discordUserId,
-            @Nonnull String discordDisplayName,
-            @Nonnull String guildId) {
-        var listing = listingController.getListingsWithKeyword(keyword, guildId);
+    private List<MessageCreateData> convertListingToMessageBuilder(
+            @Nonnull String discordUserId, @Nonnull String discordDisplayName) {
+
         List<MessageCreateData> messages = new ArrayList<>();
 
-        if (listing.isEmpty()) {
+        if (listings.isEmpty()) {
             return messages;
         }
 
-        for (Listing list : listing) {
+        for (Listing list : listings) {
             var messageCreateData =
                     new MessageCreateBuilder()
                             .setEmbeds(messageBuilder.toMessageEmbed(list, discordDisplayName))
@@ -117,37 +109,95 @@ public class SearchListingsCommand implements SlashCommandHandler{
      * @param user - The user who intiated the command.
      * @param listingsMessages - The user's listings in message format.
      */
-    private void sendListingsMessageToUser(User user, List<MessageCreateData> listingsMessages) {
+    private void sendListingsMessageToUser(@Nonnull User user) {
+
+        List<MessageCreateData> listingsMessages =
+                convertListingToMessageBuilder(user.getId(), user.getName());
+
         for (MessageCreateData message : listingsMessages) {
             messageBuilder.sendPrivateMessage(user, message);
         }
     }
 
-    /**
-     * Retrieves the trading channel where the listing is located.
-     *
-     * @param guildId - the id of the guild where the listing is located.
-     * @return - The trading channel
-     * @throws GuildNotFoundException - guild was not found in JDA.
-     * @throws ChannelNotFoundException - text channel was not found in JDA.
-     */
-    MessageChannel getTradingChannel(@Nonnull String guildId)
-            throws GuildNotFoundException, ChannelNotFoundException {
-        var guild = jda.getGuildById(guildId);
+    @Override
+    public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
+        var buttonId = Objects.requireNonNull(event.getComponentId());
+        var handlerName = buttonId.split(":", 2)[1];
+        var selectedChoice = event.getInteraction().getValues().get(0);
+        var user = event.getUser();
 
-        if (guild == null) {
-            guildController.removeGuildByGuildId(guildId);
-            throw new GuildNotFoundException("Guild ID no longer exists in JDA.");
+        if (listings.isEmpty()) {
+            event.reply("No listings available").setEphemeral(true).complete();
+            return;
         }
 
-        var tradingChannelId = guildController.getGuildByGuildId(guildId).getTradingChannelId();
-        var channel = guild.getTextChannelById(tradingChannelId);
-
-        if (channel == null) {
-            guildController.setTradingChannelId(guildId, null);
-            throw new ChannelNotFoundException(
-                    "Trading channel ID no longer exists in the specified guild in JDA.");
+        if ("SortOption".equals(handlerName)) {
+            if ("None".equals(selectedChoice)) {
+                event.reply("Here are the listings").setEphemeral(true).complete();
+                sendListingsMessageToUser(user);
+            } else {
+                choice = selectedChoice;
+                var messageCreateBuilder = createSortingOrderMessageBuilder();
+                event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
+            }
+        } else {
+            if ("Price".equals(choice)) {
+                Collections.sort(
+                        listings,
+                        (l1, l2) ->
+                                Float.valueOf(l1.getFields().getCost().split(" ")[1])
+                                        .compareTo(
+                                                Float.valueOf(
+                                                        l2.getFields().getCost().split(" ")[1])));
+                if ("Descending".equals(selectedChoice)) {
+                    Collections.reverse(listings);
+                }
+            } else if ("Date".equals(choice)) {
+                Collections.sort(
+                        listings,
+                        (l1, l2) ->
+                                LocalDateTime.parse(
+                                                l2.getFields().getDatePosted(),
+                                                DateTimeFormatter.ofPattern(
+                                                        "MM/dd/yyyy HH:mm:ss", Locale.ENGLISH))
+                                        .compareTo(
+                                                LocalDateTime.parse(
+                                                        l2.getFields().getDatePosted(),
+                                                        DateTimeFormatter.ofPattern(
+                                                                "MM/dd/yyyy HH:mm:ss",
+                                                                Locale.ENGLISH))));
+                if ("Descending".equals(selectedChoice)) {
+                    Collections.reverse(listings);
+                }
+            } else {
+                return;
+            }
+            choice = "None";
+            event.reply("Here are the listings").setEphemeral(true).complete();
+            sendListingsMessageToUser(user);
         }
-        return channel;
+    }
+
+    @Nonnull
+    MessageCreateBuilder createSortingOptionMessageBuilder() {
+        var menu =
+                StringSelectMenu.create(getName() + ":SortOption")
+                        .setPlaceholder("Sort the listing by")
+                        .addOption("Price", "Price")
+                        .addOption("Date", "Date")
+                        .addOption("None", "None");
+
+        return new MessageCreateBuilder().addActionRow(menu.build());
+    }
+
+    @Nonnull
+    MessageCreateBuilder createSortingOrderMessageBuilder() {
+        var menu =
+                StringSelectMenu.create(getName() + ":SortOrder")
+                        .setPlaceholder("In which order?")
+                        .addOption("Ascending", "Ascending")
+                        .addOption("Descending", "Descending");
+
+        return new MessageCreateBuilder().addActionRow(menu.build());
     }
 }
