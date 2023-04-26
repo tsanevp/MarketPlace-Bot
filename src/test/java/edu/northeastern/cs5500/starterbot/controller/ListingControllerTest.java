@@ -76,34 +76,6 @@ class ListingControllerTest {
     }
 
     @Test
-    void testDeleteListingsForUserActuallyDeletesListings() {
-        // precondition
-        listingController.addListing(TEST_LISTING);
-        assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
-
-        // mutation
-        assertThat(listingController.deleteListingsForUser(USER_ID, GUILD_ID)).isTrue();
-
-        // post
-        assertThat(listingController.deleteListingsForUser(USER_ID, GUILD_ID)).isFalse();
-        assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
-    }
-
-    @Test
-    void testDeleteListingsByGuildIdActuallyDeletesListings() {
-        // precondition
-        listingController.addListing(TEST_LISTING);
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isNotEmpty();
-
-        // mutation
-        assertThat(listingController.deleteListingsWithGuildId(GUILD_ID)).isTrue();
-
-        // post
-        assertThat(listingController.deleteListingsWithGuildId(GUILD_ID)).isFalse();
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isEmpty();
-    }
-
-    @Test
     void testDeleteCollectionOfListings() {
         // precondition
         Collection<Listing> testCollection = new ArrayList<>();
@@ -213,8 +185,8 @@ class ListingControllerTest {
         Collection<Listing> testCollection = Arrays.asList(TEST_LISTING);
 
         // precondition
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isNotNull();
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isEmpty();
+        assertThat(listingController.getListingsInGuild(GUILD_ID)).isNotNull();
+        assertThat(listingController.getListingsInGuild(GUILD_ID)).isEmpty();
 
         // mutation
         listingController.addListing(TEST_LISTING);

@@ -33,9 +33,13 @@ public class CommandModule {
     }
 
     @Provides
-    @IntoSet
-    public StringSelectHandler provideLocation(SettingLocationHelper stringSelectLocation) {
-        return stringSelectLocation;
+    public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
+        return removeMember;
+    }
+
+    @Provides
+    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
+        return newMember;
     }
 
     @Provides
@@ -45,8 +49,9 @@ public class CommandModule {
     }
 
     @Provides
-    public NewMemberHandler provideNewMember(NewMemberEvent newMember) {
-        return newMember;
+    @IntoSet
+    public StringSelectHandler provideLocation(SettingLocationHelper stringSelectLocation) {
+        return stringSelectLocation;
     }
 
     @Provides
@@ -87,10 +92,5 @@ public class CommandModule {
     public SlashCommandHandler provideUpdateLocationCommand(
             UpdateLocationCommand updateLocationCommand) {
         return updateLocationCommand;
-    }
-
-    @Provides
-    public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
-        return removeMember;
     }
 }
