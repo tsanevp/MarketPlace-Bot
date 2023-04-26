@@ -29,23 +29,24 @@ public class ListingController {
     }
 
     /**
-     * Deletes the all the listings of a specific user.
+     * Deletes all the listings of the collection.
      *
-     * @param discordMemberId - The userId of the discord user.
-     * @param guild - The guild in which the listings is contained in.
+     * @param listings - the collection of listings that needs to be deleted.
      * @returns Whether listing is successfully deleted.
      */
-    public boolean deleteListingsForUser(@Nonnull String discordMemberId, @Nonnull String guildId) {
-        if (countListingsByMemberId(discordMemberId, guildId) == 0) {
+    public boolean deleteCollectionOfListings(Collection<Listing> listings) {
+        if (listings.isEmpty()) {
             return false;
         }
 
-        for (Listing listing : getListingsByMemberId(discordMemberId, guildId)) {
+        for (Listing listing : listings) {
             var listingObjectId = listing.getId();
+
             if (Objects.nonNull(listingObjectId)) {
                 listingRepository.delete(listingObjectId);
             }
         }
+
         return true;
     }
 
@@ -85,7 +86,7 @@ public class ListingController {
      */
     public Collection<Listing> getListingsWithKeyword(
             @Nonnull String keyword, @Nonnull String guildId) {
-        return getAllListingsInGuild(guildId).stream()
+        return getListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getTitle().contains(keyword))
                 .toList();
     }
@@ -99,7 +100,7 @@ public class ListingController {
      */
     public Collection<Listing> getListingsByMemberId(
             @Nonnull String discordMemberId, @Nonnull String guildId) {
-        return getAllListingsInGuild(guildId).stream()
+        return getListingsInGuild(guildId).stream()
                 .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
                 .toList();
     }
@@ -110,7 +111,7 @@ public class ListingController {
      * @param guild - The guild that the listings contain in.
      * @return A collection of listings.
      */
-    public Collection<Listing> getAllListingsInGuild(@Nonnull String guildId) {
+    public Collection<Listing> getListingsInGuild(@Nonnull String guildId) {
         return listingRepository.getAll().stream()
                 .filter(listing -> listing.getGuildId().equals(guildId))
                 .toList();
