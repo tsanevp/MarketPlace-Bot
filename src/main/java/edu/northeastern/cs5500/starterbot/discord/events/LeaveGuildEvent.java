@@ -40,15 +40,12 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
 
         var membersList = guildController.getGuildByGuildId(guildId).getUsersOnServer();
 
-        var memberIdsToRemove =
-                membersList.stream()
-                        .filter(
-                                memberId ->
-                                        guildController.verifyUserNoLongerExistsInAnyGuild(
-                                                memberId))
-                        .toList();
+        for (String memberId : membersList) {
+            if (guildController.verifyUserNoLongerExistsInAnyGuild(memberId)) {
+                userController.removeUserByMemberId(memberId);
+            }
+        }
 
-        memberIdsToRemove.forEach(memberId -> userController.removeUserByMemberId(memberId));
         guildController.removeGuildByGuildId(guildId);
     }
 }
