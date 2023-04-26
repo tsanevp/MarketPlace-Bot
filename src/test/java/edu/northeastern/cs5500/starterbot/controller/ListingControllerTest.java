@@ -36,7 +36,9 @@ class ListingControllerTest {
                         .condition("Good")
                         .datePosted("test date")
                         .build();
+
         Objects.requireNonNull(LISTING_FIELDS);
+
         TEST_LISTING =
                 Listing.builder()
                         .id(new ObjectId())
@@ -52,6 +54,7 @@ class ListingControllerTest {
 
     @BeforeEach
     void getListingController() {
+        // setup
         listingController = new ListingController(new InMemoryRepository<>());
     }
 
@@ -73,17 +76,19 @@ class ListingControllerTest {
     }
 
     @Test
-    void testDeleteListingByMemberIdActuallyDeletesListing() {
+    void testDeleteCollectionOfListings() {
         // precondition
-        listingController.addListing(TEST_LISTING);
-        assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isNotEmpty();
+        Collection<Listing> testCollection = new ArrayList<>();
+        assertThat(listingController.deleteCollectionOfListings(testCollection)).isFalse();
 
+        Listing ListingWithNullObjectId = TEST_LISTING;
+        ListingWithNullObjectId.setId(null);
         // mutation
-        assertThat(listingController.deleteListingsForUser(USER_ID, GUILD_ID)).isTrue();
+        testCollection.add(TEST_LISTING);
+        testCollection.add(ListingWithNullObjectId);
 
         // post
-        assertThat(listingController.deleteListingsForUser(USER_ID, GUILD_ID)).isFalse();
-        assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
+        assertThat(listingController.deleteCollectionOfListings(testCollection)).isTrue();
     }
 
     @Test
@@ -180,8 +185,8 @@ class ListingControllerTest {
         Collection<Listing> testCollection = Arrays.asList(TEST_LISTING);
 
         // precondition
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isNotNull();
-        assertThat(listingController.getAllListingsInGuild(GUILD_ID)).isEmpty();
+        assertThat(listingController.getListingsInGuild(GUILD_ID)).isNotNull();
+        assertThat(listingController.getListingsInGuild(GUILD_ID)).isEmpty();
 
         // mutation
         listingController.addListing(TEST_LISTING);
