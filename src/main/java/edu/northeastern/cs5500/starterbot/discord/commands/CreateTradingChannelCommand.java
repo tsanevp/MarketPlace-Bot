@@ -44,7 +44,7 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
     public CommandData getCommandData() {
         return Commands.slash(
                         getName(),
-                        "Please input the name you wish to give the new trading channel. The name will be displayed as lower-case.")
+                        "Input the desired name of the new trading channel. It will be displayed as lower-case.")
                 .addOption(
                         OptionType.STRING,
                         "name",

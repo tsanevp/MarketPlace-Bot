@@ -227,7 +227,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         // Create Listing Object
         var listing =
                 Listing.builder()
-                        .messageId(0)
                         .discordUserId(userId)
                         .guildId(guildId)
                         .title(title)
