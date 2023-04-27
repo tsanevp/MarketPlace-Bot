@@ -7,6 +7,8 @@ import edu.northeastern.cs5500.starterbot.discord.SettingLocationHelper;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.handlers.ButtonHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.NewGuildJoinedHandler;
+import edu.northeastern.cs5500.starterbot.exceptions.GuildOwnerNotFoundException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,21 +65,27 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
     }
 
     @Override
-    public void onGuildJoin(@Nonnull GuildJoinEvent event) {
+    public void onGuildJoin(@Nonnull GuildJoinEvent event) throws GuildOwnerNotFoundException {
         log.info("event: newguildjoined");
 
         // Get Guild Owner as a User
-        var owner = Objects.requireNonNull(event.getGuild().getOwner()).getUser();
-        var membersInGuild = event.getGuild().getMembers();
-        var guildId = event.getGuild().getId();
+        var guild = event.getGuild();
+        var membersInGuild = guild.getMembers();
+        var guildId = guild.getId();
         var botId = event.getJDA().getSelfUser().getId();
+        var guildOwner = guild.getOwner();
+
+        if (guildOwner == null) {
+            throw new GuildOwnerNotFoundException("Guild owner cannot be found or does not exist.");
+        }
+
 
         // Sets the owner as the guild owner and creates intro message
-        guildController.setGuildOwnerId(guildId, owner.getId());
+        guildController.setGuildOwnerId(guildId, guildOwner.getId());
         var ownerIntroMessage = createIntroMessageForOwner(guildId);
 
         // Sends intro message to Guild owner as a DM
-        messageBuilder.sendPrivateMessage(owner, ownerIntroMessage);
+        messageBuilder.sendPrivateMessage(guildOwner.getUser(), ownerIntroMessage);
 
         // Adds each user to the guild and send them an intro message
         addUsersToGuildAndAskLocation(membersInGuild, guildId, botId);

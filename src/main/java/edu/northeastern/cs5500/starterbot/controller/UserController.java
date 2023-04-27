@@ -2,6 +2,7 @@ package edu.northeastern.cs5500.starterbot.controller;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.Nullable;
+import edu.northeastern.cs5500.starterbot.exceptions.StateOrCityNotSetException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.User;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
@@ -39,10 +40,18 @@ public class UserController {
      *
      * @param discordMemberId - The discord user to get the state of residence for.
      * @return the state the user lives in.
+     * @throws StateOrCityNotSetException if the user has not set the state they live in.
      */
     @Nullable
-    public String getStateOfResidence(@Nonnull String discordMemberId) {
-        return getUserForMemberId(discordMemberId).getStateOfResidence();
+    public String getStateOfResidence(@Nonnull String discordMemberId)
+            throws StateOrCityNotSetException {
+        var stateUserIn = getUserForMemberId(discordMemberId).getStateOfResidence();
+
+        if (Objects.isNull(stateUserIn)) {
+            throw new StateOrCityNotSetException("The user has not set the state they live in.");
+        }
+
+        return stateUserIn;
     }
 
     /**
@@ -64,10 +73,18 @@ public class UserController {
      *
      * @param discordMemberId - The discord user to get the city of residence for.
      * @return the city the user lives in.
+     * @throws StateOrCityNotSetException if the user has not set the city they live in.
      */
     @Nullable
-    public String getCityOfResidence(@Nonnull String discordMemberId) {
-        return getUserForMemberId(discordMemberId).getCityOfResidence();
+    public String getCityOfResidence(@Nonnull String discordMemberId)
+            throws StateOrCityNotSetException {
+        var cityUserIn = getUserForMemberId(discordMemberId).getCityOfResidence();
+
+        if (Objects.isNull(cityUserIn)) {
+            throw new StateOrCityNotSetException("The user has not set the city they live in.");
+        }
+
+        return cityUserIn;
     }
 
     /**
@@ -126,14 +143,18 @@ public class UserController {
      * @param discordMemberId - The discord user to remove from the collection.
      * @param guildId - The guild id of guiid the user was removed or left from.
      */
-    public void removeUserByMemberId(String discordMemberId) {
+    public boolean removeUserByMemberId(@Nonnull String discordMemberId) {
         Collection<User> users = userRepository.getAll();
         for (User currentUser : users) {
-            if (currentUser.getDiscordUserId().equals(discordMemberId)) {
-                userRepository.delete(Objects.requireNonNull(currentUser.getId()));
-                return;
+            var userObjectId = currentUser.getId();
+            if (currentUser.getDiscordUserId().equals(discordMemberId)
+                    && Objects.nonNull(userObjectId)) {
+                userRepository.delete(userObjectId);
+                return true;
             }
         }
+
+        return false;
     }
 
     /**

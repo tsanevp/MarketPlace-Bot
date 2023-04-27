@@ -4,17 +4,20 @@ import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
+import edu.northeastern.cs5500.starterbot.exceptions.StateOrCityNotSetException;
 import edu.northeastern.cs5500.starterbot.model.States;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
+@Slf4j
 public class SettingLocationHelper implements StringSelectHandler {
     private static final Integer EMBED_COLOR = 0x00FFFF;
     private static final Integer MAX_MENU_SELECTIONS = 25;
@@ -80,10 +83,19 @@ public class SettingLocationHelper implements StringSelectHandler {
     private MessageEmbed cityAndStateSetEmbedMessage(
             @Nonnull String userId, @Nonnull String selectedCityOrState) {
         var description =
-                String.format(
-                        "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
-                        userController.getCityOfResidence(userId),
-                        userController.getStateOfResidence(userId));
+                "An error occured while attempting to set your city and state. Please call /updatelocation to try again.";
+
+        try {
+            description =
+                    String.format(
+                            "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
+                            userController.getCityOfResidence(userId),
+                            userController.getStateOfResidence(userId));
+        } catch (StateOrCityNotSetException e) {
+            log.info(
+                    "An error occured when the user was setting their location upon joining the guild.",
+                    e);
+        }
 
         return new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
     }

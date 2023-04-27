@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("null")
 public class CreateListingCommandTest {
-    static final int COST = 50;
+    static final String COST = "50";
     static final boolean SHIPPING_INCLUDED = false;
     static final String CONDITION = "very good";
     static final String DESCRIPTION = "test description";
@@ -125,8 +125,7 @@ public class CreateListingCommandTest {
 
     @Test
     void testReformatCostValueReturnsCurrencyExchangePlusCostValue() {
-        var cost = String.format("%s %s", "USD", 10);
-        assertThat(createListingCommand.reformatCostValue(10)).isEqualTo(cost);
+        assertThat(createListingCommand.reformatCostValue("10")).isEqualTo("USD 10");
     }
 
     @Test
