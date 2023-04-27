@@ -6,6 +6,7 @@ import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -166,8 +167,9 @@ public class GuildController {
     public boolean removeGuildByGuildId(@Nonnull String guildId) {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild guild : guilds) {
-            if (guild.getGuildId().equals(guildId)) {
-                guildRepository.delete(guild.getId());
+            var guildObjectId = guild.getId();
+            if (guild.getGuildId().equals(guildId) && Objects.nonNull(guildObjectId)) {
+                guildRepository.delete(guildObjectId);
                 return true;
             }
         }

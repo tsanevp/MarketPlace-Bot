@@ -36,7 +36,8 @@ public class UserController {
     }
 
     /**
-     * Set the state that the user lives in.
+     * Set the state that the user lives in. Nullable because the user may have missed
+     * setting their state OR they do not wish to.
      *
      * @param discordMemberId - The discord user to get the state of residence for.
      * @return the state the user lives in.
@@ -62,7 +63,8 @@ public class UserController {
     }
 
     /**
-     * Set the state that the user lives in.
+     * Set the state that the user lives in. Nullable because the user may have missed
+     * setting their city OR they do not wish to.
      *
      * @param discordMemberId - The discord user to get the city of residence for.
      * @return the city the user lives in.
@@ -89,7 +91,8 @@ public class UserController {
 
     /**
      * Gets the current listing the user is working on. There will only ever be one current listing,
-     * if it is not null.
+     * if it is not null. Nullable because when a user does have a listing in-progress, it should
+     * be in a null state.
      *
      * @param discordMemberId - The discord user to get the current listing for.
      * @return the current listing object.
