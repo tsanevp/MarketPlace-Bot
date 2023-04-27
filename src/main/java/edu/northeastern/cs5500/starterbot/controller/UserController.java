@@ -41,7 +41,6 @@ public class UserController {
      *
      * @param discordMemberId - The discord user to get the state of residence for.
      * @return the state the user lives in.
-     * @throws StateOrCityNotSetException if the user has not set the state they live in.
      */
     @Nullable
     public String getStateOfResidence(@Nonnull String discordMemberId) {
@@ -68,7 +67,6 @@ public class UserController {
      *
      * @param discordMemberId - The discord user to get the city of residence for.
      * @return the city the user lives in.
-     * @throws StateOrCityNotSetException if the user has not set the city they live in.
      */
     @Nullable
     public String getCityOfResidence(@Nonnull String discordMemberId) {
