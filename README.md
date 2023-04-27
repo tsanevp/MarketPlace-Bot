@@ -65,7 +65,10 @@ After filling out the template, the user can choose to post, edit, or cancel the
 ![createTradingChannel](images/createTradingChannel.PNG)
 # Events
 ## Bot Joins / Removed From Server
-- <b>When a bot joins</b>: First, the server owner will receive the following DM from the bot:
+
+### Bot joins
+
+First, the server owner will receive the following DM from the bot:
 
 ![Screenshot (50)](https://user-images.githubusercontent.com/78775944/232926423-d039fda7-286d-4cd2-b9b9-d978e2218a4b.png)
 
@@ -73,13 +76,18 @@ If the owner selects "Bot Can Create The Channel", the bot will attempt to creat
 
 Second, each member of the server, including the owner, will receive a DM from the bot asking the member to select the State and City they are located in from drop-down menus. An exact location is not necessary. The bot tracks this information to later attach it to listings created by members.
 
-- <b>When a bot leaves</b>: Listings within the server will be deleted from the database. If the server owner decides to invite the bot back, previous information will no longer be available. User data will also be removed if the user is not a part of another server containing the bot.
+### Bot leaves
+
+Listings within the server will be deleted from the database. If the server owner decides to invite the bot back, previous information will no longer be available. User data will also be removed if the user is not a part of another server containing the bot.
 ## Member Joins / Removed From Server
-- <b>When a new member joins</b>: The bot will send a greeting to the user's direct messages and ask for user to update their location.
-- <b>When a member is removed</b>: Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
+### New Member Joins
+ The bot will send a greeting to the user's direct messages and ask for user to update their location.
+
+### Member is Removed
+Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
 
 # Credits
-Foundations of Computer Science @ NEU, Instructor: Alexander Lash
+Foundations of Software Engineering @ NEU, Instructor: Alexander Lash
 ## Collaborators:
 - Lena Duong
 - Peter Tsanev
