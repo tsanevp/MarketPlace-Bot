@@ -25,7 +25,7 @@ To view all documentation related to our bot, please use the following links:
 # Getting Started
 - This project was built in VS Code.
 - Please see the build.gradle file for dependencies.
-## Building and Deploying the Bot
+## Building and Deploying The Bot
 <i> Skip these steps if using our [production bot](#join-our-production-server) </i>
 1. Clone this repository to your local machine.
 2. Create an Application at the Discord Developer Portal.
@@ -81,7 +81,7 @@ Second, each member of the server, including the owner, will receive a DM from t
 Listings within the server will be deleted from the database. If the server owner decides to invite the bot back, previous information will no longer be available. User data will also be removed if the user is not a part of another server containing the bot.
 ## Member Joins / Removed From Server
 ### New Member Joins
- The bot will send a greeting to the user's direct messages and ask for user to update their location.
+The bot will send a greeting to the user's direct messages and ask for user to update their location.
 
 ### Member is Removed
 Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
