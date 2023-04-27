@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.discord;
 
-import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
@@ -65,7 +64,7 @@ public class SettingLocationHelper implements StringSelectHandler {
         } else {
             var stateAbbreviation =
                     States.valueOfFullName(selectedCityOrState).getAbbreviatedName();
-            var cityStringSelectMenu = createCityMessageBuilder(stateAbbreviation);
+            var cityStringSelectMenu = createCitySelectMenu(stateAbbreviation);
 
             userController.setStateOfResidence(userId, stateAbbreviation);
             event.deferEdit().setComponents(ActionRow.of(cityStringSelectMenu)).queue();
@@ -144,8 +143,7 @@ public class SettingLocationHelper implements StringSelectHandler {
      * @return the StringSelectMenu of cities for the given State.
      */
     @Nonnull
-    @VisibleForTesting
-    StringSelectMenu createCityMessageBuilder(@Nonnull String stateAbbreviation) {
+    private StringSelectMenu createCitySelectMenu(@Nonnull String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
 
