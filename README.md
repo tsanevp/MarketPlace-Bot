@@ -8,7 +8,7 @@ Unlike other online marketplaces or discussion forums, our bot targets Discord u
 Marketplace Bot has the following features:
 - [Creating a Listing](#creating-a-listing): Users can create their own listings by filling out a pre-made template that includes the essential details of the item being sold.
 - [Viewing Your Own Listings](#viewing-your-own-listings): Users can review the listings they have already posted and delete the ones that are no longer active.
-- [Search and Sort for Listings](#search-and-sort-for-listings): Users can search for specific listings that contain a keyword in the title and sort through them by date/price.
+- [Search and Sort for Listings](#search-and-sort-listings): Users can search for specific listings that contain a keyword in the title and sort through them by date/price.
 - [Updating Your Location](#updating-your-location): Users can add or update their approximate location that is displayed along with their listing, which informs other potential buyers where the item may be picked up/shipped from.
 - [Creating a New Channel](#creating-a-new-trading-channel): A text channel with special permissions, where the bot can post users' listings, will be created in the server.
 
