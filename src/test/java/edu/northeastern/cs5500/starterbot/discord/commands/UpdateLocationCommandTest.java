@@ -35,7 +35,7 @@ public class UpdateLocationCommandTest {
         // Test that embed has attributes we expect
         assertThat(getEmbed.getDescription())
                 .isEqualTo(
-                        "To update your State and City, plese select the correct values from the drop-down menus below.");
+                        "To set your State and City, plese select the correct values from the drop-down menus below.");
         assertThat(getEmbed.getColorRaw()).isEqualTo(0x00FFFF);
 
         // Test that the method also has two string select menus returned
