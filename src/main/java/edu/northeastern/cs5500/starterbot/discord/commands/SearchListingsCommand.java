@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -85,13 +84,14 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * results. Sends the Select Menu as an ephemeral reply to the user.
      *
      * @param event The SlashCommandInteractionEvent event.
+     * @throws GuildNotFoundException
      */
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
             throws GuildNotFoundException {
         log.info("event: /searchlistings");
 
-        var keyword = Objects.requireNonNull(event.getOption("keyword")).getAsString();
+        var keyword = event.getOption("keyword").getAsString();
         var guild = event.getGuild();
 
         if (guild == null) {
@@ -171,11 +171,16 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      *
      * @param event the StringSelectInteractionEvent containing information about the user's
      *     selection
+     * @throws InvalidIDException
      */
     @Override
-    public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
+    public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event)
+            throws IllegalStateException {
 
-        var buttonId = Objects.requireNonNull(event.getComponentId());
+        var buttonId = event.getComponentId();
+        if (buttonId == null) {
+            throw new IllegalStateException("Button ID was unavailable for listings.");
+        }
         var handlerName = buttonId.split(":", 5)[1];
         var keyword = buttonId.split(":", 5)[2];
         var guildId = buttonId.split(":", 5)[3];
@@ -196,7 +201,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
             if (NONE.equals(selectedChoice)) {
                 sendListingsMessageToUser(user, listings);
                 var embedWithoutSorting =
-                        buildConfirmationEmbed("The listings are sent to your DM.");
+                        buildConfirmationEmbed("Search results are sent to your DM.");
                 event.deferEdit().setComponents().setEmbeds(embedWithoutSorting).complete();
 
             } else {
@@ -227,7 +232,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
 
             String message =
                     String.format(
-                            "The listings sorted by %s in %s order are sent to your DM.",
+                            "Search result sorted by %s in %s order are sent to your DM.",
                             choice, selectedChoice);
             event.deferEdit().setComponents().setEmbeds(buildConfirmationEmbed(message)).complete();
         }
