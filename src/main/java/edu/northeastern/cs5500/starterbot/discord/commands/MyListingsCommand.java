@@ -95,7 +95,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @return List<MessageCreateBuilder>
      * @throws InvalidIDException
      */
-    @VisibleForTesting
     @Nonnull
     private List<MessageCreateData> getListingsMessages(
             @Nonnull String discordUserId,
@@ -137,10 +136,13 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      */
     private void sendListingsMessageToUser(
             @Nonnull User user, @Nonnull List<MessageCreateData> listingsMessages) {
+
         for (MessageCreateData message : listingsMessages) {
+
             if (message == null) {
                 continue;
             }
+
             messageBuilder.sendPrivateMessage(user, message);
         }
     }
@@ -150,9 +152,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throws IllegalStateException {
         var userId = event.getUser().getId();
         var buttonId = event.getButton().getId();
+
         if (buttonId == null) {
             throw new IllegalStateException("Button event had no id");
         }
+
         var buttonIdSplit = buttonId.split(":");
         var buttonEvent = event.deferEdit().setComponents();
         var listing = listingController.getListingById(new ObjectId(buttonIdSplit[1]));
@@ -194,16 +198,20 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     private void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
             throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
         var guildId = listing.getGuildId();
+
         if (guildId.length() == 0) {
             throw new IllegalStateException(
                     "Guild ID was invalid when attempting to delete listing");
         }
+
         var channel = getTradingChannel(guildId);
         var listingId = listing.getId();
+
         if (listingId == null) {
             throw new IllegalStateException(
                     "Unable to delete listing ID because ID was not found.");
         }
+
         listingController.deleteListingById(listingId, userId);
         channel.deleteMessageById(listing.getMessageId()).queue();
     }
@@ -217,7 +225,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      * @throws InvalidIDException
      */
-    @Nullable
     private MessageChannel getTradingChannel(@Nonnull String guildId)
             throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
         var guild = jda.getGuildById(guildId);
