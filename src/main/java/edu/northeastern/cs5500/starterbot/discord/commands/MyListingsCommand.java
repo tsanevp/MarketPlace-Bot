@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
-import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
@@ -212,7 +211,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
      */
-    @Nullable
+    @Nonnull
     private MessageChannel getTradingChannel(@Nonnull String guildId)
             throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
