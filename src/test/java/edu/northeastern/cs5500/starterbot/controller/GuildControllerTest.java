@@ -95,6 +95,26 @@ public class GuildControllerTest {
     }
 
     @Test
+    void testGetTradingChannelIdByGuildIdReturnsTheExpectedValue() {
+        // Define guild and trading channel ids
+        var guildId = "12345";
+        var tradingChannelId = "some id";
+
+        // Ensure size of collection is zero at start
+        assertThat(guildController.getSizeGuildCollection()).isEqualTo(0);
+
+        // Create a new guild object and set the trading channel id
+        guildController.setTradingChannelId(guildId, tradingChannelId);
+
+        // Check to see if size increased to 1
+        assertThat(guildController.getSizeGuildCollection()).isEqualTo(1);
+
+        // Check to see if the trading channel id is what was set
+        assertThat(guildController.getTradingChannelIdByGuildId(guildId))
+                .isEqualTo(tradingChannelId);
+    }
+
+    @Test
     void testAddUserToServerWorksAndTheUserIsAddedToSet() {
         // Define guild and trading channel ids
         var guildId = "12345";

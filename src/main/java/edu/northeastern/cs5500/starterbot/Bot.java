@@ -21,8 +21,8 @@ public class Bot {
     @Inject
     Bot() {}
 
-    @Inject MessageListener messageListener;
     @Inject JDA jda;
+    @Inject MessageListener messageListener;
 
     static String getBotToken() {
         return new ProcessBuilder().environment().get("BOT_TOKEN");

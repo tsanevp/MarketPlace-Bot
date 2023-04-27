@@ -8,6 +8,7 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
+import edu.northeastern.cs5500.starterbot.exceptions.GuildOwnerNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public class MessageListener extends ListenerAdapter {
             if (command.getName().equals(event.getName())) {
                 try {
                     command.onSlashCommandInteraction(event);
-                } catch (GuildNotFoundException e) {
+                } catch (GuildNotFoundException | GuildOwnerNotFoundException e) {
                     log.error("There was an error in the slash command interaction", e);
                 }
                 return;
@@ -76,7 +77,11 @@ public class MessageListener extends ListenerAdapter {
 
         for (ButtonHandler buttonHandler : buttons) {
             if (buttonHandler.getName().equals(handlerName)) {
-                buttonHandler.onButtonInteraction(event);
+                try {
+                    buttonHandler.onButtonInteraction(event);
+                } catch (GuildNotFoundException e) {
+                    log.error("There was an error in the button interaction", e);
+                }
                 return;
             }
         }
@@ -108,7 +113,11 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
-        newGuildJoined.onGuildJoin(event);
+        try {
+            newGuildJoined.onGuildJoin(event);
+        } catch (GuildOwnerNotFoundException e) {
+            log.error("The guild owner could not be assigned when the bot joined the guild", e);
+        }
     }
 
     @Override
