@@ -2,7 +2,6 @@ package edu.northeastern.cs5500.starterbot.controller;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import edu.northeastern.cs5500.starterbot.exceptions.StateOrCityNotSetException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.ListingFields;
 import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
@@ -31,8 +30,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testSetAndGetStateOfResidenceForUserActuallySetsAndGetsStateOfResidence()
-            throws StateOrCityNotSetException {
+    void testSetAndGetStateOfResidenceForUserActuallySetsAndGetsStateOfResidence() {
         // Need to first set state of residence since get() is @NonNull
         userController.setStateOfResidence(DISCORD_ID_1, STATE_OF_RESIDENCE_1);
 
@@ -43,8 +41,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testSetAndGetCityOfResidenceForUserActuallySetsAndGetsCityOfResidence()
-            throws StateOrCityNotSetException {
+    void testSetAndGetCityOfResidenceForUserActuallySetsAndGetsCityOfResidence() {
         // Need to first set city of residence since get() is @NonNull
         userController.setCityOfResidence(DISCORD_ID_1, CITY_OF_RESIDENCE_1);
 

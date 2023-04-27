@@ -2,7 +2,6 @@ package edu.northeastern.cs5500.starterbot.controller;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.mongodb.lang.Nullable;
-import edu.northeastern.cs5500.starterbot.exceptions.StateOrCityNotSetException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.model.User;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
