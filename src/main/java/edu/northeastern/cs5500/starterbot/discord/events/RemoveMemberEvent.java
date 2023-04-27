@@ -33,15 +33,16 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
     @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
         log.info("event: removemember");
+
         var userId = event.getUser().getId();
         var guildId = event.getGuild().getId();
-
-        var tradingChannelId = guildController.getGuildByGuildId(guildId).getTradingChannelId();
+        var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
         var channel = event.getGuild().getTextChannelById(tradingChannelId);
 
         if (channel == null) {
             throw new IllegalStateException("Channel was unable to be retrieved.");
         }
+
         var listingsOfMember = listingController.getListingsByMemberId(userId, guildId);
 
         // Remove all the posted listing the user has made from the trading channel

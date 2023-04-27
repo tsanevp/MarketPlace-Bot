@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import edu.northeastern.cs5500.starterbot.controller.CityController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
-import edu.northeastern.cs5500.starterbot.exceptions.StateOrCityNotSetException;
 import edu.northeastern.cs5500.starterbot.model.States;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
@@ -48,26 +48,27 @@ public class SettingLocationHelper implements StringSelectHandler {
      */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
-        var buttonId = Objects.requireNonNull(event.getComponentId());
-        var handlerName = buttonId.split(":", 2)[1];
         var userId = event.getUser().getId();
-        var selectedCityOrState = event.getInteraction().getValues().get(0);
+        var buttonId = event.getComponentId();
+        var handlerName = buttonId.split(":", 2)[1];
+        var selectedCityOrState = event.getValues().get(0);
 
-        Objects.requireNonNull(selectedCityOrState);
+        if (selectedCityOrState == null) {
+            throw new IllegalStateException("Menu selection string was invalid.");
+        }
 
         if ("cities".equals(handlerName)) {
             userController.setCityOfResidence(userId, selectedCityOrState);
 
             var messageEmbed = cityAndStateSetEmbedMessage(userId, selectedCityOrState);
             event.deferEdit().setComponents().setEmbeds(messageEmbed).queue();
-
         } else {
             var stateAbbreviation =
                     States.valueOfFullName(selectedCityOrState).getAbbreviatedName();
-            var messageCreateBuilder = createCityMessageBuilder(stateAbbreviation);
+            var cityStringSelectMenu = createCityMessageBuilder(stateAbbreviation);
 
             userController.setStateOfResidence(userId, stateAbbreviation);
-            event.deferEdit().setComponents(messageCreateBuilder.getComponents()).queue();
+            event.deferEdit().setComponents(ActionRow.of(cityStringSelectMenu)).queue();
         }
     }
 
@@ -82,19 +83,20 @@ public class SettingLocationHelper implements StringSelectHandler {
     @Nonnull
     private MessageEmbed cityAndStateSetEmbedMessage(
             @Nonnull String userId, @Nonnull String selectedCityOrState) {
-        var description =
-                "An error occured while attempting to set your city and state. Please call /updatelocation to try again.";
+        var city = userController.getCityOfResidence(userId);
+        var state = userController.getStateOfResidence(userId);
 
-        try {
-            description =
-                    String.format(
-                            "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
-                            userController.getCityOfResidence(userId),
-                            userController.getStateOfResidence(userId));
-        } catch (StateOrCityNotSetException e) {
+        var description =
+                String.format(
+                        "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
+                        userController.getCityOfResidence(userId),
+                        userController.getStateOfResidence(userId));
+
+        if (city == null || state == null) {
             log.info(
-                    "An error occured when the user was setting their location upon joining the guild.",
-                    e);
+                    "An error occured when the user was setting their location upon joining the guild.");
+            description =
+                    "An error occured while attempting to set your city and state. Please call /updatelocation to try again.";
         }
 
         return new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
@@ -118,10 +120,8 @@ public class SettingLocationHelper implements StringSelectHandler {
 
         var count = 1;
         for (States state : States.values()) {
-
             if (!state.equals(States.UNKNOWN)) {
                 var stateName = state.getFullName();
-
                 if (count <= MAX_MENU_SELECTIONS) {
                     statesFirstHalf.addOption(stateName, stateName);
                 } else {
@@ -141,11 +141,11 @@ public class SettingLocationHelper implements StringSelectHandler {
      * the given State.
      *
      * @param stateAbbreviation - the abbreviation of the State that we need to pull city data on.
-     * @return A MessageCreateBuilder with the StringSelectMenu of cities for the given State.
+     * @return the StringSelectMenu of cities for the given State.
      */
     @Nonnull
     @VisibleForTesting
-    MessageCreateBuilder createCityMessageBuilder(@Nonnull String stateAbbreviation) {
+    StringSelectMenu createCityMessageBuilder(@Nonnull String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
 
@@ -158,6 +158,6 @@ public class SettingLocationHelper implements StringSelectHandler {
             menu.addOption(city, city);
         }
 
-        return new MessageCreateBuilder().addActionRow(menu.build());
+        return menu.build();
     }
 }

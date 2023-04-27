@@ -44,7 +44,7 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
     public CommandData getCommandData() {
         return Commands.slash(
                         getName(),
-                        "Please input the name you wish to give the new trading channel. The name must be lower-case.")
+                        "Please input the name you wish to give the new trading channel. The name will be displayed as lower-case.")
                 .addOption(
                         OptionType.STRING,
                         "name",
@@ -73,7 +73,7 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
 
         // Verify that the user who called the command is the guild owner
         if (!guildOwner.getId().equals(event.getUser().getId())) {
-            event.reply("Only the owner of this Discord server can create a new trading channel!")
+            event.reply("Only the owner of this Discord server can create a new trading channel.")
                     .setEphemeral(true)
                     .queue();
             return;
@@ -84,7 +84,7 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
             if (desiredChannelName.equals(guildChannel.getName())) {
                 var messageToSend =
                         String.format(
-                                "A channel with the name %s already exists on your server. Please call this command again and input a name not already in use. Thank you.",
+                                "A channel with the name %s already exists on your server. Please call /createtradingchannel command again and input a name not already in use. Thank you.",
                                 desiredChannelName);
                 var channelExistsMessage =
                         new MessageCreateBuilder().setContent(messageToSend).build();
@@ -136,10 +136,9 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
                 String.format(
                         "A new channel named %s has been created in your server %s.",
                         channelName, guild.getName());
-
         var successMessage = new MessageCreateBuilder().setContent(messageToSend).build();
 
-        // Send success message that the channel was created
+        // Send success message that the channel was created to owner
         messageBuilder.sendPrivateMessage(owner, successMessage);
 
         // Set this channel as the trading channel for the Discord server

@@ -46,6 +46,17 @@ public class GuildController {
     }
 
     /**
+     * Gets the trading channel id for the current guild.
+     *
+     * @param guildId - The id of the guild to get the trading channel id for.
+     * @return the trading channel id for the guild id passed.
+     */
+    @Nonnull
+    public String getTradingChannelIdByGuildId(@Nonnull String guildId) {
+        return getGuildByGuildId(guildId).getTradingChannelId();
+    }
+
+    /**
      * Adds the user to the list of user that are in the guild.
      *
      * @param guildId - The id of the guild to add the user to.

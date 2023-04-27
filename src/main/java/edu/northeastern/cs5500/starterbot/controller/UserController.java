@@ -43,15 +43,8 @@ public class UserController {
      * @throws StateOrCityNotSetException if the user has not set the state they live in.
      */
     @Nullable
-    public String getStateOfResidence(@Nonnull String discordMemberId)
-            throws StateOrCityNotSetException {
-        var stateUserIn = getUserForMemberId(discordMemberId).getStateOfResidence();
-
-        if (Objects.isNull(stateUserIn)) {
-            throw new StateOrCityNotSetException("The user has not set the state they live in.");
-        }
-
-        return stateUserIn;
+    public String getStateOfResidence(@Nonnull String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getStateOfResidence();
     }
 
     /**
@@ -76,15 +69,8 @@ public class UserController {
      * @throws StateOrCityNotSetException if the user has not set the city they live in.
      */
     @Nullable
-    public String getCityOfResidence(@Nonnull String discordMemberId)
-            throws StateOrCityNotSetException {
-        var cityUserIn = getUserForMemberId(discordMemberId).getCityOfResidence();
-
-        if (Objects.isNull(cityUserIn)) {
-            throw new StateOrCityNotSetException("The user has not set the city they live in.");
-        }
-
-        return cityUserIn;
+    public String getCityOfResidence(@Nonnull String discordMemberId) {
+        return getUserForMemberId(discordMemberId).getCityOfResidence();
     }
 
     /**

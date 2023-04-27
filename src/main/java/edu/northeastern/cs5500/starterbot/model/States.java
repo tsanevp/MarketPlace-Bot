@@ -1,9 +1,3 @@
-package edu.northeastern.cs5500.starterbot.model;
-
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 /***************************************************************************************
  *   Title: US.java
  *   Author: AustinC, harlanhaskins
@@ -13,6 +7,12 @@ import javax.annotation.Nonnull;
  *   License: https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
  *
  ***************************************************************************************/
+
+package edu.northeastern.cs5500.starterbot.model;
+
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nonnull;
 
 // <-------------------- START OF LICENSE ------------------>
 public enum States {
