@@ -3,6 +3,7 @@ package edu.northeastern.cs5500.starterbot.controller;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +47,6 @@ public class ListingController {
 
         for (Listing listing : listings) {
             var listingObjectId = listing.getId();
-
             if (Objects.nonNull(listingObjectId)) {
                 listingRepository.delete(listingObjectId);
             }
@@ -63,6 +63,7 @@ public class ListingController {
      */
     public boolean deleteListingById(@Nonnull ObjectId objectId, @Nonnull String discordMemberId) {
         Listing listing = getListingById(objectId);
+
         if (listing == null || !listing.getDiscordUserId().equals(discordMemberId)) {
             return false;
         }
@@ -96,7 +97,11 @@ public class ListingController {
         List<Listing> lists = getListingsInGuild(guildId).stream()
         .filter(listing -> listing.getTitle().contains(keyword))
         .toList();
-        Objects.requireNonNull(lists);
+
+        if (lists == null) {
+            return new ArrayList<>();
+        }
+
         return lists;
     }
 
@@ -108,12 +113,14 @@ public class ListingController {
      * @return A collection of listings.
      */
     @Nonnull
-    public Collection<Listing> getListingsByMemberId(
+    public List<Listing> getListingsByMemberId(
             @Nonnull String discordMemberId, @Nonnull String guildId) {
-        Collection<Listing> lists = getListingsInGuild(guildId).stream()
+        List<Listing> lists = getListingsInGuild(guildId).stream()
         .filter(listing -> listing.getDiscordUserId().equals(discordMemberId))
         .toList();
-        Objects.requireNonNull(lists);
+        if (lists == null) {
+            return new ArrayList<>();
+        }
         return lists;
     }
 
@@ -124,11 +131,13 @@ public class ListingController {
      * @return A collection of listings.
      */
     @Nonnull
-    public Collection<Listing> getListingsInGuild(@Nonnull String guildId) {
-        Collection<Listing> lists = listingRepository.getAll().stream()
+    public List<Listing> getListingsInGuild(@Nonnull String guildId) {
+        List<Listing> lists = listingRepository.getAll().stream()
         .filter(listing -> listing.getGuildId().equals(guildId))
         .toList();
-        Objects.requireNonNull(lists);
+        if (lists == null) {
+            return new ArrayList<>();
+        }
         return lists;
     }
 
