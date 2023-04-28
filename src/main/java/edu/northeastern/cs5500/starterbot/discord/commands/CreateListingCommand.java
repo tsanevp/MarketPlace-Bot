@@ -135,23 +135,23 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var description = Objects.requireNonNull(event.getOption("description")).getAsString();
 
         // Get user and guild data
-        var userId = event.getUser().getId();
-        var discordDisplayName = event.getUser().getName();
-        var guild = event.getGuild();
+        var user = event.getUser();
+        var userId = user.getId();
+        var discordDisplayName = user.getName();
 
+        var guild = event.getGuild();
         if (guild == null) {
             throw new GuildNotFoundException("Event has no guild.");
         }
 
         var guildId = guild.getId();
+        var titleReformatted = reformatListingTitle(user, title);
 
         // For all images attached by the user, store their urls in a list
         List<String> imageURLs = new ArrayList<>();
         for (OptionMapping image : event.getOptionsByType(OptionType.ATTACHMENT)) {
             imageURLs.add(image.getAsAttachment().getUrl());
         }
-
-        var titleReformatted = reformatListingTitle(event.getUser(), title);
 
         // Create ListingFields and Listing objects
         var listingFields = buildListingFields(cost, shippingIncluded, condition, description);
@@ -175,8 +175,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param shippingIncluded - Whether shipping is included in the cost.
      * @param condition - The condition of the item being sold.
      * @param description - A description of the item being sold.
-     * @return a ListingFields object.
-     * @throws DateTimeException used to indicate a problem while calculating a date-time.
+     * @return A ListingFields object.
+     * @throws DateTimeException Used to indicate a problem while calculating a date-time.
      */
     @Nonnull
     @VisibleForTesting
@@ -200,7 +200,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .build();
 
         Objects.requireNonNull(listingFields);
-
         return listingFields;
     }
 
@@ -212,7 +211,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param userId - The id of the user who created the listing.
      * @param imageURLs - A list of image urls. These are the images of the item.
      * @param listingFields - A ListingFields object that holds data of each listing field.
-     * @return a Listing object.
+     * @return A Listing object.
      */
     @Nonnull
     @VisibleForTesting
@@ -237,7 +236,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         .build();
 
         Objects.requireNonNull(listing);
-
         return listing;
     }
 
@@ -247,7 +245,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *
      * @param discordDisplayName - The display name of the user who created the listing.
      * @param listing - The listing object that was created from the user input.
-     * @return the confirmation message to send the user asking if the user wants to post, edit, or
+     * @return The confirmation message to send the user asking if the user wants to post, edit, or
      *     delete the listing.
      */
     @Nonnull
@@ -270,27 +268,26 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *
      * @param userId - The userId of the member who posted the listing.
      * @param title - The original title of the listing.
-     * @return the title of the listing with the city and state added to it.
-     * @throws IllegalStateException if the string reformat of title throws an exception.
+     * @return The title of the listing with the city and state added to it.
+     * @throws IllegalStateException If the string reformat of title throws an exception.
      */
     @Nonnull
     private String reformatListingTitle(@Nonnull User user, @Nonnull String title)
             throws IllegalStateException {
         var userId = user.getId();
+
         var city = userController.getCityOfResidence(userId);
         var state = userController.getStateOfResidence(userId);
-
         if (city == null || state == null) {
             log.info("User has not set their city or state of residence");
             messageBuilder.sendPrivateMessage(
                     user,
                     "You have not properly set you city and state location. Please call "
-                            + "/updatelocation to set them so they are included in future listings.");
+                            + "/updatelocation to set your city and state.");
             return title;
         }
 
         var titleReformatted = (String.format("[%s, %s]%s", city, state, title));
-
         if (titleReformatted == null) {
             throw new IllegalStateException(
                     "The title could not be reformatted to include the user's location.");
@@ -302,18 +299,18 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     /**
      * Method to get the date and time the listing was posted.
      *
-     * @return the date and time the listing was posted.
-     * @throws DateTimeException used to indicate a problem while calculating a date-time.
+     * @return The date and time the listing was posted.
+     * @throws DateTimeException Used to indicate a problem while calculating a date-time.
      */
     @Nonnull
     @VisibleForTesting
     String getDatePosted() throws DateTimeException {
         var dateReformatted =
                 DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss").format(LocalDateTime.now());
-
         if (dateReformatted == null) {
             throw new DateTimeException(
-                    "There was an error when attempting to reformat the date and time a listing was posted.");
+                    "There was an error when attempting to reformat the date and time a "
+                            + "listing was posted.");
         }
 
         return dateReformatted;
@@ -325,15 +322,14 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * @param cost - The monetary cost of the item being sold.
      * @param shippingIncluded - A boolean indicating whether shipping costs are included in the
      *     item's price.
-     * @return a list where the first index is the Cost field name reformatted, and the second is
+     * @return A list where the first index is the Cost field name reformatted, and the second is
      *     the price reformatted.
-     * @throws IllegalStateException if the string reformat of cost throws an exception.
+     * @throws IllegalStateException If the string reformat of cost throws an exception.
      */
     @Nonnull
     @VisibleForTesting
     String reformatCostValue(@Nonnull String cost) throws IllegalStateException {
         var costReformatted = String.format("%s %s", CURRENCY_USED, cost);
-
         if (costReformatted == null) {
             throw new IllegalStateException(
                     "A listing's price could not be reformatted to include the currency.");
@@ -353,7 +349,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
         var buttonLabel = event.getButton().getLabel();
 
         var currentListing = userController.getCurrentListing(userId);
-
         if (currentListing == null) {
             listingNotFoundOrIsNull(buttonEvent);
             return;
@@ -361,7 +356,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
 
         if ("Post".equals(buttonLabel)) {
             var guild = event.getGuild();
-
             if (guild == null) {
                 throw new GuildNotFoundException("Event has no guild.");
             }
@@ -372,11 +366,11 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                 log.error("createlisting encountered an error when trying to post the listing", e);
                 buttonEvent
                         .setContent(
-                                "The bot could not find a trading channel id to post the listing to. Please inform the guild owner of this issue.")
+                                "The bot could not find a trading channel id to post the "
+                                        + "listing to. Please inform the guild owner of this issue.")
                         .setEmbeds()
                         .queue();
             }
-
         } else if ("Edit".equals(buttonLabel)) {
             sendEditListingInstructions(buttonEvent, currentListing);
         } else {
@@ -418,8 +412,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             throws ChannelNotFoundException {
         var guildObject = guildController.getGuildByGuildId(guild.getId());
         var tradingChannelId = guildObject.getTradingChannelId();
-        var textChannel = guild.getTextChannelById(tradingChannelId);
 
+        var textChannel = guild.getTextChannelById(tradingChannelId);
         if (textChannel == null) {
             throw new ChannelNotFoundException(
                     "Unable to post listing because the channel/server cannot be found.");
@@ -442,7 +436,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                 String.format(
                         "Your listing has been posted to the following text channel: %s!",
                         textChannel.getName());
-
         var successEmbed =
                 new EmbedBuilder().setDescription(successMessage).setColor(EMBED_COLOR).build();
 
@@ -461,8 +454,9 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             @Nonnull MessageEditCallbackAction buttonEvent, @Nonnull Listing currentListing) {
         var editMessage =
                 String.format(
-                        "To Edit your listing, COPY & PASTE the following to your message line. This "
-                                + "will auto-fill each section BUT will not reattach your images. Text to copy and paste: %n%n%s",
+                        "To Edit your listing, COPY & PASTE the following to your message line. "
+                                + "This will auto-fill each section BUT will not reattach your "
+                                + "images. Text to copy and paste: %n%n%s",
                         createListingCommandAsString(currentListing));
         var editEmbed =
                 new EmbedBuilder().setDescription(editMessage).setColor(EMBED_COLOR).build();
@@ -490,8 +484,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      * Method to build the /command input the user gave when calling /createlisting.
      *
      * @param currentListing - The current listing the user is working on.
-     * @return the command input the user entered as a string.
-     * @throws IllegalStateException if the listing cannot be converted to a string.
+     * @return The command input the user entered as a string.
+     * @throws IllegalStateException If the listing cannot be converted to a string.
      */
     @Nonnull
     @VisibleForTesting
@@ -499,21 +493,21 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             throws IllegalStateException {
         var fields = currentListing.getFields();
         var cost = fields.getCost().replace(CURRENCY_USED, "");
-        var title = currentListing.getTitle();
 
+        var title = currentListing.getTitle();
         if (title.contains("]")) {
             title = title.split("]")[1];
         }
 
         var listingAsString =
                 String.format(
-                        "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s",
+                        "/createlisting title: %s item_cost: %s shipping_included: %s "
+                                + "description: %s condition: %s",
                         title,
                         cost,
                         fields.getShippingIncluded(),
                         fields.getDescription(),
                         fields.getCondition());
-
         if (listingAsString == null) {
             throw new IllegalStateException("The listing could not be reformatted into a string.");
         }

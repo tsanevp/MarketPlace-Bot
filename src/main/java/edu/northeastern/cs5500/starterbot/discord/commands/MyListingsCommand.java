@@ -91,7 +91,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param discordDisplayName - The user's display name in discord.
      * @param guildId - The id of the guild that the user is in.
      * @return All the listings as discord messages.
-     * @throws IllegalStateException - If button is null, an exception is thrown.
+     * @throws IllegalStateException If button is null, an exception is thrown.
      */
     @Nonnull
     private List<MessageCreateData> getListingsMessages(
@@ -108,13 +108,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
         for (Listing list : listing) {
             var buttonId = String.format("%s:%s:delete", getName(), list.getId());
-
             if (buttonId == null) {
                 throw new IllegalStateException("Button ID was unavailable for listings.");
             }
 
             var button = Button.danger(buttonId, "Delete");
-
             var messageCreateData =
                     new MessageCreateBuilder()
                             .addActionRow(button)
@@ -122,7 +120,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
                             .build();
             messages.add(messageCreateData);
         }
-
         return messages;
     }
 
@@ -134,12 +131,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      */
     private void sendListingsMessageToUser(
             @Nonnull User user, @Nonnull List<MessageCreateData> listingsMessages) {
-
         for (MessageCreateData message : listingsMessages) {
             if (message == null) {
                 continue;
             }
-
             messageBuilder.sendPrivateMessage(user, message);
         }
     }
@@ -148,20 +143,21 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event)
             throws IllegalStateException {
         var userId = event.getUser().getId();
-        var buttonId = event.getButton().getId();
 
+        var buttonId = event.getButton().getId();
         if (buttonId == null) {
             throw new IllegalStateException("Button event had no id");
         }
 
         var buttonIdSplit = buttonId.split(":");
         var buttonEvent = event.deferEdit().setComponents();
-        var listing = listingController.getListingById(new ObjectId(buttonIdSplit[1]));
 
+        var listing = listingController.getListingById(new ObjectId(buttonIdSplit[1]));
         if (listing == null) {
             log.error("Listing is no longer in database");
             event.reply(
-                            "Listings are not updated. Please use /mylistings to recieve an updated list.")
+                            "Listings are not updated. Please use /mylistings "
+                                    + "to recieve an updated list.")
                     .queue();
             return;
         }
@@ -188,9 +184,9 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      *
      * @param userId - The id of the user.
      * @param listing - The listing to be deleted.
-     * @throws GuildNotFoundException - Guild was not found in JDA.
-     * @throws ChannelNotFoundException - Text channel was not found in JDA.
-     * @throws IllegalStateException - Listing was not found.
+     * @throws GuildNotFoundException If guild was not found in JDA.
+     * @throws ChannelNotFoundException If text channel was not found in JDA.
+     * @throws IllegalStateException If listing was not found.
      */
     private void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
             throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
@@ -218,8 +214,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      *
      * @param guildId - The id of the guild where the listing is located.
      * @return The trading channel.
-     * @throws GuildNotFoundException - Guild was not found in JDA.
-     * @throws ChannelNotFoundException - Text channel was not found in JDA.
+     * @throws GuildNotFoundException If guild was not found in JDA.
+     * @throws ChannelNotFoundException If text channel was not found in JDA.
      */
     @Nonnull
     private MessageChannel getTradingChannel(@Nonnull String guildId)
