@@ -41,23 +41,23 @@ Upon adding the bot to a server, please read what happens when [bot joins server
 # Commands
 Below are the commands that users can call to the bot.
 ## Create a Listing
-`/createlisting`: Displays a template for the user to fill out accordingly.<br>
-![createListingCommand](images/createListingCommand.PNG)<br>
+`/createlisting`: Displays a template for the user to fill out accordingly.<br><br>
+![createListingCommand](images/createListingCommand.PNG)<br><br>
 
 After filling out the template, the user can choose to post, edit, or cancel their listing. When posting the listing, it will be displayed in the designated trading channel.<br>
 
 ## View Your Own Listings
-`/mylisting`: Sends the user a direct message containing all their listings within the server. User can choose to delete their listing.
+`/mylisting`: Sends the user a direct message containing all their listings within the server. User can choose to delete their listing.<br>
 ## Search and Sort Listings
-`/searchlistings`: Allows users to search for listings containing a keyword in the title. Users can sort their search results with a select menu and are given the option to sort by price or date.
-![searchCommand](images/searchCommand.PNG)
+`/searchlistings`: Allows users to search for listings containing a keyword in the title. Users can sort their search results with a select menu and are given the option to sort by price or date.<br><br>
+![searchCommand](images/searchCommand.PNG)<br>
 ## Update Your Location
-`/updatelocation`: Prompts the user to update their state and city through a direct message.<br>
-![updateLocationState](images/updateLocationStates.PNG)<br>
-![updateLocationCity](images/updateLocationCity.PNG)
+`/updatelocation`: Prompts the user to update their state and city through a direct message.<br><br>
+![updateLocationState](images/updateLocationStates.PNG)<br><br>
+![updateLocationCity](images/updateLocationCity.PNG)<br>
 ## Create a New Trading Channel
-`/createtradingchannel`: Creates a new text-channel using a unique name defined by the user. This channel has special permissions where only the bot can send messages.<br>
-![createTradingChannel](images/createTradingChannel.PNG)
+`/createtradingchannel`: Creates a new text-channel using a unique name defined by the user. This channel has special permissions where only the bot can send messages.<br><br>
+![createTradingChannel](images/createTradingChannel.PNG)<br>
 # Events
 ## Bot Joins Server
 
@@ -84,3 +84,14 @@ Foundations of Software Engineering @ NEU, Instructor: Alexander Lash
 - Lena Duong
 - Peter Tsanev
 - Hanchen Zhang
+# Licenses
+## States.java file:
+```
+Title: US.java
+Author: AustinC, harlanhaskins
+Date: 2017
+Code version: 1.1
+Availability: https://github.com/AustinC/UnitedStates/blob/master/src/main/java/unitedstates/US.java
+License: https://github.com/AustinC/UnitedStates/blob/master/LICENSE.md
+The codebase above is based on the following repository: https://gist.github.com/webdevwilson/5271984
+```
