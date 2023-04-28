@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
 import org.bson.types.ObjectId;
 
 /*
@@ -29,7 +28,7 @@ public class Listing implements Model {
     @Nonnull String discordUserId;
 
     // The guild that the listing is contained in
-    @Nonnull @NotBlank String guildId;
+    @Nonnull String guildId;
 
     // Title of the listing
     @Nonnull String title;
