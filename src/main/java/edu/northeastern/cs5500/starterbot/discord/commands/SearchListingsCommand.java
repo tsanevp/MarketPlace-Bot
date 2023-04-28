@@ -206,12 +206,12 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
                 var embedWithoutSorting =
                         buildConfirmationEmbed("Search results are sent to your DM.");
                 event.deferEdit().setComponents().setEmbeds(embedWithoutSorting).complete();
-
-            } else {
-                var sortingOrderSelectMenu =
-                        createSortingOrderSelectMenu(keyword, guildId, selectedChoice);
-                event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
+                return;
             }
+
+            var sortingOrderSelectMenu =
+                    createSortingOrderSelectMenu(keyword, guildId, selectedChoice);
+            event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
 
         } else {
 
