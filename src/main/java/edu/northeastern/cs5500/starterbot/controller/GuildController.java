@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,7 +51,7 @@ public class GuildController {
      * Gets the trading channel id for the current guild.
      *
      * @param guildId - The id of the guild to get the trading channel id for.
-     * @return the trading channel id for the guild id passed.
+     * @return The trading channel id for the guild id passed.
      */
     @Nonnull
     public String getTradingChannelIdByGuildId(@Nonnull String guildId) {
@@ -69,7 +70,6 @@ public class GuildController {
 
         usersOnServer.add(discordMemberId);
         guild.setUsersOnServer(usersOnServer);
-
         guildRepository.update(guild);
     }
 
@@ -108,7 +108,6 @@ public class GuildController {
             guildRepository.update(guild);
             return true;
         }
-
         return false;
     }
 
@@ -117,7 +116,7 @@ public class GuildController {
      *
      * @param discordMemberId - The discord user that may be contained in the guild.
      * @param guildId - The id of the guild to verify a user is in.
-     * @return whether the user already exists in the guild.
+     * @return Whether the user already exists in the guild.
      */
     public boolean verifyUserInGuild(@Nonnull String guildId, @Nonnull String discordMemberId) {
         return getGuildByGuildId(guildId).getUsersOnServer().contains(discordMemberId);
@@ -127,7 +126,7 @@ public class GuildController {
      * Method to check if the user exists in ANY guild.
      *
      * @param discordMemberId - The discord user that may be contained in the guild.
-     * @return the true if the user is no longer exists in any guild, false if not.
+     * @return The true if the user is no longer exists in any guild, false if not.
      */
     public boolean verifyUserNoLongerExistsInAnyGuild(@Nonnull String discordMemberId) {
         return guildRepository.getAll().stream()
@@ -140,7 +139,7 @@ public class GuildController {
      * Gets the guild object for the guild id passed.
      *
      * @param guildId - The id of the guild object to return.
-     * @return the guild object with the given guild id.
+     * @return The guild object with the given guild id.
      */
     @Nonnull
     public Guild getGuildByGuildId(@Nonnull String guildId) {
@@ -168,6 +167,7 @@ public class GuildController {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild guild : guilds) {
             var guildObjectId = guild.getId();
+
             if (guild.getGuildId().equals(guildId) && Objects.nonNull(guildObjectId)) {
                 guildRepository.delete(guildObjectId);
                 return true;
@@ -179,9 +179,10 @@ public class GuildController {
     /**
      * Method to get the size of the guild collection. Used mainly for test purposes.
      *
-     * @return the size of the guild collection.
+     * @return The size of the guild collection.
      */
     @VisibleForTesting
+    @Nonnegative
     long getSizeGuildCollection() {
         return guildRepository.count();
     }

@@ -61,13 +61,11 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
         log.info("event: newguildjoined");
 
         var botId = jda.getSelfUser().getId();
-
-        // Get Guild Owner as a User
         var guild = event.getGuild();
         var guildId = guild.getId();
         var membersInGuild = guild.getMembers();
-        var guildOwner = guild.getOwner();
 
+        var guildOwner = guild.getOwner();
         if (guildOwner == null) {
             throw new GuildOwnerNotFoundException("Guild owner cannot be found or does not exist.");
         }
@@ -88,7 +86,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
      * can be created by the bot.
      *
      * @param guildId - The id of the guild the bot was just added to.
-     * @return the intro message created that will eventually be sent to the guild owner.
+     * @return The intro message created that will eventually be sent to the guild owner.
      */
     @Nonnull
     @VisibleForTesting
@@ -102,7 +100,6 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
 
         var buttonIdCreateChannel = String.format("%s:%s:createnewchannel", getName(), guildId);
         var buttonIdDoNotCreateChannel = String.format("%s:%s:no", getName(), guildId);
-
         if (buttonIdCreateChannel == null || buttonIdDoNotCreateChannel == null) {
             throw new IllegalStateException("Button id creation failed in NewGuildJoinedEvent");
         }
@@ -140,7 +137,6 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
             var userId = user.getId();
 
             listOfUserIds.add(userId);
-
             if (userId.equals(botId)) {
                 continue;
             }
@@ -158,20 +154,18 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
             throws IllegalStateException, GuildNotFoundException {
         var userClicked = event.getUser();
         var buttonLabel = event.getButton().getLabel();
-        var buttonId = event.getButton().getId();
 
+        var buttonId = event.getButton().getId();
         if (buttonId == null) {
             throw new IllegalStateException("Button event had no id");
         }
 
         var guildId = buttonId.split(":")[1];
-
         if (guildId == null) {
             throw new IllegalStateException("Button id did not have a guild id in it");
         }
 
         var guild = jda.getGuildById(guildId);
-
         if (guild == null) {
             throw new GuildNotFoundException("JDA could not find a guild with that id");
         }
@@ -197,7 +191,7 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
      * @param owner - A guild owner.
      * @param buttonLabel - The button label.
      * @param guild - The guild JDA object.
-     * @throws IllegalStateException - Cannot retrieve message.
+     * @throws IllegalStateException Cannot retrieve message.
      */
     private void attemptToCreateTradingChannel(
             @Nonnull User owner, @Nonnull String buttonLabel, @Nonnull Guild guild)
@@ -212,14 +206,12 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
 
         // Checks if a channel named trading-channel already exists on the server
         for (GuildChannel guildChannel : guild.getTextChannels()) {
-
             if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
                 var nameExistsMessage =
                         String.format(
                                 "A text channel named %s already exists on your server. %s",
                                 DEFAULT_TRADING_CHANNEL_NAME,
                                 CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
-
                 if (nameExistsMessage == null) {
                     throw new IllegalStateException("This message cannot be delivered");
                 }

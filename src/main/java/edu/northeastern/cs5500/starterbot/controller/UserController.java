@@ -39,7 +39,7 @@ public class UserController {
      * state OR they do not wish to.
      *
      * @param discordMemberId - The discord user to get the state of residence for.
-     * @return the state the user lives in.
+     * @return The state the user lives in.
      */
     @Nullable
     public String getStateOfResidence(@Nonnull String discordMemberId) {
@@ -65,7 +65,7 @@ public class UserController {
      * city OR they do not wish to.
      *
      * @param discordMemberId - The discord user to get the city of residence for.
-     * @return the city the user lives in.
+     * @return The city the user lives in.
      */
     @Nullable
     public String getCityOfResidence(@Nonnull String discordMemberId) {
@@ -92,7 +92,7 @@ public class UserController {
      * in a null state.
      *
      * @param discordMemberId - The discord user to get the current listing for.
-     * @return the current listing object.
+     * @return The current listing object.
      */
     @Nullable
     public Listing getCurrentListing(@Nonnull String discordMemberId) {
@@ -104,7 +104,7 @@ public class UserController {
      * a new user is created and added to the collection.
      *
      * @param discordMemberId - The discord user to get from the repository.
-     * @return the user obtained from the repository OR the user just created.
+     * @return The user obtained from the repository OR the user just created.
      */
     @Nonnull
     @VisibleForTesting
@@ -146,7 +146,7 @@ public class UserController {
     /**
      * Method to get the size of the user collection. Used mainly for test purposes.
      *
-     * @return the size of the user collection.
+     * @return The size of the user collection.
      */
     @VisibleForTesting
     long getSizeUserCollection() {

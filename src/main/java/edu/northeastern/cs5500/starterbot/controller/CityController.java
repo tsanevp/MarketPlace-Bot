@@ -26,7 +26,6 @@ public class CityController {
      */
     public List<String> getCitiesByState(String stateAbbreviation, int maxResults) {
         var cities = censusService.getCitiesByState(stateAbbreviation);
-
         if (cities == null) {
             return Collections.emptyList();
         }
@@ -35,7 +34,6 @@ public class CityController {
         cities.sort((left, right) -> Integer.compare(right.getPopulation(), left.getPopulation()));
 
         List<String> result = new ArrayList<>();
-
         for (var city : cities) {
             if (result.size() >= maxResults) {
                 break;
@@ -43,7 +41,6 @@ public class CityController {
 
             result.add(city.getName());
         }
-
         return result;
     }
 }

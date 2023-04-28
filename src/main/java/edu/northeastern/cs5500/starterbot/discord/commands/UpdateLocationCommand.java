@@ -55,7 +55,7 @@ public class UpdateLocationCommand implements SlashCommandHandler {
      *
      * @param statesSelectMessageBuilder - A message create builder containing both the state select
      *     menus.
-     * @return the message to send to the user with how to update their location and the state
+     * @return The message to send to the user with how to update their location and the state
      *     select menus.
      */
     @Nonnull
@@ -64,15 +64,11 @@ public class UpdateLocationCommand implements SlashCommandHandler {
             @Nonnull MessageCreateBuilder statesSelectMessageBuilder) {
         var updateLocationString =
                 "To set your State and City, plese select the correct values from the drop-down menus below.";
-
-        // Embed with instructions on how to update your location
         var updateLocationInstructions =
                 new EmbedBuilder()
                         .setDescription(updateLocationString)
                         .setColor(EMBED_COLOR)
                         .build();
-
-        // Message that includes update instructions and location selection menus
         return statesSelectMessageBuilder.addEmbeds(updateLocationInstructions).build();
     }
 }

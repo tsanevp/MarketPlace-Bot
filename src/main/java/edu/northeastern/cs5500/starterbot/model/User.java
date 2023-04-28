@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
 /*
- * Represents the model of the user that is stored in MongoDB
+ * Represents the model of the user that is stored in MongoDB.
  */
 @Data
 @AllArgsConstructor

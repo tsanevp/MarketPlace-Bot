@@ -25,7 +25,7 @@ public class MessageBuilderHelper {
      *
      * @param listing - The listing to create a message embed from.
      * @param discordDisplayName - The display name of the user who posted the listing.
-     * @return a List of message embeds that make up the listing.
+     * @return A List of message embeds that make up the listing.
      */
     @Nonnull
     public List<MessageEmbed> toMessageEmbed(Listing listing, @Nonnull String discordDisplayName) {
@@ -55,7 +55,6 @@ public class MessageBuilderHelper {
         // Create child embeds that "append" additional images to parent embed
         var isFirstImage = true;
         for (String imageUrl : listing.getImages()) {
-
             if (isFirstImage) {
                 isFirstImage = false;
                 continue;
@@ -67,7 +66,6 @@ public class MessageBuilderHelper {
                             .setTitle(parentEmbed.getTitle(), parentEmbed.getUrl())
                             .setImage(imageUrl)
                             .build();
-
             listingsMessage.add(additionalImageEmbeds);
         }
 

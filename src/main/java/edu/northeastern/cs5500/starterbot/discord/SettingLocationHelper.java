@@ -32,7 +32,7 @@ public class SettingLocationHelper implements StringSelectHandler {
     /**
      * Method to get the name of the command
      *
-     * @return the name of the command
+     * @return The name of the command
      */
     @Override
     @Nonnull
@@ -43,15 +43,15 @@ public class SettingLocationHelper implements StringSelectHandler {
     /**
      * This method is called when a user either selects the state OR the city they are located in
      *
-     * @param event the JDA onStringSelectInteraction event that we can pull info from
+     * @param event - The JDA onStringSelectInteraction event that we can pull info from
      */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event) {
         var userId = event.getUser().getId();
         var buttonId = event.getComponentId();
         var handlerName = buttonId.split(":", 2)[1];
-        var selectedCityOrState = event.getValues().get(0);
 
+        var selectedCityOrState = event.getValues().get(0);
         if (selectedCityOrState == null) {
             throw new IllegalStateException("Menu selection string was invalid.");
         }
@@ -84,18 +84,17 @@ public class SettingLocationHelper implements StringSelectHandler {
             @Nonnull String userId, @Nonnull String selectedCityOrState) {
         var city = userController.getCityOfResidence(userId);
         var state = userController.getStateOfResidence(userId);
-
         var description =
                 String.format(
-                        "You have set %s, %s as your City and State. You can later update these using the /updatelocation bot command.",
-                        userController.getCityOfResidence(userId),
-                        userController.getStateOfResidence(userId));
+                        "You have set %s, %s as your City and State. You can later update these "
+                                + "using the /updatelocation bot command.",
+                        city, state);
 
         if (city == null || state == null) {
-            log.info(
-                    "An error occured when the user was setting their location upon joining the guild.");
+            log.info("An error occured when setting user location upon joining the guild.");
             description =
-                    "An error occured while attempting to set your city and state. Please call /updatelocation to try again.";
+                    "An error occured while attempting to set your city and state. Please call "
+                            + "/updatelocation to try again.";
         }
 
         return new EmbedBuilder().setDescription(description).setColor(EMBED_COLOR).build();
@@ -119,13 +118,15 @@ public class SettingLocationHelper implements StringSelectHandler {
 
         var count = 1;
         for (States state : States.values()) {
-            if (!state.equals(States.UNKNOWN)) {
-                var stateName = state.getFullName();
-                if (count <= MAX_MENU_SELECTIONS) {
-                    statesFirstHalf.addOption(stateName, stateName);
-                } else {
-                    statesSecondHalf.addOption(stateName, stateName);
-                }
+            if (state.equals(States.UNKNOWN)) {
+                continue;
+            }
+
+            var stateName = state.getFullName();
+            if (count <= MAX_MENU_SELECTIONS) {
+                statesFirstHalf.addOption(stateName, stateName);
+            } else {
+                statesSecondHalf.addOption(stateName, stateName);
             }
             count++;
         }
@@ -139,14 +140,13 @@ public class SettingLocationHelper implements StringSelectHandler {
      * Method to create a StringSelectMenu with the MAX_MENU_SELECTIONS most populated cities for
      * the given State.
      *
-     * @param stateAbbreviation - the abbreviation of the State that we need to pull city data on.
-     * @return the StringSelectMenu of cities for the given State.
+     * @param stateAbbreviation - The abbreviation of the State that we need to pull city data on.
+     * @return The StringSelectMenu of cities for the given State.
      */
     @Nonnull
     private StringSelectMenu createCitySelectMenu(@Nonnull String stateAbbreviation) {
         List<String> cities =
                 cityController.getCitiesByState(stateAbbreviation, MAX_MENU_SELECTIONS);
-
         var menu =
                 StringSelectMenu.create(getName() + ":cities")
                         .setPlaceholder("Select The City You Live In");
@@ -155,7 +155,6 @@ public class SettingLocationHelper implements StringSelectHandler {
             Objects.requireNonNull(city);
             menu.addOption(city, city);
         }
-
         return menu.build();
     }
 }

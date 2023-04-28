@@ -6,12 +6,15 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,9 +41,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 @Slf4j
 public class SearchListingsCommand implements SlashCommandHandler, StringSelectHandler {
 
+    @Inject JDA jda;
     @Inject ListingController listingController;
     @Inject MessageBuilderHelper messageBuilder;
-    @Inject JDA jda;
 
     private static final Integer EMBED_COLOR = 0x00FFFF;
     private static final String ASCENDING = "Ascending";
@@ -68,7 +71,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Returns the CommandData object representing the command and its options.
      *
-     * @return - The CommandData object representing the command and its options.
+     * @return The CommandData object representing the command and its options.
      */
     @Override
     @Nonnull
@@ -86,14 +89,14 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * results. Sends the Select Menu as an ephemeral reply to the user.
      *
      * @param event - The SlashCommandInteractionEvent event.
-     * @throws GuildNotFoundException - guild was not found in JDA.
+     * @throws GuildNotFoundException If guild was not found in JDA.
      */
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
             throws GuildNotFoundException {
         log.info("event: /searchlistings");
 
-        var keyword = event.getOption("keyword").getAsString();
+        var keyword = Objects.requireNonNull(event.getOption("keyword")).getAsString();
         var guild = event.getGuild();
 
         if (guild == null) {
@@ -119,16 +122,16 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * @param guildId - The ID of the guild to search in.
      * @return A list of listings that match the search criteria.
      */
+    @Nonnull
     private List<Listing> searchListings(@Nonnull String keyword, @Nonnull String guildId) {
-
         return new ArrayList<>(listingController.getListingsWithKeyword(keyword, guildId));
     }
 
     /**
      * Sends a list of listings to a user via private message.
      *
-     * @param user - the user to whom the message will be sent
-     * @param listings - the list of listings to be sent
+     * @param user - The user to whom the message will be sent.
+     * @param listings - The list of listings to be sent.
      */
     private void sendListingsMessageToUser(@Nonnull User user, @Nonnull List<Listing> listings) {
 
@@ -144,9 +147,10 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Builds a message embed to confirm a listing.
      *
-     * @param message - the message to be displayed in the embed
-     * @return the message embed
+     * @param message - The message to be displayed in the embed.
+     * @return The message embed.
      */
+    @Nonnull
     private MessageEmbed buildConfirmationEmbed(@Nonnull String message) {
         return new EmbedBuilder().setDescription(message).setColor(EMBED_COLOR).build();
     }
@@ -154,9 +158,10 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Converts the cost of a listing to a float value.
      *
-     * @param listing - the listing to convert
-     * @return the cost of the listing as a float value
+     * @param listing - The listing to convert.
+     * @return The cost of the listing as a float value.
      */
+    @Nonnegative
     private Float getListingCostAsFloat(@Nonnull Listing listing) {
         return Float.valueOf(listing.getFields().getCost().split(" ")[1]);
     }
@@ -164,43 +169,56 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Converts the posted date of a listing to a LocalDateTime object.
      *
-     * @param listing - the listing to convert
-     * @return the posted date of the listing as a LocalDateTime object
+     * @param listing - The listing to convert.
+     * @return The posted date of the listing as a LocalDateTime object.
+     * @throws DateTimeException If there was an error reformatting the date.
      */
-    private LocalDateTime getListingPostedDateAsLocalDateTime(@Nonnull Listing listing) {
+    @Nonnull
+    private LocalDateTime getListingPostedDateAsLocalDateTime(@Nonnull Listing listing)
+            throws DateTimeException {
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss", Locale.ENGLISH);
-        return LocalDateTime.parse(listing.getFields().getDatePosted(), formatter);
+        var dateReformatted = LocalDateTime.parse(listing.getFields().getDatePosted(), formatter);
+
+        if (dateReformatted == null) {
+            throw new DateTimeException("There was an error refortmatting the date.");
+        }
+
+        return dateReformatted;
     }
 
     /**
      * Called when a user selects an option from a StringSelectMenu component. Sort the listings
      * depends on the user's choices and DM the listings.
      *
-     * @param event - the StringSelectInteractionEvent containing information about the user's
-     *     selection
-     * @throws IllegalStateException
+     * @param event - The StringSelectInteractionEvent containing information about the user's
+     *     selection.
+     * @throws IllegalStateException If a string formatted or obtained is null.
      */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event)
             throws IllegalStateException {
-
-        var buttonId = event.getComponentId();
-        if (buttonId == null) {
-            throw new IllegalStateException("Button ID was unavailable.");
-        }
-        var handlerName = buttonId.split(":", 5)[1];
-        var keyword = buttonId.split(":", 5)[2];
-        var guildId = buttonId.split(":", 5)[3];
-        var choice = buttonId.split(":", 5)[4];
-
-        var selectedChoice = event.getInteraction().getValues().get(0);
         var user = event.getUser();
+        var menuId = event.getComponentId();
+        var handlerName = menuId.split(":", 5)[1];
+
+        // Verify string values parsed from menu id are not null
+        var keyword = menuId.split(":", 5)[2];
+        var guildId = menuId.split(":", 5)[3];
+        var choice = menuId.split(":", 5)[4];
+        if (keyword == null || guildId == null || choice == null) {
+            throw new IllegalStateException("Menu ID could not be split and indexed.");
+        }
+
+        // Verify the selected menu option is not null
+        var selectedChoice = event.getInteraction().getValues().get(0);
+        if (selectedChoice == null) {
+            throw new IllegalStateException("Selected menu choice could not be accessed.");
+        }
 
         List<Listing> listings = searchListings(keyword, guildId);
 
         if ("SortOption".equals(handlerName)) {
-
             if (NONE.equals(selectedChoice)) {
                 sendListingsMessageToUser(user, listings);
                 var embedWithoutSorting =
@@ -212,42 +230,77 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
             var sortingOrderSelectMenu =
                     createSortingOrderSelectMenu(keyword, guildId, selectedChoice);
             event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
-
         } else {
-
+            // Options to sort by
             if (PRICE.equals(choice)) {
-                Collections.sort(
-                        listings,
-                        (l1, l2) -> getListingCostAsFloat(l1).compareTo(getListingCostAsFloat(l2)));
+                sortListingsByPrice(listings);
             } else {
-                Collections.sort(
-                        listings,
-                        (l1, l2) ->
-                                getListingPostedDateAsLocalDateTime(l1)
-                                        .compareTo(getListingPostedDateAsLocalDateTime(l1)));
+                sortListingsByDateTime(listings);
             }
 
+            // Sort in decending order, if selected
             if (DESCENDING.equals(selectedChoice)) {
                 Collections.reverse(listings);
             }
 
+            // Send sorted listing to user dms
             sendListingsMessageToUser(user, listings);
 
+            // Create and send message to user that sorting was successful
             String message =
                     String.format(
                             "Search result sorted by %s in %s order are sent to your DM.",
                             choice, selectedChoice);
+            if (message == null) {
+                throw new IllegalStateException("Success message could not be properly formatted.");
+            }
+
             event.deferEdit().setComponents().setEmbeds(buildConfirmationEmbed(message)).complete();
         }
+    }
+
+    /**
+     * Sorts the List<Listings> by price in ascending order. Has null checks intergrated into the
+     * sort method.
+     *
+     * @param listings - The list of listings to sort in place.
+     */
+    private void sortListingsByPrice(List<Listing> listings) {
+        Collections.sort(
+                listings,
+                (l1, l2) -> {
+                    if (l1 == null || l2 == null) {
+                        return -1;
+                    }
+                    return getListingCostAsFloat(l1).compareTo(getListingCostAsFloat(l2));
+                });
+    }
+
+    /**
+     * Sorts the List<Listings> by DateTime in ascending order. Has null checks intergrated into the
+     * sort method.
+     *
+     * @param listings - The list of listings to sort in place.
+     */
+    private void sortListingsByDateTime(List<Listing> listings) {
+        Collections.sort(
+                listings,
+                (l1, l2) -> {
+                    if (l1 == null || l2 == null) {
+                        return -1;
+                    }
+                    return getListingPostedDateAsLocalDateTime(l1)
+                            .compareTo(getListingPostedDateAsLocalDateTime(l1));
+                });
     }
 
     /**
      * Creates a StringSelectMenu component to allow the user to select price, date or none to sort
      * the listings.
      *
-     * @param keyword - the search keyword used to find the listings
-     * @param guildId - the ID of the guild in which the search was performed
-     * @return a MessageCreateData containing the StringSelectMenu component
+     * @param keyword - The search keyword used to find the listings.
+     * @param guildId - The ID of the guild in which the search was performed.
+     * @return A MessageCreateData containing the StringSelectMenu component.
      */
     @Nonnull
     private MessageCreateData createSortingOptionSelectMenu(
@@ -266,10 +319,10 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * Creates a StringSelectMenu component to allow the user to select a sorting
      * order(ascending/descending) for the listings.
      *
-     * @param keyword - the search keyword used to find the listings
-     * @param guildId - the ID of the guild in which the search was performed
-     * @param choice - the sorting option chosen by the user
-     * @return The StringSelectMenu
+     * @param keyword - The search keyword used to find the listings.
+     * @param guildId - The ID of the guild in which the search was performed.
+     * @param choice - The sorting option chosen by the user.
+     * @return The StringSelectMenu containing the sorting order selections.
      */
     @Nonnull
     private StringSelectMenu createSortingOrderSelectMenu(
