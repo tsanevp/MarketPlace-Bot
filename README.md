@@ -12,11 +12,11 @@ To view all documentation related to our bot, please use the following links:
 
 ## Features
 Marketplace Bot has the following features:
-- [Creating a Listing](#creating-a-listing): Users can post their listing by filling out a form that inquires details of the item being sold.
-- [Viewing Your Own Listings](#viewing-your-own-listings): Users can review the listings they have already posted and delete the ones that are no longer active.
+- [Create a Listing](#create-a-listing): Users can post their listing by filling out a form that inquires details of the item being sold.
+- [View Your Own Listings](#view-your-own-listings): Users can review the listings they have already posted and delete the ones that are no longer active.
 - [Search and Sort for Listings](#search-and-sort-listings): Users can search for specific listings that contain a keyword in the title and sort the results by date/price.
-- [Updating Your Location](#updating-your-location): Users can add or update their approximate location that is displayed along with their listing, which informs other potential buyers where the item may be picked up/shipped from.
-- [Creating a New Channel](#creating-a-new-trading-channel): A text channel with special permissions, where the bot can post users' listings, will be created in the server.
+- [Update Your Location](#update-your-location): Users can add or update their approximate location that is displayed along with their listing, which informs other potential buyers where the item may be picked up/shipped from.
+- [Create a New Channel](#create-a-new-trading-channel): A text channel with special permissions, where the bot can post users' listings, will be created in the server.
 # Getting Started
 This project was built using VS Code. Please see the build.gradle file for dependencies.
 ## Building and Deploying The Bot
@@ -40,22 +40,22 @@ Upon adding the bot to a server, please read what happens when [bot joins server
 
 # Commands
 Below are the commands that users can call to the bot.
-## Creating a Listing
+## Create a Listing
 `/createlisting`: Displays a template for the user to fill out accordingly.<br>
 ![createListingCommand](images/createListingCommand.PNG)<br>
 
 After filling out the template, the user can choose to post, edit, or cancel their listing. When posting the listing, it will be displayed in the designated trading channel.<br>
 
-## Viewing Your Own Listings
+## View Your Own Listings
 `/mylisting`: Sends the user a direct message containing all their listings within the server. User can choose to delete their listing.
 ## Search and Sort Listings
 `/searchlistings`: Allows users to search for listings containing a keyword in the title. Users can sort their search results with a select menu and are given the option to sort by price or date.
 ![searchCommand](images/searchCommand.PNG)
-## Updating Your Location
+## Update Your Location
 `/updatelocation`: Prompts the user to update their state and city through a direct message.<br>
 ![updateLocationState](images/updateLocationStates.PNG)<br>
 ![updateLocationCity](images/updateLocationCity.PNG)
-## Creating a New Trading Channel
+## Create a New Trading Channel
 `/createtradingchannel`: Creates a new text-channel using a unique name defined by the user. This channel has special permissions where only the bot can send messages.<br>
 ![createTradingChannel](images/createTradingChannel.PNG)
 # Events
