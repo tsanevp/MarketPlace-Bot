@@ -36,12 +36,12 @@ public class UpdateLocationCommand implements SlashCommandHandler {
     @Nonnull
     public CommandData getCommandData() {
         return Commands.slash(
-                getName(), "Update your location by selecting you new State &/or City");
+                getName(), "Update your location by selecting the State and City closest to you");
     }
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        log.info("event: updatelocation");
+        log.info("event: /updatelocation");
 
         var statesSelectMessageBuilder = settingLocationHelper.createStatesMessageBuilder();
         var updateLocationMessage = createUpdateLocationMessage(statesSelectMessageBuilder);
@@ -63,7 +63,7 @@ public class UpdateLocationCommand implements SlashCommandHandler {
     MessageCreateData createUpdateLocationMessage(
             @Nonnull MessageCreateBuilder statesSelectMessageBuilder) {
         var updateLocationString =
-                "To update your State and City, plese select the correct values from the drop-down menus below.";
+                "To set your State and City, plese select the correct values from the drop-down menus below.";
 
         // Embed with instructions on how to update your location
         var updateLocationInstructions =

@@ -1,7 +1,5 @@
 package edu.northeastern.cs5500.starterbot.discord.commands;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.GuildController;
 import edu.northeastern.cs5500.starterbot.controller.ListingController;
 import edu.northeastern.cs5500.starterbot.controller.UserController;
@@ -13,7 +11,6 @@ import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.model.Listing;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -37,11 +34,11 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
 
     private static final Integer EMBED_COLOR = 0x00FFFF;
 
+    @Inject JDA jda;
     @Inject UserController userController;
     @Inject ListingController listingController;
     @Inject GuildController guildController;
     @Inject MessageBuilderHelper messageBuilder;
-    @Inject JDA jda;
 
     @Inject
     public MyListingsCommand() {
@@ -95,7 +92,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @return List<MessageCreateBuilder>
      * @throws InvalidIDException
      */
-    @VisibleForTesting
     @Nonnull
     private List<MessageCreateData> getListingsMessages(
             @Nonnull String discordUserId,
@@ -189,7 +185,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @param listing - the listing to be deleted.
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
-     * @throws InvalidIDException
      */
     private void onDeleteListingButtonClick(@Nonnull String userId, @Nonnull Listing listing)
             throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
@@ -215,11 +210,10 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
      * @return - The trading channel
      * @throws GuildNotFoundException - guild was not found in JDA.
      * @throws ChannelNotFoundException - text channel was not found in JDA.
-     * @throws InvalidIDException
      */
-    @Nullable
+    @Nonnull
     private MessageChannel getTradingChannel(@Nonnull String guildId)
-            throws GuildNotFoundException, ChannelNotFoundException, IllegalStateException {
+            throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
 
         if (guild == null) {
@@ -227,15 +221,7 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throw new GuildNotFoundException("Guild ID no longer exists in JDA.");
         }
 
-        var tradingChannelId =
-                Objects.requireNonNull(
-                        guildController.getGuildByGuildId(guildId).getTradingChannelId());
-
-        if (tradingChannelId.length() == 0) {
-            throw new IllegalStateException(
-                    "Could to retrieve Trading Channel because ID was empty.");
-        }
-
+        var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
         var channel = guild.getTextChannelById(tradingChannelId);
 
         if (channel == null) {
