@@ -71,7 +71,6 @@ public class UserControllerTest {
         // Create Listing object
         var listing =
                 Listing.builder()
-                        .messageId(0)
                         .discordUserId(DISCORD_ID_1)
                         .guildId("234257657568")
                         .title("test title")

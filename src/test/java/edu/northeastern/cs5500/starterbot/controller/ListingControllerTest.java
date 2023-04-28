@@ -8,6 +8,7 @@ import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +23,9 @@ class ListingControllerTest {
     static final String USER_ID = "631666734125987209";
     static final String GUILD_ID = "294764645159495548";
     static final String TITLE = "test";
+    static final Long MESSAGE_ID = 1234567L;
+    static final List<String> IMAGES = new ArrayList<>(Arrays.asList("Test url", "test"));
+    static final String URL = "test_url";
     ListingFields LISTING_FIELDS;
     Listing TEST_LISTING;
     ListingController listingController;
@@ -42,12 +46,12 @@ class ListingControllerTest {
         TEST_LISTING =
                 Listing.builder()
                         .id(new ObjectId())
-                        .messageId(123455677)
+                        .messageId(MESSAGE_ID)
                         .discordUserId(USER_ID)
                         .guildId(GUILD_ID)
                         .title(TITLE)
-                        .url("test url")
-                        .images(new ArrayList<>(Arrays.asList("Test url", "test")))
+                        .url(URL)
+                        .images(IMAGES)
                         .fields(LISTING_FIELDS)
                         .build();
     }
@@ -104,15 +108,16 @@ class ListingControllerTest {
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
         assertThat(listingController.deleteListingById(TEST_LISTING.getId(), USER_ID)).isFalse();
 
+        
         Listing listingNotMatch =
                 Listing.builder()
                         .id(new ObjectId())
-                        .messageId(123455677)
+                        .messageId(MESSAGE_ID)
                         .discordUserId("different user")
                         .guildId(GUILD_ID)
                         .title(TITLE)
-                        .url("url")
-                        .images(new ArrayList<>(Arrays.asList("url", "test")))
+                        .url(URL)
+                        .images(IMAGES)
                         .fields(LISTING_FIELDS)
                         .build();
 
