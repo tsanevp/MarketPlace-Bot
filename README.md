@@ -56,6 +56,7 @@ After filling out the template, the user can choose to post, edit, or cancel the
 `/mylisting`: Sends the user a direct message containing all their listings within the server. User can choose to delete their listing.
 ## Search and Sort Listings
 `/searchlistings`: Allows users to search for listings containing a keyword in the title. Users can sort their search results with a select menu and are given the option to sort by price or date.
+![searchCommand](images/searchCommand.PNG)
 ## Updating Your Location
 `/updatelocation`: Prompts the user to update their state and city through a direct message.<br>
 ![updateLocationState](images/updateLocationStates.PNG)<br>
