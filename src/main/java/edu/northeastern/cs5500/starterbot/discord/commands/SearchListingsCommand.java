@@ -68,7 +68,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Returns the CommandData object representing the command and its options.
      *
-     * @return The CommandData object representing the command and its options.
+     * @return - The CommandData object representing the command and its options.
      */
     @Override
     @Nonnull
@@ -85,8 +85,8 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * Handles the SlashCommandInteractionEvent event by creating a Select Menu to sort the search
      * results. Sends the Select Menu as an ephemeral reply to the user.
      *
-     * @param event The SlashCommandInteractionEvent event.
-     * @throws GuildNotFoundException
+     * @param event - The SlashCommandInteractionEvent event.
+     * @throws GuildNotFoundException - guild was not found in JDA.
      */
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
@@ -115,8 +115,8 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Searches for listings with the given keyword in the given guild.
      *
-     * @param keyword The keyword to search for.
-     * @param guildId The ID of the guild to search in.
+     * @param keyword - The keyword to search for.
+     * @param guildId - The ID of the guild to search in.
      * @return A list of listings that match the search criteria.
      */
     private List<Listing> searchListings(@Nonnull String keyword, @Nonnull String guildId) {
@@ -127,8 +127,8 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Sends a list of listings to a user via private message.
      *
-     * @param user the user to whom the message will be sent
-     * @param listings the list of listings to be sent
+     * @param user - the user to whom the message will be sent
+     * @param listings - the list of listings to be sent
      */
     private void sendListingsMessageToUser(@Nonnull User user, @Nonnull List<Listing> listings) {
 
@@ -144,7 +144,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Builds a message embed to confirm a listing.
      *
-     * @param message the message to be displayed in the embed
+     * @param message - the message to be displayed in the embed
      * @return the message embed
      */
     private MessageEmbed buildConfirmationEmbed(@Nonnull String message) {
@@ -154,7 +154,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Converts the cost of a listing to a float value.
      *
-     * @param listing the listing to convert
+     * @param listing - the listing to convert
      * @return the cost of the listing as a float value
      */
     private Float getListingCostAsFloat(@Nonnull Listing listing) {
@@ -164,7 +164,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
     /**
      * Converts the posted date of a listing to a LocalDateTime object.
      *
-     * @param listing the listing to convert
+     * @param listing - the listing to convert
      * @return the posted date of the listing as a LocalDateTime object
      */
     private LocalDateTime getListingPostedDateAsLocalDateTime(@Nonnull Listing listing) {
@@ -177,9 +177,9 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * Called when a user selects an option from a StringSelectMenu component. Sort the listings
      * depends on the user's choices and DM the listings.
      *
-     * @param event the StringSelectInteractionEvent containing information about the user's
+     * @param event - the StringSelectInteractionEvent containing information about the user's
      *     selection
-     * @throws InvalidIDException
+     * @throws IllegalStateException
      */
     @Override
     public void onStringSelectInteraction(@Nonnull StringSelectInteractionEvent event)
@@ -187,7 +187,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
 
         var buttonId = event.getComponentId();
         if (buttonId == null) {
-            throw new IllegalStateException("Button ID was unavailable for listings.");
+            throw new IllegalStateException("Button ID was unavailable.");
         }
         var handlerName = buttonId.split(":", 5)[1];
         var keyword = buttonId.split(":", 5)[2];
@@ -245,8 +245,8 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * Creates a StringSelectMenu component to allow the user to select price, date or none to sort
      * the listings.
      *
-     * @param keyword the search keyword used to find the listings
-     * @param guildId the ID of the guild in which the search was performed
+     * @param keyword - the search keyword used to find the listings
+     * @param guildId - the ID of the guild in which the search was performed
      * @return a MessageCreateData containing the StringSelectMenu component
      */
     @Nonnull
@@ -266,9 +266,9 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * Creates a StringSelectMenu component to allow the user to select a sorting
      * order(ascending/descending) for the listings.
      *
-     * @param keyword the search keyword used to find the listings
-     * @param guildId the ID of the guild in which the search was performed
-     * @param choice the sorting option chosen by the user
+     * @param keyword - the search keyword used to find the listings
+     * @param guildId - the ID of the guild in which the search was performed
+     * @param choice - the sorting option chosen by the user
      * @return The StringSelectMenu
      */
     @Nonnull
