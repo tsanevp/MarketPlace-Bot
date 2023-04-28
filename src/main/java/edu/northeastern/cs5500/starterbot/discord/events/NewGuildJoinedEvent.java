@@ -11,7 +11,6 @@ import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildOwnerNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,15 +39,6 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
                     + "Is it okay for the bot to create a new channel named 'trading-channel' in your server? If you wish to create a channel with a custom name, or "
                     + "if a channel with this name already exists, you will need to call the /createtradingchannel bot command. Without you or the bot creating this "
                     + "new channel, the bot cannot funciton as intended.";
-
-    @Nonnull
-    private static final String TRADING_CHANNEL_NAME_ALREADY_EXISTS =
-            Objects.requireNonNull(
-                    String.format(
-                            "A text channel named %s already exists on your server. %s",
-                            DEFAULT_TRADING_CHANNEL_NAME,
-                            CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION));
-
     @Inject JDA jda;
     @Inject GuildController guildController;
     @Inject MessageBuilderHelper messageBuilder;
@@ -207,9 +197,11 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
      * @param owner - A guild owner.
      * @param buttonLabel - The button label.
      * @param guild - The guild JDA object.
+     * @throws IllegalStateException - Cannot retrieve message.
      */
     private void attemptToCreateTradingChannel(
-            @Nonnull User owner, @Nonnull String buttonLabel, @Nonnull Guild guild) {
+            @Nonnull User owner, @Nonnull String buttonLabel, @Nonnull Guild guild)
+            throws IllegalStateException {
 
         // Checks to see if owner selected that they'll create the channel
         if ("I'll Create The Channel".equals(buttonLabel)) {
@@ -220,8 +212,19 @@ public class NewGuildJoinedEvent implements NewGuildJoinedHandler, ButtonHandler
 
         // Checks if a channel named trading-channel already exists on the server
         for (GuildChannel guildChannel : guild.getTextChannels()) {
+
             if (DEFAULT_TRADING_CHANNEL_NAME.equals(guildChannel.getName())) {
-                messageBuilder.sendPrivateMessage(owner, TRADING_CHANNEL_NAME_ALREADY_EXISTS);
+                var nameExistsMessage =
+                        String.format(
+                                "A text channel named %s already exists on your server. %s",
+                                DEFAULT_TRADING_CHANNEL_NAME,
+                                CALL_CREATE_TRADING_CHANNEL_COMMAND_INSTRUCTION);
+
+                if (nameExistsMessage == null) {
+                    throw new IllegalStateException("This message cannot be delivered");
+                }
+
+                messageBuilder.sendPrivateMessage(owner, nameExistsMessage);
                 return;
             }
         }

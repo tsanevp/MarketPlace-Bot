@@ -1,13 +1,12 @@
 package edu.northeastern.cs5500.starterbot.model;
 
 import com.mongodb.lang.Nullable;
-import javax.annotation.Nonnull;
 import java.util.List;
+import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
 import org.bson.types.ObjectId;
 

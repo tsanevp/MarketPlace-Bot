@@ -82,7 +82,7 @@ class ListingControllerTest {
     @Test
     void testDeleteCollectionOfListings() {
         // precondition
-        Collection<Listing> testCollection = new ArrayList<>();
+        var testCollection = new ArrayList<Listing>();
         assertThat(listingController.deleteCollectionOfListings(testCollection)).isFalse();
 
         Listing ListingWithNullObjectId = TEST_LISTING;
@@ -108,7 +108,6 @@ class ListingControllerTest {
         assertThat(listingController.getListingsByMemberId(USER_ID, GUILD_ID)).isEmpty();
         assertThat(listingController.deleteListingById(TEST_LISTING.getId(), USER_ID)).isFalse();
 
-        
         Listing listingNotMatch =
                 Listing.builder()
                         .id(new ObjectId())
