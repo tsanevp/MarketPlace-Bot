@@ -1,12 +1,13 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.mongodb.lang.NonNull;
 import edu.northeastern.cs5500.starterbot.model.Guild;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -25,7 +26,7 @@ public class GuildController {
      * @param guildId - The id of the guild to set the trading channel id for.
      * @param guildOwnerId - The id of the owner to set for the guild.
      */
-    public void setGuildOwnerId(@NonNull String guildId, @NonNull String guildOwnerId) {
+    public void setGuildOwnerId(@Nonnull String guildId, @Nonnull String guildOwnerId) {
         var guild = getGuildByGuildId(guildId);
 
         guild.setGuildOwnerId(guildOwnerId);
@@ -38,11 +39,22 @@ public class GuildController {
      * @param guildId - The id of the guild to set the trading channel id for.
      * @param tradingChannelId - The trading channel id to set for the guild.
      */
-    public void setTradingChannelId(@NonNull String guildId, @NonNull String tradingChannelId) {
+    public void setTradingChannelId(@Nonnull String guildId, @Nonnull String tradingChannelId) {
         var guild = getGuildByGuildId(guildId);
 
         guild.setTradingChannelId(tradingChannelId);
         guildRepository.update(guild);
+    }
+
+    /**
+     * Gets the trading channel id for the current guild.
+     *
+     * @param guildId - The id of the guild to get the trading channel id for.
+     * @return the trading channel id for the guild id passed.
+     */
+    @Nonnull
+    public String getTradingChannelIdByGuildId(@Nonnull String guildId) {
+        return getGuildByGuildId(guildId).getTradingChannelId();
     }
 
     /**
@@ -51,7 +63,7 @@ public class GuildController {
      * @param guildId - The id of the guild to add the user to.
      * @param discordMemberId - The id of the user that should be added to the guild.
      */
-    public void addUserToServer(@NonNull String guildId, @NonNull String discordMemberId) {
+    public void addUserToServer(@Nonnull String guildId, @Nonnull String discordMemberId) {
         var guild = getGuildByGuildId(guildId);
         var usersOnServer = guild.getUsersOnServer();
 
@@ -68,7 +80,7 @@ public class GuildController {
      * @param listOfUserIds - A list of the user ids that should be added to the guild.
      */
     public void addAllCurrentUsersToServer(
-            @NonNull String guildId, @NonNull List<String> listOfUserIds) {
+            @Nonnull String guildId, @Nonnull List<String> listOfUserIds) {
         var guild = getGuildByGuildId(guildId);
         var usersOnServer = guild.getUsersOnServer();
 
@@ -87,7 +99,7 @@ public class GuildController {
      * @param guildId - The id of the guild that the user is in.
      * @returns Whether the user was successfully removed from the guild.
      */
-    public boolean removeUserInServer(@NonNull String guildId, @NonNull String discordMemberId) {
+    public boolean removeUserInServer(@Nonnull String guildId, @Nonnull String discordMemberId) {
         var guild = getGuildByGuildId(guildId);
         var guildUsers = guild.getUsersOnServer();
 
@@ -107,7 +119,7 @@ public class GuildController {
      * @param guildId - The id of the guild to verify a user is in.
      * @return whether the user already exists in the guild.
      */
-    public boolean verifyUserInGuild(@NonNull String guildId, @NonNull String discordMemberId) {
+    public boolean verifyUserInGuild(@Nonnull String guildId, @Nonnull String discordMemberId) {
         return getGuildByGuildId(guildId).getUsersOnServer().contains(discordMemberId);
     }
 
@@ -117,7 +129,7 @@ public class GuildController {
      * @param discordMemberId - The discord user that may be contained in the guild.
      * @return the true if the user is no longer exists in any guild, false if not.
      */
-    public boolean verifyUserNoLongerExistsInAnyGuild(@NonNull String discordMemberId) {
+    public boolean verifyUserNoLongerExistsInAnyGuild(@Nonnull String discordMemberId) {
         return guildRepository.getAll().stream()
                 .filter(guild -> guild.getUsersOnServer().contains(discordMemberId))
                 .toList()
@@ -130,8 +142,8 @@ public class GuildController {
      * @param guildId - The id of the guild object to return.
      * @return the guild object with the given guild id.
      */
-    @NonNull
-    public Guild getGuildByGuildId(@NonNull String guildId) {
+    @Nonnull
+    public Guild getGuildByGuildId(@Nonnull String guildId) {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild currentGuild : guilds) {
             if (currentGuild.getGuildId().equals(guildId)) {
@@ -152,11 +164,12 @@ public class GuildController {
      * @param guildId - The id of the guild that needs to be removed.
      * @return Whether the guild has been successfully deleted.
      */
-    public boolean removeGuildByGuildId(@NonNull String guildId) {
+    public boolean removeGuildByGuildId(@Nonnull String guildId) {
         Collection<Guild> guilds = guildRepository.getAll();
         for (Guild guild : guilds) {
-            if (guild.getGuildId().equals(guildId)) {
-                guildRepository.delete(guild.getId());
+            var guildObjectId = guild.getId();
+            if (guild.getGuildId().equals(guildId) && Objects.nonNull(guildObjectId)) {
+                guildRepository.delete(guildObjectId);
                 return true;
             }
         }

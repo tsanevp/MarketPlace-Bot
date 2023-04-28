@@ -1,6 +1,7 @@
 package edu.northeastern.cs5500.starterbot.discord.handlers;
 
 import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
+import edu.northeastern.cs5500.starterbot.exceptions.GuildOwnerNotFoundException;
 import javax.annotation.Nonnull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -13,5 +14,5 @@ public interface SlashCommandHandler {
     public CommandData getCommandData();
 
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
-            throws GuildNotFoundException;
+            throws GuildNotFoundException, GuildOwnerNotFoundException;
 }
