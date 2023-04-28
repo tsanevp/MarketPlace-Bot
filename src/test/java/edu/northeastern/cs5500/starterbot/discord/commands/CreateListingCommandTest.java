@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("null")
 public class CreateListingCommandTest {
-    static final int COST = 50;
+    static final String COST = "50";
     static final boolean SHIPPING_INCLUDED = false;
     static final String CONDITION = "very good";
     static final String DESCRIPTION = "test description";
-    static final String TITLE = "test title";
+    static final String TITLE = "[Seattle, WA]test title";
     static final String GUILD_ID = "12345";
     static final String USER_ID = "11223344";
     static final String URL =
@@ -125,21 +125,24 @@ public class CreateListingCommandTest {
 
     @Test
     void testReformatCostValueReturnsCurrencyExchangePlusCostValue() {
-        var cost = String.format("%s %s", "USD", 10);
-        assertThat(createListingCommand.reformatCostValue(10)).isEqualTo(cost);
+        assertThat(createListingCommand.reformatCostValue("10")).isEqualTo("USD 10");
     }
 
     @Test
     void testCreateListingCommandAsString() {
         var costReformatted = listingFieldsObjectOne.getCost().replace("USD", "");
         var titleReformatted = listingObjectOne.getTitle();
+
         if (titleReformatted.contains("]")) {
             titleReformatted = titleReformatted.split("]")[1];
         }
+
+        assertThat(titleReformatted).isEqualTo("test title");
+
         var listingAsString =
                 Objects.requireNonNull(
                         String.format(
-                                "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s image1: [attachment]",
+                                "/createlisting title: %s item_cost: %s shipping_included: %s description: %s condition: %s",
                                 titleReformatted,
                                 costReformatted,
                                 listingFieldsObjectOne.getShippingIncluded(),
@@ -147,5 +150,15 @@ public class CreateListingCommandTest {
                                 listingFieldsObjectOne.getCondition()));
         assertThat(createListingCommand.createListingCommandAsString(listingObjectOne))
                 .isEqualTo(listingAsString);
+
+        var listingObjectTwo =
+                createListingCommand.buildListing(
+                        "test title", GUILD_ID, USER_ID, LIST_IMAGE_URLS, listingFieldsObjectOne);
+        titleReformatted = listingObjectTwo.getTitle();
+
+        if (titleReformatted.contains("]")) {
+            titleReformatted = titleReformatted.split("]")[1];
+        }
+        assertThat(titleReformatted).isEqualTo("test title");
     }
 }

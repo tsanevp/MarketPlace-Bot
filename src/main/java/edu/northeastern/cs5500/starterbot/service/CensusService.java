@@ -98,7 +98,7 @@ public class CensusService {
         return cityCache.computeIfAbsent(
                 stateAbbreviation.toUpperCase(),
                 key -> {
-                    States state = States.valueOfAbbreviation(key);
+                    States state = States.valueOfAbbreviatedName(key);
 
                     String url =
                             String.format(API_CENSUS_GOV_GET_NAME_FOR_STATE, state.getStateCode());
