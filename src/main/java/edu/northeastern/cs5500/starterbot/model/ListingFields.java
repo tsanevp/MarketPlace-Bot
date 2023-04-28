@@ -19,7 +19,7 @@ public class ListingFields {
     @Nonnull String cost;
 
     // Whether shipping is included in the cost of item
-    Boolean shippingIncluded;
+    @Nonnull Boolean shippingIncluded;
 
     // Condition of the item
     @Nonnull String condition;

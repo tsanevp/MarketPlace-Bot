@@ -95,8 +95,8 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
         }
 
         // A new text channel is created and set as the new trading channel for the server
-        createNewTradingChannel(
-                guildOwner.getUser(), guild, Objects.requireNonNull(desiredChannelName));
+        Objects.requireNonNull(desiredChannelName);
+        createNewTradingChannel(guildOwner.getUser(), guild, desiredChannelName);
         var messageToSend =
                 String.format(
                         "The new text channel with the name %s has been set as the main trading channel. All new listings will be posted there!",
