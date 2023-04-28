@@ -27,6 +27,8 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 /**
  * This class represents the command to search listings with a keyword and sort the result with
@@ -75,7 +77,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
                 .addOption(
                         OptionType.STRING,
                         "keyword",
-                        "Please provide the keyword for the search",
+                        "Please provide the keyword to filter your search by",
                         true);
     }
 
@@ -100,8 +102,14 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
 
         var guildId = guild.getId();
 
+        List<Listing> listings = searchListings(keyword, guildId);
+        if (listings.isEmpty()) {
+            event.reply("No listings available").setEphemeral(true).complete();
+            return;
+        }
+
         var sortingOptionSelectMenu = createSortingOptionSelectMenu(keyword, guildId);
-        event.reply(sortingOptionSelectMenu.build()).setEphemeral(true).queue();
+        event.reply(sortingOptionSelectMenu).setEphemeral(true).queue();
     }
 
     /**
@@ -193,11 +201,6 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
 
         if ("SortOption".equals(handlerName)) {
 
-            if (listings.isEmpty()) {
-                event.reply("No listings available").setEphemeral(true).complete();
-                return;
-            }
-
             if (NONE.equals(selectedChoice)) {
                 sendListingsMessageToUser(user, listings);
                 var embedWithoutSorting =
@@ -207,7 +210,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
             } else {
                 var sortingOrderSelectMenu =
                         createSortingOrderSelectMenu(keyword, guildId, selectedChoice);
-                event.deferEdit().setComponents(sortingOrderSelectMenu.getComponents()).complete();
+                        event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
             }
 
         } else {
@@ -244,10 +247,10 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      *
      * @param keyword the search keyword used to find the listings
      * @param guildId the ID of the guild in which the search was performed
-     * @return a MessageCreateBuilder containing the StringSelectMenu component
+     * @return a MessageCreateData containing the StringSelectMenu component
      */
     @Nonnull
-    private MessageCreateBuilder createSortingOptionSelectMenu(
+    private MessageCreateData createSortingOptionSelectMenu(
             @Nonnull String keyword, @Nonnull String guildId) {
         var sortingOptionSelectMenu =
                 StringSelectMenu.create(
@@ -256,7 +259,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
                         .addOption(PRICE, PRICE)
                         .addOption(DATE, DATE)
                         .addOption(NONE, NONE);
-        return new MessageCreateBuilder().addActionRow(sortingOptionSelectMenu.build());
+        return new MessageCreateBuilder().addActionRow(sortingOptionSelectMenu.build()).build();
     }
 
     /**
@@ -266,10 +269,10 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
      * @param keyword the search keyword used to find the listings
      * @param guildId the ID of the guild in which the search was performed
      * @param choice the sorting option chosen by the user
-     * @return a MessageCreateBuilder containing the StringSelectMenu component
+     * @return The StringSelectMenu
      */
     @Nonnull
-    private MessageCreateBuilder createSortingOrderSelectMenu(
+    private StringSelectMenu createSortingOrderSelectMenu(
             @Nonnull String keyword, @Nonnull String guildId, @Nonnull String choice) {
         var sortingOrderSelectMenu =
                 StringSelectMenu.create(
@@ -277,6 +280,6 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
                         .setPlaceholder("In which order?")
                         .addOption(ASCENDING, ASCENDING)
                         .addOption(DESCENDING, DESCENDING);
-        return new MessageCreateBuilder().addActionRow(sortingOrderSelectMenu.build());
+        return sortingOrderSelectMenu.build();
     }
 }
