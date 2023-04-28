@@ -84,6 +84,7 @@ public class ListingController {
      * @param guild - The guild in which the listing is contained in.
      * @return A collection of listings.
      */
+    @Nullable
     public Collection<Listing> getListingsWithKeyword(
             @Nonnull String keyword, @Nonnull String guildId) {
         return getListingsInGuild(guildId).stream()
