@@ -6,6 +6,7 @@ import dagger.multibindings.IntoSet;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateListingCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.CreateTradingChannelCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.MyListingsCommand;
+import edu.northeastern.cs5500.starterbot.discord.commands.SearchListingsCommand;
 import edu.northeastern.cs5500.starterbot.discord.commands.UpdateLocationCommand;
 import edu.northeastern.cs5500.starterbot.discord.events.LeaveGuildEvent;
 import edu.northeastern.cs5500.starterbot.discord.events.NewGuildJoinedEvent;
@@ -92,5 +93,18 @@ public class CommandModule {
     public SlashCommandHandler provideUpdateLocationCommand(
             UpdateLocationCommand updateLocationCommand) {
         return updateLocationCommand;
+    }
+
+    @Provides
+    @IntoSet
+    public SlashCommandHandler provideSearchListingsCommand(
+            SearchListingsCommand searchListingsCommand) {
+        return searchListingsCommand;
+    }
+
+    @Provides
+    @IntoSet
+    public StringSelectHandler provideSortingOption(SearchListingsCommand searchListingsCommand) {
+        return searchListingsCommand;
     }
 }
