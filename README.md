@@ -85,7 +85,7 @@ Foundations of Software Engineering @ NEU, Instructor: Alexander Lash
 - Peter Tsanev
 - Hanchen Zhang
 # Licenses
-## States.java file:
+## States.java File:
 ```
 Title: US.java
 Author: AustinC, harlanhaskins
