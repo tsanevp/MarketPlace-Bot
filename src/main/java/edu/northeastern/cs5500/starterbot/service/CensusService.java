@@ -62,6 +62,12 @@ public class CensusService {
         return res.body();
     }
 
+    /**
+     * Parses the cities that are passed in json format and creates a List of CityResponse objects.
+     *
+     * @param json - The cities to be parsed, currently in json format.
+     * @return a list of CityResponse objects.
+     */
     @Nullable
     List<CityResponse> parseCitiesByState(String json) {
         if (json == null) {
@@ -93,6 +99,13 @@ public class CensusService {
         return cities;
     }
 
+    /**
+     * Calls the http url to get the cities for a certain state. After, parses the cities to only
+     * return only the data we want.
+     *
+     * @param stateAbbreviation - The state abbreviation to get the cities for.
+     * @return a list of CityResponse objects.
+     */
     @Nullable
     public List<CityResponse> getCitiesByState(String stateAbbreviation) {
         return cityCache.computeIfAbsent(

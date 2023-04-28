@@ -48,7 +48,6 @@ public class ListingController {
                 listingRepository.delete(listingObjectId);
             }
         }
-
         return true;
     }
 
@@ -65,6 +64,7 @@ public class ListingController {
         if (listing == null || !listing.getDiscordUserId().equals(discordMemberId)) {
             return false;
         }
+
         listingRepository.delete(objectId);
         return true;
     }
@@ -74,7 +74,7 @@ public class ListingController {
      *
      * @param discordMemberId - The id of a discord user.
      * @param guildId - The id of the guild in which the listing is contained in.
-     * @return Number of listings.
+     * @return The number of listings.
      */
     @Nonnegative
     public int countListingsByMemberId(@Nonnull String discordMemberId, @Nonnull String guildId) {
@@ -90,9 +90,12 @@ public class ListingController {
      */
     @Nonnull
     public List<Listing> getListingsWithKeyword(@Nonnull String keyword, @Nonnull String guildId) {
+        var keywordLower = keyword.toLowerCase();
         List<Listing> lists =
                 getListingsInGuild(guildId).stream()
-                        .filter(listing -> listing.getTitle().contains(keyword))
+                        .filter(
+                                listing ->
+                                        (listing.getTitle().toLowerCase()).contains(keywordLower))
                         .toList();
 
         if (lists == null) {

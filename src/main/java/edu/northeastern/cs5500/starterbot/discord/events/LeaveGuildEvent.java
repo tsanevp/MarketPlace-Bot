@@ -38,7 +38,6 @@ public class LeaveGuildEvent implements LeaveGuildEventHandler {
         var membersList = guildController.getGuildByGuildId(guildId).getUsersOnServer();
 
         for (String memberId : membersList) {
-
             if (memberId == null) {
                 log.error("Error when removing member from the guild during guild leave event.");
                 continue;

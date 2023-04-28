@@ -44,7 +44,8 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
     public CommandData getCommandData() {
         return Commands.slash(
                         getName(),
-                        "Input the desired name of the new trading channel. It will be displayed as lower-case.")
+                        "Input the desired name of the new trading channel. It will be displayed "
+                                + "as lower-case.")
                 .addOption(
                         OptionType.STRING,
                         "name",
@@ -57,16 +58,17 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
             throws GuildNotFoundException, GuildOwnerNotFoundException {
         log.info("event: /createtradingchannel");
 
+        // Get user input
         var desiredChannelName =
                 Objects.requireNonNull(event.getOption("name")).getAsString().toLowerCase();
-        var guild = event.getGuild();
+        Objects.requireNonNull(desiredChannelName);
 
+        var guild = event.getGuild();
         if (guild == null) {
             throw new GuildNotFoundException("Event has no guild.");
         }
 
         var guildOwner = guild.getOwner();
-
         if (guildOwner == null) {
             throw new GuildOwnerNotFoundException("Guild owner cannot be found or does not exist.");
         }
@@ -84,7 +86,9 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
             if (desiredChannelName.equals(guildChannel.getName())) {
                 var messageToSend =
                         String.format(
-                                "A channel with the name %s already exists on your server. Please call /createtradingchannel command again and input a name not already in use. Thank you.",
+                                "A channel with the name %s already exists on your server. Please "
+                                        + "call /createtradingchannel command again and input a "
+                                        + "name not already in use. Thank you.",
                                 desiredChannelName);
                 var channelExistsMessage =
                         new MessageCreateBuilder().setContent(messageToSend).build();
@@ -95,11 +99,11 @@ public class CreateTradingChannelCommand implements SlashCommandHandler {
         }
 
         // A new text channel is created and set as the new trading channel for the server
-        Objects.requireNonNull(desiredChannelName);
         createNewTradingChannel(guildOwner.getUser(), guild, desiredChannelName);
         var messageToSend =
                 String.format(
-                        "The new text channel with the name %s has been set as the main trading channel. All new listings will be posted there!",
+                        "The new text channel with the name %s has been set as the main trading "
+                                + "channel. All new listings will be posted there!",
                         desiredChannelName);
         var channelCreatedMessage = new MessageCreateBuilder().setContent(messageToSend).build();
 

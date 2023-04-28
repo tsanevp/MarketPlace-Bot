@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /*
- * Represents the additional fields of the listing message
+ * Represents the additional fields of the listing message.
  */
 @Data
 @Builder

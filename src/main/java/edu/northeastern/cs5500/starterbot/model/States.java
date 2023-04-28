@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
-// <-------------------- START OF LICENSE ------------------>
 public enum States {
     ALABAMA("Alabama", "AL", "01"),
     ALASKA("Alaska", "AK", "02"),
@@ -70,7 +69,7 @@ public enum States {
     WYOMING("Wyoming", "WY", "56"),
     UNKNOWN("Unknown", "", "");
 
-    /** The state's full, unabbreviated name . */
+    /** The state's full, unabbreviated name. */
     @Nonnull private String fullName;
 
     /** The state's abbreviated name. */
@@ -92,9 +91,9 @@ public enum States {
     /**
      * Constructs a new state.
      *
-     * @param fullName the state's full, unabbreviated name.
-     * @param abbreviatedName the state's abbreviated name.
-     * @param stateCode the state's FIPS code.
+     * @param fullName - The state's full, unabbreviated name.
+     * @param abbreviatedName - The state's abbreviated name.
+     * @param stateCode - The state's FIPS code.
      */
     States(@Nonnull String fullName, @Nonnull String abbreviatedName, @Nonnull String stateCode) {
         this.fullName = fullName;
@@ -105,7 +104,7 @@ public enum States {
     /**
      * Returns the state's full, unabbreviated name.
      *
-     * @return the state's full, unabbreviated name.
+     * @return The state's full, unabbreviated name.
      */
     @Nonnull
     public String getFullName() {
@@ -115,7 +114,7 @@ public enum States {
     /**
      * Returns the state's abbreviated name.
      *
-     * @return the state's abbreviated name.
+     * @return The state's abbreviated name.
      */
     @Nonnull
     public String getAbbreviatedName() {
@@ -125,7 +124,7 @@ public enum States {
     /**
      * Returns the state's code.
      *
-     * @return the state's state code.
+     * @return The state's state code.
      */
     @Nonnull
     public String getStateCode() {
@@ -135,8 +134,8 @@ public enum States {
     /**
      * Gets the enum constant with the specified abbreviated name.
      *
-     * @param abbr the state's abbreviation.
-     * @return the enum constant with the specified abbreviated name.
+     * @param abbr - The state's abbreviation.
+     * @return The enum constant with the specified abbreviated name.
      */
     @Nonnull
     public static States valueOfAbbreviatedName(final String abbr) {
@@ -151,9 +150,9 @@ public enum States {
     /**
      * Gets the enum constant's values for the specified name.
      *
-     * @param fullName the state's full, unabbreviated name.
-     * @return the enum constant's values (full name, abrv, state code).
-     * @throws IllegalArgumentException if the name does not exist.
+     * @param fullName - The state's full, unabbreviated name.
+     * @return The enum constant's values (full name, abrv, state code).
+     * @throws IllegalArgumentException If the name does not exist.
      */
     @Nonnull
     public static States valueOfFullName(final @Nonnull String fullName) {

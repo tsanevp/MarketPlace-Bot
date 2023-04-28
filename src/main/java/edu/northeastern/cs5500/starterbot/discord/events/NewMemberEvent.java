@@ -59,7 +59,7 @@ public class NewMemberEvent implements NewMemberHandler {
      * @param guildName - The name of the guild the user joined.
      * @param statesSelectMessageBuilder - A message create builder containing both the state select
      *     menus.
-     * @return the introduction message that is sent to the user that includes the state selection
+     * @return The introduction message that is sent to the user that includes the state selection
      *     menus.
      */
     @Nonnull
@@ -72,7 +72,6 @@ public class NewMemberEvent implements NewMemberHandler {
                 String.format(
                         "Hello %s! For potential future sales and purchases, please select the State & City you are located in below. If you do not see your city, please select the one nearest to you.",
                         userName);
-
         var newUserWelcomeEmbed =
                 new EmbedBuilder()
                         .setTitle(String.format("Welcome to %s!", guildName))

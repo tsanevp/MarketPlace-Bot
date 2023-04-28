@@ -12,16 +12,23 @@ public class CityResponse {
     final int stateCode;
     @Nonnull final String zipCode;
 
+    /**
+     * Constructs a City Response object. Below are a number of Objects.requireNonNull checks.
+     * Sonarlint would gives null check errors until we had the code set up as it is below. Multiple
+     * methods were attempted to prevent this approach, but they did not work.
+     *
+     * @param cityData - The data regarding a city.
+     */
     public CityResponse(List<String> cityData) {
         String cityNameFull = cityData.get(0);
         Objects.requireNonNull(cityNameFull);
 
         int lastComma = cityNameFull.lastIndexOf(",");
-
         if (lastComma == -1) {
             throw new IllegalArgumentException(
                     "Invalid city/town name (expected a ',' somewhere): " + cityNameFull);
         }
+
         var cityName = cityNameFull.substring(0, lastComma - 5);
         Objects.requireNonNull(cityName);
         this.name = cityName;
