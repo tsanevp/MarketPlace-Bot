@@ -25,10 +25,10 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 /**
  * This class represents the command to search listings with a keyword and sort the result with
@@ -210,7 +210,7 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
             } else {
                 var sortingOrderSelectMenu =
                         createSortingOrderSelectMenu(keyword, guildId, selectedChoice);
-                        event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
+                event.deferEdit().setComponents(ActionRow.of(sortingOrderSelectMenu)).complete();
             }
 
         } else {
