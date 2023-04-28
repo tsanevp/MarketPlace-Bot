@@ -1,30 +1,24 @@
 # Marketplace (Discord Bot)
 Marketplace aims to simplify the process of buying/selling/trading items. This user-friendly tool is built using JDA (Java Discord API), and all data is stored in MongoDB.
-## Features
-To emlimate the need for online marketplaces or discussion forum
 
-Unlike other online marketplaces or discussion forums, our bot targets Discord users who are interested in integrating a C2C marketplace functionality into their server. This narrows the search for sellers & buyers of specific items that may be related to their interest group. The bot assists in sharing and filtering listings, making the selling experience <b>easier</b> and searching for items <b>faster</b>.
+## Summary
+Unlike other online marketplaces or discussion forums, our bot targets Discord users who are interested in integrating a C2C marketplace functionality into their server. This bot helps narrow the search for users looking to buy/sell within their interest-based communities. The bot assists in sharing and filtering listings, making the selling experience <b>easier</b> and the search for items <b>faster</b>.
 
-Marketplace Bot has the following features:
-- [Creating a Listing](#creating-a-listing): Users can create their own listings by filling out a pre-made template that includes the essential details of the item being sold.
-- [Viewing Your Own Listings](#viewing-your-own-listings): Users can review the listings they have already posted and delete the ones that are no longer active.
-- [Search and Sort for Listings](#search-and-sort-listings): Users can search for specific listings that contain a keyword in the title and sort through them by date/price.
-- [Updating Your Location](#updating-your-location): Users can add or update their approximate location that is displayed along with their listing, which informs other potential buyers where the item may be picked up/shipped from.
-- [Creating a New Channel](#creating-a-new-trading-channel): A text channel with special permissions, where the bot can post users' listings, will be created in the server.
-
-## Bot Documentation
 To view all documentation related to our bot, please use the following links:
 
-[Group Bear Shared Google Drive](https://drive.google.com/drive/folders/1Sn4PxEXHuTDNMWvR-0BYmb5M2VSLNGK6?usp=sharing)
+- [Group Bear Shared Google Drive](https://drive.google.com/drive/folders/1Sn4PxEXHuTDNMWvR-0BYmb5M2VSLNGK6?usp=sharing)
+- [Group Bear Sprint Board](https://github.com/orgs/CS5500-S-2023/projects/65?query=is%3Aopen+sort%3Aupdated-desc)
+- [Group Bear GitHub Repository](https://github.com/CS5500-S-2023/team-bear)
 
-[Group Bear Sprint Board](https://github.com/orgs/CS5500-S-2023/projects/65?query=is%3Aopen+sort%3Aupdated-desc)
-
-[Group Bear GitHub Repository](https://github.com/CS5500-S-2023/team-bear)
-
-
+## Features
+Marketplace Bot has the following features:
+- [Creating a Listing](#creating-a-listing): Users can post their listing by filling out a form that inquires details of the item being sold.
+- [Viewing Your Own Listings](#viewing-your-own-listings): Users can review the listings they have already posted and delete the ones that are no longer active.
+- [Search and Sort for Listings](#search-and-sort-listings): Users can search for specific listings that contain a keyword in the title and sort the results by date/price.
+- [Updating Your Location](#updating-your-location): Users can add or update their approximate location that is displayed along with their listing, which informs other potential buyers where the item may be picked up/shipped from.
+- [Creating a New Channel](#creating-a-new-trading-channel): A text channel with special permissions, where the bot can post users' listings, will be created in the server.
 # Getting Started
-- This project was built in VS Code.
-- Please see the build.gradle file for dependencies.
+This project was built using VS Code. Please see the build.gradle file for dependencies.
 ## Building and Deploying The Bot
 <i> Skip these steps if using our [production bot](#join-our-production-server) </i>
 1. Clone this repository to your local machine.
@@ -42,9 +36,9 @@ Use the following invite link to join our Production Discord server: [Invite Lin
 ## Add The Bot to a Server
 Use the following invite link to add the bot to a server: [Bot Invite Link](https://discord.com/api/oauth2/authorize?client_id=1093746738361270373&permissions=8&scope=bot)
 
-Upon adding the bot to a server, please see what happens when [bot joins server](#bot-joins--removed-from-server) below.
+Upon adding the bot to a server, please read what happens when [bot joins server](#bot-joins-server)
 
-# Executing Commands
+# Commands
 Below are the commands that users can call to the bot.
 ## Creating a Listing
 `/createlisting`: Displays a template for the user to fill out accordingly.<br>
@@ -64,9 +58,7 @@ After filling out the template, the user can choose to post, edit, or cancel the
 `/createtradingchannel`: Creates a new text-channel using a unique name defined by the user. This channel has special permissions where only the bot can send messages.<br>
 ![createTradingChannel](images/createTradingChannel.PNG)
 # Events
-## Bot Joins / Removed From Server
-
-### Bot joins
+## Bot Joins Server
 
 First, the server owner will receive the following DM from the bot:
 
@@ -76,14 +68,13 @@ If the owner selects "Bot Can Create The Channel", the bot will attempt to creat
 
 Second, each member of the server, including the owner, will receive a DM from the bot asking the member to select the State and City they are located in from drop-down menus. An exact location is not necessary. The bot tracks this information to later attach it to listings created by members.
 
-### Bot leaves
+## Bot Leaves Server
 
 Listings within the server will be deleted from the database. If the server owner decides to invite the bot back, previous information will no longer be available. User data will also be removed if the user is not a part of another server containing the bot.
-## Member Joins / Removed From Server
-### New Member Joins
+## New Member Joins Server
 The bot will send a greeting to the user's direct messages and ask for user to update their location.
 
-### Member is Removed
+## Member is Removed From Server
 Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
 
 # Credits
