@@ -222,7 +222,8 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             @Nonnull String userId,
             @Nonnull List<String> imageURLs,
             @Nonnull ListingFields listingFields) {
-        var url = Objects.requireNonNull(imageURLs.get(0));
+        var url = imageURLs.get(0);
+        Objects.requireNonNull(url);
 
         // Create Listing Object
         var listing =

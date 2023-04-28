@@ -22,7 +22,7 @@ public class Listing implements Model {
     ObjectId id;
 
     // MessageEmbed id. This is null until a listing is posted
-    @Nullable long messageId;
+    @Nullable Long messageId;
 
     // The user id of the account who created the listing
     @Nonnull String discordUserId;

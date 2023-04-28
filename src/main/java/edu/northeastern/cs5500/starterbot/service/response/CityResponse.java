@@ -13,16 +13,24 @@ public class CityResponse {
     @Nonnull final String zipCode;
 
     public CityResponse(List<String> cityData) {
-        @Nonnull String cityName = Objects.requireNonNull(cityData.get(0));
-        int lastComma = cityName.lastIndexOf(",");
+        String cityNameFull = cityData.get(0);
+        Objects.requireNonNull(cityNameFull);
+
+        int lastComma = cityNameFull.lastIndexOf(",");
+
         if (lastComma == -1) {
             throw new IllegalArgumentException(
-                    "Invalid city/town name (expected a ',' somewhere): " + cityName);
+                    "Invalid city/town name (expected a ',' somewhere): " + cityNameFull);
         }
-        this.name = Objects.requireNonNull(cityName.substring(0, lastComma - 5));
+        var cityName = cityNameFull.substring(0, lastComma - 5);
+        Objects.requireNonNull(cityName);
+        this.name = cityName;
 
         this.population = Integer.parseInt(cityData.get(1));
         this.stateCode = Integer.parseInt(cityData.get(2));
-        this.zipCode = Objects.requireNonNull(cityData.get(3));
+
+        var cityDataZipCode = cityData.get(3);
+        Objects.requireNonNull(cityDataZipCode);
+        this.zipCode = cityDataZipCode;
     }
 }

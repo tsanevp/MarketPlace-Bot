@@ -47,7 +47,6 @@ public class MessageBuilderHelperTest {
                         .build();
         var listingWithoutShipping =
                 Listing.builder()
-                        .messageId(0)
                         .discordUserId(discordUserId)
                         .guildId(guildId)
                         .title(title)
@@ -81,7 +80,6 @@ public class MessageBuilderHelperTest {
 
         var listingWithShipping =
                 Listing.builder()
-                        .messageId(0)
                         .discordUserId(discordUserId)
                         .guildId(guildId)
                         .title(title)
