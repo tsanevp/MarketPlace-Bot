@@ -57,7 +57,6 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
         // Defined public and empty for Dagger injection
     }
 
-
     @Override
     @Nonnull
     public String getName() {

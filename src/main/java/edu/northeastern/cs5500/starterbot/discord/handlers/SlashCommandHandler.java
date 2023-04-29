@@ -10,7 +10,7 @@ public interface SlashCommandHandler {
 
     /**
      * Retrieves the name of the command that uses the slash command.
-     * 
+     *
      * @return The name of the command.
      */
     @Nonnull
@@ -18,7 +18,7 @@ public interface SlashCommandHandler {
 
     /**
      * Retrieves user input for each option displayed in the slash command.
-     * 
+     *
      * @return The data from the slash command.
      */
     @Nonnull
@@ -26,7 +26,7 @@ public interface SlashCommandHandler {
 
     /**
      * Handles the event when a slash command interaction occurs.
-     * 
+     *
      * @param event - The event where a slash command interaction occured in JDA.
      */
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
