@@ -57,22 +57,13 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
         // Defined public and empty for Dagger injection
     }
 
-    /**
-     * Returns the name of the command.
-     *
-     * @return The name of the command.
-     */
+
     @Override
     @Nonnull
     public String getName() {
         return "searchlistings";
     }
 
-    /**
-     * Returns the CommandData object representing the command and its options.
-     *
-     * @return The CommandData object representing the command and its options.
-     */
     @Override
     @Nonnull
     public CommandData getCommandData() {
@@ -84,13 +75,6 @@ public class SearchListingsCommand implements SlashCommandHandler, StringSelectH
                         true);
     }
 
-    /**
-     * Handles the SlashCommandInteractionEvent event by creating a Select Menu to sort the search
-     * results. Sends the Select Menu as an ephemeral reply to the user.
-     *
-     * @param event - The SlashCommandInteractionEvent event.
-     * @throws GuildNotFoundException If guild was not found in JDA.
-     */
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event)
             throws GuildNotFoundException {
