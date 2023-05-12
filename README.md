@@ -80,11 +80,11 @@ The bot will send a greeting to the user's direct messages and ask the user to u
 Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
 
 # Credits
-Foundations of Software Engineering @ NEU, Instructor: Alexander Lash
+Foundations of Software Engineering @ NEU, Instructor: [Alexander Lash](https://github.com/abl)
 ## Collaborators:
-- Lena Duong
-- Peter Tsanev
-- Hanchen Zhang
+- [Lena Duong](https://github.com/lenad90)
+- [Peter Tsanev](https://github.com/tsanevp)
+- [Hanchen Zhang](https://github.com/hanchenz)
 # Licenses
 ## States.java File:
 ```
