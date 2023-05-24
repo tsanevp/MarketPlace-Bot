@@ -4,11 +4,10 @@ Marketplace aims to simplify the process of buying/selling/trading items. This u
 ## Summary
 Unlike other online marketplaces or discussion forums, our bot targets Discord users who are interested in integrating a C2C marketplace functionality into their server. This bot helps narrow the search for users looking to buy/sell within their interest-based communities. The bot assists in sharing and filtering listings, making the selling experience <b>easier</b> and the search for items <b>faster</b>.
 
-To view all documentation related to our bot, please use the following links:
+This repository is a <b>continuation</b> of a group project completed in Northeastern University's CS5500 course. To view the original project's repository and work, use the following links:
 
 - [YouTube Video Presentation](https://www.youtube.com/watch?v=vBgy_S-a8P8)
 - [Group Bear Shared Google Drive](https://drive.google.com/drive/folders/1Sn4PxEXHuTDNMWvR-0BYmb5M2VSLNGK6?usp=sharing)
-- [Group Bear Sprint Board](https://github.com/orgs/CS5500-S-2023/projects/65?query=is%3Aopen+sort%3Aupdated-desc)
 - [Group Bear GitHub Repository](https://github.com/CS5500-S-2023/team-bear)
 
 ## Features
@@ -80,11 +79,11 @@ The bot will send a greeting to the user's direct messages and ask the user to u
 Only listings in the server belonging to the user will be removed from the database. User data will only be fully erased in the database if they do not belong to any other server containing the bot.
 
 # Credits
-Foundations of Software Engineering @ NEU, Instructor: Alexander Lash
+Foundations of Software Engineering @ NEU, Instructor: [Alexander Lash](https://github.com/abl)
 ## Collaborators:
-- Lena Duong
-- Peter Tsanev
-- Hanchen Zhang
+- [Lena Duong](https://github.com/lenad90)
+- [Peter Tsanev](https://github.com/tsanevp)
+- [Hanchen Zhang](https://github.com/hanchenz)
 # Licenses
 ## States.java File:
 ```
