@@ -4,7 +4,7 @@ kill_signal = "SIGINT"
 kill_timeout = "5s"
 
 [build]
-  image = "flyio/hellofly:latest"
+  builder = "paketobuildpacks/builder:base"
 
 [deploy]
   strategy = "canary"
