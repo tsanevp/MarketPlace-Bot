@@ -1,44 +1,40 @@
-app = "marketplace-bot"
-
+ app = "marketplace-bot"
+primary_region = "sea"
 kill_signal = "SIGINT"
-kill_timeout = 5
-processes = []
+kill_timeout = "5s"
 
 [build]
-  builder = "paketobuildpacks/builder:base"
-
-[build.args]
-  BP_JVM_VERSION="17"
-
-[env]
-  BPL_JVM_THREAD_COUNT=50
-  JAVA_TOOL_OPTIONS="-Xss256K -XX:ReservedCodeCacheSize=64M -XX:MaxMetaspaceSize=64M"
+  image = "flyio/hellofly:latest"
 
 [deploy]
   strategy = "canary"
 
+[env]
+  BPL_JVM_THREAD_COUNT = "50"
+  JAVA_TOOL_OPTIONS = "-Xss256K -XX:ReservedCodeCacheSize=64M -XX:MaxMetaspaceSize=64M"
+
 [[services]]
-  http_checks = []
+  protocol = "tcp"
   internal_port = 8080
   processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
 
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
   [services.concurrency]
+    type = "connections"
     hard_limit = 25
     soft_limit = 20
-    type = "connections"
-
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
 
   [[services.tcp_checks]]
-    grace_period = "1s"
     interval = "15s"
+    timeout = "2s"
+    grace_period = "1s"
+    restart_limit = 6
+
     restart_limit = 6
     timeout = "2s"
