@@ -1,4 +1,4 @@
-app = "cs5500-s23-bear"
+app = "marketplace-bot"
 
 kill_signal = "SIGINT"
 kill_timeout = 5
