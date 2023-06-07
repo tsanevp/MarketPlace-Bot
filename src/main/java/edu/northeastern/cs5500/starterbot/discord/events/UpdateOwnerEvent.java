@@ -32,7 +32,7 @@ public class UpdateOwnerEvent implements UpdateOwnerEventHandler {
     @Override
     public void onGuildUpdateOwner(@Nonnull GuildUpdateOwnerEvent event) {
         log.info("event: updateowner");
-        
+
         guildController.setGuildOwnerId(event.getGuild().getId(), event.getNewOwnerId());
     }
 }

@@ -44,7 +44,7 @@ public class CommandModule {
     public UpdateOwnerEventHandler provideUpdateOwnerEvent(UpdateOwnerEvent updateOwnerEvent) {
         return updateOwnerEvent;
     }
-    
+
     @Provides
     public RemoveMemberHandler provideRemoveMember(RemoveMemberEvent removeMember) {
         return removeMember;
