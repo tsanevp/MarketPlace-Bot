@@ -7,6 +7,7 @@ import edu.northeastern.cs5500.starterbot.discord.handlers.NewMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.RemoveMemberHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.SlashCommandHandler;
 import edu.northeastern.cs5500.starterbot.discord.handlers.StringSelectHandler;
+import edu.northeastern.cs5500.starterbot.discord.handlers.UpdateOwnerEventHandler;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildNotFoundException;
 import edu.northeastern.cs5500.starterbot.exceptions.GuildOwnerNotFoundException;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -37,6 +39,7 @@ public class MessageListener extends ListenerAdapter {
     @Inject NewGuildJoinedHandler newGuildJoined;
     @Inject RemoveMemberHandler removeMember;
     @Inject LeaveGuildEventHandler guildLeaveEvent;
+    @Inject UpdateOwnerEventHandler updateOwnerEvent;
 
     @Inject
     public MessageListener() {
@@ -123,6 +126,11 @@ public class MessageListener extends ListenerAdapter {
     @Override
     public void onGuildLeave(@Nonnull GuildLeaveEvent event) {
         guildLeaveEvent.onGuildLeaveEvent(event);
+    }
+
+    @Override
+    public void onGuildUpdateOwner(@Nonnull GuildUpdateOwnerEvent event) {
+        updateOwnerEvent.onGuildUpdateOwner(event);
     }
 
     @Override
