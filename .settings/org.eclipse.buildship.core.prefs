@@ -9,5 +9,3 @@ java.home=/usr/local/sdkman/candidates/java/current
 jvm.arguments=
 offline.mode=false
 override.workspace.settings=true
-show.console.view=true
-show.executions.view=true
