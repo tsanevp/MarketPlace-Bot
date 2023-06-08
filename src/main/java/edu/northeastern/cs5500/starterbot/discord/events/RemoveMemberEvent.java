@@ -46,6 +46,7 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
 
         var channel = guild.getTextChannelById(tradingChannelId);
         if (channel == null) {
+            log.error("This guild does not have a designated trading channel.");
             channel = guild.getTextChannels().get(0);
         }
 
@@ -56,7 +57,10 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
 
             if (!channel.getId().equals(channelIdListingPostedIn)) {
                 var tempChannel = guild.getTextChannelById(channelIdListingPostedIn);
-                if (tempChannel == null) continue;
+                if (tempChannel == null) {
+                    log.error("This channel either no longer exists or could not be found."); 
+                    continue;
+                }
                 channel = tempChannel;
             }
 
