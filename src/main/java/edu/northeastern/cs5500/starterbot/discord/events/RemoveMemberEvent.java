@@ -58,7 +58,7 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
             if (!channel.getId().equals(channelIdListingPostedIn)) {
                 var tempChannel = guild.getTextChannelById(channelIdListingPostedIn);
                 if (tempChannel == null) {
-                    log.error("This channel either no longer exists or could not be found."); 
+                    log.error("This channel either no longer exists or could not be found.");
                     continue;
                 }
                 channel = tempChannel;
