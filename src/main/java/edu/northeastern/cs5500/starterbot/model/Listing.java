@@ -30,6 +30,9 @@ public class Listing implements Model {
     // The guild that the listing is contained in
     @Nonnull String guildId;
 
+    // The channel id the listing was posted in
+    @Nonnull String postedChannelId;
+
     // Title of the listing
     @Nonnull String title;
 

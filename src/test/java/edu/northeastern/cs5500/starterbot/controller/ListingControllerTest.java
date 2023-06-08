@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 class ListingControllerTest {
     static final String USER_ID = "631666734125987209";
     static final String GUILD_ID = "294764645159495548";
+    static final String POSTED_CHANNEL_ID = "1116146149183725601";
     static final String TITLE = "test";
     static final Long MESSAGE_ID = 1234567L;
     static final List<String> IMAGES = new ArrayList<>(Arrays.asList("Test url", "test"));
@@ -49,6 +50,7 @@ class ListingControllerTest {
                         .messageId(MESSAGE_ID)
                         .discordUserId(USER_ID)
                         .guildId(GUILD_ID)
+                        .postedChannelId(POSTED_CHANNEL_ID)
                         .title(TITLE)
                         .url(URL)
                         .images(IMAGES)
@@ -114,6 +116,7 @@ class ListingControllerTest {
                         .messageId(MESSAGE_ID)
                         .discordUserId("different user")
                         .guildId(GUILD_ID)
+                        .postedChannelId(POSTED_CHANNEL_ID)
                         .title(TITLE)
                         .url(URL)
                         .images(IMAGES)

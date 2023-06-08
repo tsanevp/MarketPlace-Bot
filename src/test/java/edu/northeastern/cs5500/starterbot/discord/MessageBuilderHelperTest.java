@@ -30,6 +30,8 @@ public class MessageBuilderHelperTest {
         // Define Listing parameters
         var discordUserId = "DISCORD_ID_1";
         var title = "test title";
+        var postedChannelId = "1116146149183725601";
+
         List<String> imageUrl = new ArrayList<>();
         var url =
                 "https://cdn.discordapp.com/ephemeral-attachments/1077737981869297745/1096913399180435537/Screenshot_2023-04-07_at_12.31.41_PM.png";
@@ -49,6 +51,7 @@ public class MessageBuilderHelperTest {
                 Listing.builder()
                         .discordUserId(discordUserId)
                         .guildId(guildId)
+                        .postedChannelId(postedChannelId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)
@@ -82,6 +85,7 @@ public class MessageBuilderHelperTest {
                 Listing.builder()
                         .discordUserId(discordUserId)
                         .guildId(guildId)
+                        .postedChannelId(postedChannelId)
                         .title(title)
                         .url(url)
                         .images(imageUrl)

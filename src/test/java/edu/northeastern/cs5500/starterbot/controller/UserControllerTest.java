@@ -21,6 +21,7 @@ public class UserControllerTest {
     static final String TRADING_CHANNEL_ID_1 = "trading-channel";
     static final String STATE_OF_RESIDENCE_1 = "WA";
     static final String CITY_OF_RESIDENCE_1 = "Seattle";
+    static final String POSTED_CHANNEL_ID = "1116146149183725601";
 
     UserController userController;
 
@@ -73,6 +74,7 @@ public class UserControllerTest {
                 Listing.builder()
                         .discordUserId(DISCORD_ID_1)
                         .guildId("234257657568")
+                        .postedChannelId(POSTED_CHANNEL_ID)
                         .title("test title")
                         .url(url)
                         .images(imageUrl)

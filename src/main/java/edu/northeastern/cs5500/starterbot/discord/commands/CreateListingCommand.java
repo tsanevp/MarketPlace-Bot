@@ -153,9 +153,19 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             imageURLs.add(image.getAsAttachment().getUrl());
         }
 
+        // Get the id of the trading channel the listing will be posted in
+        var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
+
         // Create ListingFields and Listing objects
         var listingFields = buildListingFields(cost, shippingIncluded, condition, description);
-        var listing = buildListing(titleReformatted, guildId, userId, imageURLs, listingFields);
+        var listing =
+                buildListing(
+                        userId,
+                        guildId,
+                        tradingChannelId,
+                        titleReformatted,
+                        imageURLs,
+                        listingFields);
 
         // Temporarily store the listing in MongoDB
         userController.setCurrentListing(userId, listing);
@@ -206,9 +216,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     /**
      * Build and returns a Listing object given its variables.
      *
-     * @param title - The title of the listing.
-     * @param guildId - The id of the guild the listing was created in.
      * @param userId - The id of the user who created the listing.
+     * @param guildId - The id of the guild the listing was created in.
+     * @param tradingChannelId - The id of the channel the listing will be posted in.
+     * @param title - The title of the listing.
      * @param imageURLs - A list of image urls. These are the images of the item.
      * @param listingFields - A ListingFields object that holds data of each listing field.
      * @return A Listing object.
@@ -216,9 +227,10 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     @Nonnull
     @VisibleForTesting
     Listing buildListing(
-            @Nonnull String title,
-            @Nonnull String guildId,
             @Nonnull String userId,
+            @Nonnull String guildId,
+            @Nonnull String tradingChannelId,
+            @Nonnull String title,
             @Nonnull List<String> imageURLs,
             @Nonnull ListingFields listingFields) {
         var url = imageURLs.get(0);
@@ -229,6 +241,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                 Listing.builder()
                         .discordUserId(userId)
                         .guildId(guildId)
+                        .postedChannelId(tradingChannelId)
                         .title(title)
                         .url(url)
                         .images(imageURLs)
