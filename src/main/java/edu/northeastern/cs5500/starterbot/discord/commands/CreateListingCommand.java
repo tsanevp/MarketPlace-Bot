@@ -153,16 +153,12 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
             imageURLs.add(image.getAsAttachment().getUrl());
         }
 
-        // Get the id of the trading channel the listing will be posted in
-        var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
-
         // Create ListingFields and Listing objects
         var listingFields = buildListingFields(cost, shippingIncluded, condition, description);
         var listing =
                 buildListing(
                         userId,
                         guildId,
-                        tradingChannelId,
                         titleReformatted,
                         imageURLs,
                         listingFields);
@@ -218,7 +214,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
      *
      * @param userId - The id of the user who created the listing.
      * @param guildId - The id of the guild the listing was created in.
-     * @param tradingChannelId - The id of the channel the listing will be posted in.
      * @param title - The title of the listing.
      * @param imageURLs - A list of image urls. These are the images of the item.
      * @param listingFields - A ListingFields object that holds data of each listing field.
@@ -229,7 +224,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
     Listing buildListing(
             @Nonnull String userId,
             @Nonnull String guildId,
-            @Nonnull String tradingChannelId,
             @Nonnull String title,
             @Nonnull List<String> imageURLs,
             @Nonnull ListingFields listingFields) {
@@ -241,7 +235,6 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                 Listing.builder()
                         .discordUserId(userId)
                         .guildId(guildId)
-                        .postedChannelId(tradingChannelId)
                         .title(title)
                         .url(url)
                         .images(imageURLs)
@@ -442,6 +435,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         message -> {
                             // Set the message id and store the listing in the collection
                             currentListing.setMessageId(message.getIdLong());
+                            currentListing.setPostedChannelId(tradingChannelId);
                             listingController.addListing(currentListing);
                         });
 
