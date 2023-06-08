@@ -166,8 +166,16 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             onDeleteListingButtonClick(userId, listing);
         } catch (GuildNotFoundException | ChannelNotFoundException e) {
             log.error("myListing encountered an error when deleting listing", e);
-            event.reply("Unable to remove listing because the channel/server no longer exists.")
-                    .queue();
+            var channelOrServerDNE =
+                    new EmbedBuilder()
+                            .setDescription(
+                                    "Unable to remove listing because the channel/server no "
+                                            + "longer exists. It has been deleted from the "
+                                            + "listing database.")
+                            .setColor(EMBED_COLOR)
+                            .build();
+            buttonEvent.setEmbeds(channelOrServerDNE).queue();
+            return;
         }
 
         var deleteSuccessEmbed =
@@ -198,7 +206,6 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
         }
 
         var listingId = listing.getId();
-
         if (listingId == null) {
             throw new IllegalStateException(
                     "Unable to delete listing ID because ID was not found.");
