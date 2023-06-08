@@ -442,6 +442,7 @@ public class CreateListingCommand implements SlashCommandHandler, ButtonHandler 
                         message -> {
                             // Set the message id and store the listing in the collection
                             currentListing.setMessageId(message.getIdLong());
+                            currentListing.setPostedChannelId(tradingChannelId);
                             listingController.addListing(currentListing);
                         });
 
