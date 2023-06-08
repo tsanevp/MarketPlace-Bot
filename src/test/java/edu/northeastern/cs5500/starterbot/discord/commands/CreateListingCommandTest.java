@@ -23,6 +23,7 @@ public class CreateListingCommandTest {
     static final String TITLE = "[Seattle, WA]test title";
     static final String GUILD_ID = "12345";
     static final String USER_ID = "11223344";
+    static final String POSTED_CHANNEL_ID = "5544332211";
     static final String URL =
             "https://cdn.discordapp.com/ephemeral-attachments/1077737981869297745/1096913399180435537/Screenshot_2023-04-07_at_12.31.41_PM.png";
     static final List<String> LIST_IMAGE_URLS = new ArrayList<>(Arrays.asList(URL));
@@ -42,7 +43,12 @@ public class CreateListingCommandTest {
 
         listingObjectOne =
                 createListingCommand.buildListing(
-                        TITLE, GUILD_ID, USER_ID, LIST_IMAGE_URLS, listingFieldsObjectOne);
+                        USER_ID,
+                        GUILD_ID,
+                        POSTED_CHANNEL_ID,
+                        TITLE,
+                        LIST_IMAGE_URLS,
+                        listingFieldsObjectOne);
     }
 
     @Test
@@ -79,7 +85,12 @@ public class CreateListingCommandTest {
         // Build duplicate copy of listing object one
         var listingObjectTwo =
                 createListingCommand.buildListing(
-                        TITLE, GUILD_ID, USER_ID, LIST_IMAGE_URLS, listingFields);
+                        USER_ID,
+                        GUILD_ID,
+                        POSTED_CHANNEL_ID,
+                        TITLE,
+                        LIST_IMAGE_URLS,
+                        listingFields);
 
         // Check both objects are not null
         assertThat(listingObjectOne).isNotNull();
@@ -153,7 +164,12 @@ public class CreateListingCommandTest {
 
         var listingObjectTwo =
                 createListingCommand.buildListing(
-                        "test title", GUILD_ID, USER_ID, LIST_IMAGE_URLS, listingFieldsObjectOne);
+                        USER_ID,
+                        GUILD_ID,
+                        POSTED_CHANNEL_ID,
+                        "test title",
+                        LIST_IMAGE_URLS,
+                        listingFieldsObjectOne);
         titleReformatted = listingObjectTwo.getTitle();
 
         if (titleReformatted.contains("]")) {

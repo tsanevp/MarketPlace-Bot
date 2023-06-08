@@ -35,17 +35,35 @@ public class RemoveMemberEvent implements RemoveMemberHandler {
         log.info("event: removemember");
 
         var userId = event.getUser().getId();
-        var guildId = event.getGuild().getId();
+        var guild = event.getGuild();
+        var guildId = guild.getId();
         var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
 
-        var channel = event.getGuild().getTextChannelById(tradingChannelId);
+        var textChannels = guild.getTextChannels();
+        if (textChannels.isEmpty()) {
+            throw new IllegalStateException("Server has no text channels.");
+        }
+
+        var channel = guild.getTextChannelById(tradingChannelId);
         if (channel == null) {
-            throw new IllegalStateException("Channel was unable to be retrieved.");
+            log.error("This guild does not have a designated trading channel.");
+            channel = guild.getTextChannels().get(0);
         }
 
         // Remove all the posted listing the user has made from the trading channel
         var listingsOfMember = listingController.getListingsByMemberId(userId, guildId);
         for (Listing listing : listingsOfMember) {
+            var channelIdListingPostedIn = listing.getPostedChannelId();
+
+            if (!channel.getId().equals(channelIdListingPostedIn)) {
+                var tempChannel = guild.getTextChannelById(channelIdListingPostedIn);
+                if (tempChannel == null) {
+                    log.error("This channel either no longer exists or could not be found.");
+                    continue;
+                }
+                channel = tempChannel;
+            }
+
             channel.deleteMessageById(listing.getMessageId()).queue();
         }
 

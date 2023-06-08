@@ -166,8 +166,16 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             onDeleteListingButtonClick(userId, listing);
         } catch (GuildNotFoundException | ChannelNotFoundException e) {
             log.error("myListing encountered an error when deleting listing", e);
-            event.reply("Unable to remove listing because the channel/server no longer exists.")
-                    .queue();
+            var channelOrServerDNE =
+                    new EmbedBuilder()
+                            .setDescription(
+                                    "Unable to remove listing because the channel/server no "
+                                            + "longer exists. It has been deleted from the "
+                                            + "listing database.")
+                            .setColor(EMBED_COLOR)
+                            .build();
+            buttonEvent.setEmbeds(channelOrServerDNE).queue();
+            return;
         }
 
         var deleteSuccessEmbed =
@@ -197,28 +205,30 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
                     "Guild ID was invalid when attempting to delete listing");
         }
 
-        var channel = getTradingChannel(guildId);
         var listingId = listing.getId();
-
         if (listingId == null) {
             throw new IllegalStateException(
                     "Unable to delete listing ID because ID was not found.");
         }
 
         listingController.deleteListingById(listingId, userId);
+
+        var channel = getChannelListingPostedIn(guildId, listing);
         channel.deleteMessageById(listing.getMessageId()).queue();
     }
 
     /**
-     * Retrieves the trading channel where the listing is located.
+     * Retrieves the channel the listing was posted in. The trading channel may have changed.
      *
      * @param guildId - The id of the guild where the listing is located.
-     * @return The trading channel.
+     * @param listing - The listing to search for and delete.
+     * @return The channel the listing was posted in.
      * @throws GuildNotFoundException If guild was not found in JDA.
      * @throws ChannelNotFoundException If text channel was not found in JDA.
      */
     @Nonnull
-    private MessageChannel getTradingChannel(@Nonnull String guildId)
+    private MessageChannel getChannelListingPostedIn(
+            @Nonnull String guildId, @Nonnull Listing listing)
             throws GuildNotFoundException, ChannelNotFoundException {
         var guild = jda.getGuildById(guildId);
 
@@ -227,8 +237,8 @@ public class MyListingsCommand implements SlashCommandHandler, ButtonHandler {
             throw new GuildNotFoundException("Guild ID no longer exists in JDA.");
         }
 
-        var tradingChannelId = guildController.getTradingChannelIdByGuildId(guildId);
-        var channel = guild.getTextChannelById(tradingChannelId);
+        var channelIdListingPostedIn = listing.getPostedChannelId();
+        var channel = guild.getTextChannelById(channelIdListingPostedIn);
 
         if (channel == null) {
             throw new ChannelNotFoundException(
