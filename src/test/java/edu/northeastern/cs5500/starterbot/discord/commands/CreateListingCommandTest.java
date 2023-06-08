@@ -102,6 +102,7 @@ public class CreateListingCommandTest {
         // Check shipping included and condition return what we expect, assume rest do also
         assertThat(listingObjectOne.getFields()).isEqualTo(listingFields);
         assertThat(listingObjectOne.getDiscordUserId()).isEqualTo(USER_ID);
+        assertThat(listingObjectOne.getPostedChannelId()).isEqualTo(POSTED_CHANNEL_ID);
     }
 
     @Test
